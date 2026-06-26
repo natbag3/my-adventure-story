@@ -362,20 +362,109 @@ function StepWrap({ title, children }: { title: string; children: React.ReactNod
   );
 }
 
-function GeneratingState() {
+const MAGIC_MESSAGES = [
+  "Painting enchanted forests…",
+  "Waking sleepy dragons…",
+  "Sprinkling fairy dust…",
+  "Filling the skies with stars…",
+  "Opening magical portals…",
+  "Tucking in friendly clouds…",
+  "Polishing the moonlight…",
+];
+
+function StoryPreparation({
+  total,
+  done,
+  stage,
+  childName,
+}: {
+  total: number;
+  done: number;
+  stage: "writing" | "painting" | "binding";
+  childName: string;
+}) {
+  const [msgIdx, setMsgIdx] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setMsgIdx((i) => (i + 1) % MAGIC_MESSAGES.length), 2400);
+    return () => clearInterval(id);
+  }, []);
+
+  const pct =
+    stage === "writing"
+      ? 8
+      : stage === "binding"
+      ? 100
+      : total > 0
+      ? Math.max(10, Math.round((done / total) * 92) + 8)
+      : 12;
+
+  const Row = ({ label, state }: { label: string; state: "done" | "active" | "pending" }) => (
+    <div className="flex items-center gap-3 text-left">
+      <span
+        className={cn(
+          "grid size-6 place-items-center rounded-full text-xs",
+          state === "done" && "bg-mint/20 text-mint",
+          state === "active" && "bg-star/20 text-star animate-pulse",
+          state === "pending" && "bg-foreground/10 text-foreground/40",
+        )}
+      >
+        {state === "done" ? "✓" : state === "active" ? "✦" : "·"}
+      </span>
+      <span
+        className={cn(
+          "font-medium",
+          state === "pending" ? "text-foreground/40" : "text-foreground",
+        )}
+      >
+        {label}
+      </span>
+    </div>
+  );
+
   return (
-    <div className="grid place-items-center py-16 text-center">
+    <div className="grid place-items-center py-12 text-center animate-fade-in">
       <div className="relative mb-8">
         <div className="grid size-32 place-items-center rounded-full bg-gradient-to-br from-lavender via-peach to-star text-5xl shadow-[0_0_60px_oklch(0.7_0.18_295/0.5)] animate-float">
-          🌙
+          📖
         </div>
         <span className="absolute -top-2 -left-4 text-2xl animate-twinkle">✦</span>
         <span className="absolute top-6 -right-6 text-xl animate-twinkle" style={{ animationDelay: "0.6s" }}>✦</span>
         <span className="absolute -bottom-3 left-6 text-2xl animate-twinkle" style={{ animationDelay: "1.2s" }}>✦</span>
         <span className="absolute -bottom-1 right-2 text-lg animate-twinkle" style={{ animationDelay: "1.8s" }}>☁️</span>
       </div>
-      <p className="font-display text-2xl text-foreground mb-2">Spinning starlight into a story…</p>
-      <p className="text-foreground/55">Drawing illustrations · choosing words · sprinkling magic</p>
+
+      <p className="font-display text-3xl text-foreground mb-2">
+        ✨ Creating {childName}'s magical adventure…
+      </p>
+      <p key={msgIdx} className="text-foreground/60 mb-8 animate-fade-in">
+        {MAGIC_MESSAGES[msgIdx]}
+      </p>
+
+      <div className="w-full max-w-sm space-y-3 rounded-2xl border border-hairline bg-surface/60 p-5 mb-6">
+        <Row label="Writing your story" state={stage === "writing" ? "active" : "done"} />
+        <Row
+          label={
+            stage === "painting" && total > 0
+              ? `Painting illustrations (${done}/${total})`
+              : "Painting illustrations"
+          }
+          state={stage === "writing" ? "pending" : stage === "painting" ? "active" : "done"}
+        />
+        <Row
+          label="Building your adventure book"
+          state={stage === "binding" ? "active" : "pending"}
+        />
+      </div>
+
+      <div className="w-full max-w-sm h-2 overflow-hidden rounded-full bg-foreground/10">
+        <div
+          className="h-full bg-gradient-to-r from-lavender via-peach to-star transition-all duration-500"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <p className="mt-3 text-xs text-foreground/45 font-mono uppercase tracking-widest">
+        {pct}% ready
+      </p>
     </div>
   );
 }
