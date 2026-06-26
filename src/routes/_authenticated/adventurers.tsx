@@ -164,7 +164,13 @@ function AdventurersPage() {
                     ))}
                   </div>
 
-                  <div className="mt-6 flex items-center justify-end gap-2 border-t border-hairline pt-5">
+                  <div className="mt-6 flex flex-wrap items-center justify-end gap-2 border-t border-hairline pt-5">
+                    <button
+                      onClick={() => regeneratePortrait(c.id, c.first_name)}
+                      className="rounded-full border border-hairline px-4 py-2 text-xs font-medium text-foreground/70 hover:text-foreground"
+                    >
+                      {c.portrait_url ? "Redraw portrait" : "Draw portrait"}
+                    </button>
                     <button
                       onClick={() => deleteChild(c.id, c.first_name)}
                       className="rounded-full border border-hairline px-4 py-2 text-xs font-medium text-foreground/55 hover:text-destructive"
