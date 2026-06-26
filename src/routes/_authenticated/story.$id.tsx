@@ -125,8 +125,10 @@ function StoryReader() {
     return (
       <AppShell>
         <div className="grid place-items-center py-24 text-center">
-          <span className="text-5xl animate-float">🌙</span>
-          <p className="mt-4 font-display text-xl text-foreground/70">Opening your storybook…</p>
+          <span className="text-5xl animate-float">{finishingImages ? "🎨" : "🌙"}</span>
+          <p className="mt-4 font-display text-xl text-foreground/70">
+            {finishingImages ? "Finishing illustrations…" : "Opening your storybook…"}
+          </p>
         </div>
       </AppShell>
     );
