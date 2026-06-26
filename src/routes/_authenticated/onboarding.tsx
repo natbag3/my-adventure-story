@@ -281,28 +281,38 @@ function OnboardingPage() {
       <AmbientSky />
       <div className="relative z-10 mx-auto flex min-h-screen max-w-2xl flex-col px-5 py-8">
         {/* Progress */}
-        {step > 0 && step < 6 && (
+        {step < 6 && (
           <div className="mb-8 flex items-center gap-2">
             <button
-              onClick={() => setStep((s) => Math.max(0, s - 1))}
+              onClick={() => {
+                if (step === 0) {
+                  window.history.length > 1 ? window.history.back() : navigate({ to: "/" });
+                } else {
+                  setStep((s) => Math.max(0, s - 1));
+                }
+              }}
               className="text-xs text-foreground/55 hover:text-foreground"
             >
               ← Back
             </button>
-            <div className="ml-3 flex flex-1 gap-1.5">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <span
-                  key={i}
-                  className={
-                    "h-1 flex-1 rounded-full transition-colors " +
-                    (i < step ? "bg-star" : "bg-foreground/15")
-                  }
-                />
-              ))}
-            </div>
-            <span className="ml-3 font-mono text-[10px] uppercase tracking-widest text-foreground/40">
-              {step} / 5
-            </span>
+            {step > 0 && (
+              <>
+                <div className="ml-3 flex flex-1 gap-1.5">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <span
+                      key={i}
+                      className={
+                        "h-1 flex-1 rounded-full transition-colors " +
+                        (i < step ? "bg-star" : "bg-foreground/15")
+                      }
+                    />
+                  ))}
+                </div>
+                <span className="ml-3 font-mono text-[10px] uppercase tracking-widest text-foreground/40">
+                  {step} / 5
+                </span>
+              </>
+            )}
           </div>
         )}
 
