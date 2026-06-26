@@ -31,14 +31,13 @@ type FormState = {
     curious: string;
   };
   personality_traits: string[];
-  favorite_animal: string;
-  favorite_color: string;
-  favorite_food: string;
-  favorite_toy: string;
-  favorite_story: string;
-  favorite_place: string;
-  favorite_season: string;
-  favorite_holiday: string;
+  favorite_animals: string[];
+  favorite_colors: string[];
+  favorite_foods: string[];
+  favorite_toys: string[];
+  favorite_story_themes: string[];
+  favorite_hobbies: string[];
+  favorite_places: string[];
   learning_goals: string[];
 };
 
