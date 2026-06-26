@@ -105,8 +105,15 @@ WRITING STYLE:
 - Short, lyrical lines with a clear sing-song rhythm.
 - Maximum 2–3 sentences per page. HARD CAP: 60 words per page.
 - One clear idea per page. No long paragraphs.
-- Simple vocabulary suitable for ages 3–7.
-- Warm, gentle, magical tone — never scary, dark, or abrupt.
+
+LANGUAGE SAFETY (STRICT — bedtime-safe only):
+- Use ONLY simple children's vocabulary suitable for ages 3–7.
+- NO adult words, complex emotional vocabulary, mature themes, or philosophical/abstract language.
+- NO scary, violent, dark, sad, lonely, frightening, or unsettling phrasing. No death, fear, anger, monsters chasing, getting lost alone, crying, danger, weapons.
+- NO words like: terrified, anxious, depressed, devastated, betrayal, conflict, struggle, despair, demon, evil, dead, kill, hurt, blood.
+- Replace any tricky word with a warm, friendly, gentle alternative (e.g. "afraid" → "a little unsure", "angry" → "grumpy", "scary" → "silly").
+- Warm, cozy, calming, magical tone throughout. Reads like a goodnight hug.
+- If ANY adult or complex word slips in during drafting, silently rewrite that line before output.
 
 STRUCTURE across ${pageCount} pages:
 - Page 1: Introduce ${child.first_name} and the magical setting.
