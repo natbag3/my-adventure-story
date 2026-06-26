@@ -131,12 +131,20 @@ function AdventurersPage() {
           <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.25em] text-star/80">The heroes of every story</p>
           <h1 className="font-display text-4xl md:text-5xl font-medium text-foreground">My Adventurers</h1>
         </div>
-        <Link
-          to="/onboarding"
-          className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-[0_10px_30px_-15px_oklch(0.85_0.16_88/0.6)] hover:scale-[1.02] transition-transform"
-        >
-          <span>+</span> Add Adventurer
-        </Link>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            to="/onboarding"
+            className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-[0_10px_30px_-15px_oklch(0.85_0.16_88/0.6)] hover:scale-[1.02] transition-transform"
+          >
+            <span>+</span> Add Adventurer
+          </Link>
+          <Link
+            to="/adventurers/new-pet"
+            className="inline-flex items-center gap-2 rounded-full border border-hairline bg-surface px-5 py-3 text-sm font-semibold text-foreground hover:scale-[1.02] transition-transform"
+          >
+            <span>🐾</span> Add a pet
+          </Link>
+        </div>
       </header>
 
       {loading ? (
