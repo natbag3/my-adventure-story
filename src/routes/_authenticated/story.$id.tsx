@@ -161,6 +161,12 @@ function StoryReader() {
         </div>
       </div>
 
+      {imageFailures > 0 && (
+        <div className="mx-auto mb-4 max-w-3xl rounded-2xl border border-peach/40 bg-peach/10 px-4 py-3 text-sm text-foreground/80 animate-fade-in">
+          ✨ {imageFailures} illustration{imageFailures === 1 ? "" : "s"} couldn't be drawn this time. The story is still ready to read — tap a page to retry its artwork.
+        </div>
+      )}
+
       <div className="relative mx-auto max-w-3xl">
         <div
           key={page}
