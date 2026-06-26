@@ -139,8 +139,8 @@ function AdventurersPage() {
                   : accent === "mint" ? "from-mint/40 to-star/20"
                   : "from-star/40 to-peach/20"
                 }`}>
-                  <span className="absolute bottom-4 left-6 grid size-20 place-items-center rounded-full bg-paper text-5xl shadow-xl">
-                    {c.avatar_emoji ?? "🦁"}
+                  <span className="absolute bottom-4 left-6 overflow-hidden rounded-full bg-paper shadow-xl ring-4 ring-paper/60 size-20">
+                    <CharacterAvatar portraitPath={c.portrait_url} alt={c.first_name} className="size-full" />
                   </span>
                   {age != null && (
                     <span className="absolute top-4 right-4 rounded-full bg-ink/30 px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-paper backdrop-blur">
