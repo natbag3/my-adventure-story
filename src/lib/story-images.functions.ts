@@ -82,7 +82,7 @@ export const generateStoryPageImage = createServerFn({ method: "POST" })
     const nextPages = pages.map((p, i) => (i === data.pageIndex ? { ...p, image_url: path } : p));
     const { error: updErr } = await supabase
       .from("stories")
-      .update({ pages: nextPages })
+      .update({ pages: nextPages as unknown as never })
       .eq("id", data.storyId)
       .eq("user_id", userId);
     if (updErr) throw new Error(`Could not save illustration reference: ${updErr.message}`);
