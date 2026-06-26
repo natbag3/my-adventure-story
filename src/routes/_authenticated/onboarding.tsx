@@ -74,14 +74,24 @@ const SKIN_TONES = [
   { id: "Rich", hex: "#5a3a22" },
 ];
 const OUTFIT_COLORS = [
-  { id: "Lavender", hex: "#c4b5fd" },
+  { id: "Red", hex: "#ef4444" },
+  { id: "Pink", hex: "#ec4899" },
+  { id: "Hot Pink", hex: "#f472b6" },
+  { id: "Orange", hex: "#f97316" },
+  { id: "Yellow", hex: "#facc15" },
+  { id: "Lime", hex: "#84cc16" },
   { id: "Mint", hex: "#86efac" },
-  { id: "Peach", hex: "#fdba74" },
-  { id: "Sky", hex: "#7dd3fc" },
-  { id: "Rose", hex: "#fda4af" },
   { id: "Forest", hex: "#16a34a" },
+  { id: "Teal", hex: "#14b8a6" },
+  { id: "Sky", hex: "#7dd3fc" },
   { id: "Navy", hex: "#1e3a8a" },
+  { id: "Lavender", hex: "#c4b5fd" },
+  { id: "Purple", hex: "#a855f7" },
+  { id: "Peach", hex: "#fdba74" },
   { id: "Gold", hex: "#fbbf24" },
+  { id: "White", hex: "#f8fafc" },
+  { id: "Grey", hex: "#94a3b8" },
+  { id: "Black", hex: "#1c1917" },
 ];
 const SHOES = ["Sneakers", "Boots", "Sandals", "Wellies", "Slippers", "Magical"];
 
