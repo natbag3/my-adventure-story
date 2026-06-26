@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/app-shell";
 import { CHILDREN, storiesForChild } from "@/lib/mock-data";
 
-export const Route = createFileRoute("/_authenticated/_authenticated/adventurers")({
+export const Route = createFileRoute("/_authenticated/adventurers")({
   head: () => ({
     meta: [
       { title: "My Adventurers — Adventure Club" },

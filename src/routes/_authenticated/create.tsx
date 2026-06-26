@@ -10,7 +10,7 @@ import {
 } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/_authenticated/_authenticated/create")({
+export const Route = createFileRoute("/_authenticated/create")({
   head: () => ({
     meta: [
       { title: "Create Tonight's Adventure — Adventure Club" },

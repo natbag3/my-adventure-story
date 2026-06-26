@@ -3,7 +3,7 @@ import { AppShell } from "@/components/app-shell";
 import { SUBSCRIPTION } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/_authenticated/_authenticated/subscription")({
+export const Route = createFileRoute("/_authenticated/subscription")({
   head: () => ({
     meta: [
       { title: "Subscription — Adventure Club" },

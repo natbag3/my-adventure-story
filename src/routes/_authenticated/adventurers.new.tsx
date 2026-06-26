@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { AppShell } from "@/components/app-shell";
 
-export const Route = createFileRoute("/_authenticated/_authenticated/adventurers/new")({
+export const Route = createFileRoute("/_authenticated/adventurers/new")({
   head: () => ({
     meta: [
       { title: "New Adventurer — Adventure Club" },
