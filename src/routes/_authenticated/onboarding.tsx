@@ -387,7 +387,7 @@ function ScreenIntro({ onStart }: { onStart: () => void }) {
 }
 
 function ScreenBasics({
-  form, update, age, fileRef, onPhoto, onNext,
+  form, update, age, onNext,
 }: {
   form: FormState;
   update: <K extends keyof FormState>(k: K, v: FormState[K]) => void;
