@@ -108,26 +108,29 @@ function CreateWizard() {
 
       <div className="rounded-[32px] border border-hairline bg-surface/60 p-8 min-h-[420px] animate-slide-up [animation-delay:200ms]">
         {step === 0 && (
-          <StepWrap title="Who's the hero tonight?">
+          <StepWrap title="Who is tonight's adventure for?">
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {CHILDREN.map((c) => (
-                <button
-                  key={c.id}
-                  onClick={() => setChild(c.id)}
-                  className={cn(
-                    "flex flex-col items-center gap-3 rounded-3xl border p-6 transition-all",
-                    child === c.id
-                      ? "border-star/60 bg-star/10"
-                      : "border-hairline bg-surface-elevated hover:border-foreground/30",
-                  )}
-                >
-                  <span className="grid size-20 place-items-center rounded-full bg-paper text-5xl shadow-lg">{c.avatarEmoji}</span>
-                  <span className="font-display text-lg text-foreground">{c.name}</span>
-                  <span className="text-xs text-foreground/55">Age {c.age}</span>
-                </button>
-              ))}
+              {children.map((c) => {
+                const age = calcAge(c.date_of_birth);
+                return (
+                  <button
+                    key={c.id}
+                    onClick={() => setChild(c.id)}
+                    className={cn(
+                      "flex flex-col items-center gap-3 rounded-3xl border p-6 transition-all",
+                      child === c.id
+                        ? "border-star/60 bg-star/10"
+                        : "border-hairline bg-surface-elevated hover:border-foreground/30",
+                    )}
+                  >
+                    <span className="grid size-20 place-items-center rounded-full bg-paper text-5xl shadow-lg">{c.avatar_emoji ?? "🦁"}</span>
+                    <span className="font-display text-lg text-foreground">{c.first_name}</span>
+                    {age != null && <span className="text-xs text-foreground/55">Age {age}</span>}
+                  </button>
+                );
+              })}
               <Link
-                to="/adventurers/new"
+                to="/onboarding"
                 className="grid place-items-center rounded-3xl border-2 border-dashed border-hairline text-foreground/55 hover:text-foreground p-6"
               >
                 + Add adventurer
@@ -234,7 +237,7 @@ function CreateWizard() {
                 <p className="font-display text-2xl text-foreground mb-2">Everything looks magical.</p>
                 <p className="text-foreground/55 mb-8">
                   We'll craft a {length}-minute {MOODS.find((m) => m.id === mood)?.label.toLowerCase()} adventure for{" "}
-                  {CHILDREN.find((c) => c.id === child)?.name} in the world of{" "}
+                  {selectedChild?.first_name ?? "your adventurer"} in the world of{" "}
                   {ADVENTURES.find((a) => a.id === adventure)?.label ?? "wonder"}.
                 </p>
                 <button
