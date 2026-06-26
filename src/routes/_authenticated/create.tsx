@@ -40,6 +40,14 @@ export const Route = createFileRoute("/_authenticated/create")({
 
 const STEPS = ["Stars", "World", "Mood", "Lesson", "Length", "Generate"] as const;
 
+type PetRow = {
+  id: string;
+  name: string;
+  type: "cat" | "dog";
+  fur_color: string | null;
+  eye_color: string | null;
+};
+
 function CreateWizard() {
   const navigate = useNavigate();
   const { children, activeChild } = useActiveChild();
@@ -48,6 +56,8 @@ function CreateWizard() {
   const [primaryId, setPrimaryId] = useState<string | null>(null);
   const [mode, setMode] = useState<"solo" | "multi">("solo");
   const [coStarIds, setCoStarIds] = useState<string[]>([]);
+  const [petIds, setPetIds] = useState<string[]>([]);
+  const [pets, setPets] = useState<PetRow[]>([]);
   const [adventure, setAdventure] = useState<string | null>(null);
   const [mood, setMood] = useState<string | null>("bedtime");
   const [lesson, setLesson] = useState<string | null>(null);
@@ -59,6 +69,22 @@ function CreateWizard() {
   const [error, setError] = useState<string | null>(null);
   const generateFn = useServerFn(generateStory);
   const generateImageFn = useServerFn(generateStoryPageImage);
+
+  // Fetch the user's pets once.
+  useEffect(() => {
+    let cancelled = false;
+    supabase
+      .from("pets")
+      .select("id, name, type, fur_color, eye_color")
+      .order("created_at", { ascending: true })
+      .then(({ data }) => {
+        if (cancelled) return;
+        setPets((data ?? []) as PetRow[]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Default the primary star to the currently active adventurer.
   useEffect(() => {
