@@ -392,8 +392,6 @@ function ScreenBasics({
   form: FormState;
   update: <K extends keyof FormState>(k: K, v: FormState[K]) => void;
   age: number | null;
-  fileRef: React.RefObject<HTMLInputElement | null>;
-  onPhoto: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onNext: () => void;
 }) {
   const valid = form.first_name.trim().length > 0 && form.gender !== "";
@@ -402,26 +400,7 @@ function ScreenBasics({
       title="About your child"
       subtitle="Tell us about your little hero. These details power every story."
     >
-      <div className="flex flex-col items-center">
-        <button
-          type="button"
-          onClick={() => fileRef.current?.click()}
-          className="relative grid size-36 place-items-center rounded-full border-2 border-dashed border-hairline bg-surface-elevated overflow-hidden hover:border-lavender/60 transition-colors"
-        >
-          {form.reference_photo_preview ? (
-            <img src={form.reference_photo_preview} alt="" className="size-full object-cover" />
-          ) : (
-            <div className="text-center">
-              <div className="text-3xl">📷</div>
-              <div className="mt-1 text-[10px] font-mono uppercase tracking-widest text-foreground/45">
-                Add photo
-              </div>
-            </div>
-          )}
-        </button>
-        <input ref={fileRef} type="file" accept="image/*" className="sr-only" onChange={onPhoto} />
-        <p className="mt-3 text-xs text-foreground/45">Optional — helps us draw them consistently</p>
-      </div>
+
 
       <Field label="Child's first name">
         <Input value={form.first_name} onChange={(v) => update("first_name", v)} placeholder="Natalie" />
