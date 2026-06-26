@@ -1,8 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/app-shell";
+import { CharacterAvatar } from "@/components/character-avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
+import { generateChildPortrait } from "@/lib/portraits.functions";
 import { toast } from "sonner";
 
 type ChildRow = {
@@ -10,6 +12,7 @@ type ChildRow = {
   first_name: string;
   nickname: string | null;
   avatar_emoji: string | null;
+  portrait_url: string | null;
   date_of_birth: string | null;
   personality_traits: string[];
   favorite_animals: string[];
