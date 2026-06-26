@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { generateStory } from "@/lib/stories.functions";
+import { generateStoryPageImage } from "@/lib/story-images.functions";
 
 type ChildRow = { id: string; first_name: string; avatar_emoji: string | null; portrait_url: string | null; date_of_birth: string | null };
 function calcAge(dob: string | null) {
