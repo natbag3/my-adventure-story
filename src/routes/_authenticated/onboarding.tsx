@@ -17,7 +17,7 @@ type FormState = {
   date_of_birth: string;
   reference_photo: File | null;
   reference_photo_preview: string | null;
-  avatar_emoji: string;
+  
   hair_color: string;
   hair_style: string;
   eye_color: string;
@@ -86,7 +86,7 @@ const OUTFIT_COLORS = [
   { id: "Gold", hex: "#fbbf24" },
 ];
 const SHOES = ["Sneakers", "Boots", "Sandals", "Wellies", "Slippers", "Magical"];
-const AVATARS = ["🦁", "🦊", "🐻", "🦄", "🐲", "🐙", "🐯", "🦉", "🐸", "🦋"];
+
 
 const TRAITS = [
   "Brave", "Kind", "Funny", "Creative", "Curious",
@@ -157,7 +157,7 @@ function OnboardingPage() {
     date_of_birth: "",
     reference_photo: null,
     reference_photo_preview: null,
-    avatar_emoji: "🦁",
+    
     hair_color: "",
     hair_style: "",
     eye_color: "",
@@ -248,7 +248,7 @@ function OnboardingPage() {
           gender: form.gender,
           date_of_birth: form.date_of_birth || null,
           reference_photo_url: photoUrl,
-          avatar_emoji: form.avatar_emoji,
+          
           hair_color: form.hair_color || null,
           hair_style: form.hair_style || null,
           eye_color: form.eye_color || null,
@@ -438,7 +438,7 @@ function ScreenBasics({
             <img src={form.reference_photo_preview} alt="" className="size-full object-cover" />
           ) : (
             <div className="text-center">
-              <div className="text-4xl">{form.avatar_emoji}</div>
+              <div className="text-3xl">📷</div>
               <div className="mt-1 text-[10px] font-mono uppercase tracking-widest text-foreground/45">
                 Add photo
               </div>
