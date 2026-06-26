@@ -1,10 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/app-shell";
+import { ChildSwitcher } from "@/components/child-switcher";
 import { StoryCover } from "@/components/cover";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
+import { useActiveChild } from "@/lib/active-child-context";
 
 type StoryRow = {
   id: string;
@@ -19,7 +21,6 @@ type StoryRow = {
   created_at: string;
   child_id: string;
 };
-type ChildRow = { id: string; first_name: string };
 
 export const Route = createFileRoute("/_authenticated/library")({
   head: () => ({
@@ -33,45 +34,47 @@ export const Route = createFileRoute("/_authenticated/library")({
 
 function LibraryPage() {
   const { user } = useAuth();
+  const { activeChild, children } = useActiveChild();
   const [stories, setStories] = useState<StoryRow[]>([]);
-  const [children, setChildren] = useState<ChildRow[]>([]);
   const [query, setQuery] = useState("");
-  const [child, setChild] = useState<string>("all");
+  const [scope, setScope] = useState<"active" | "all">("active");
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
-    (async () => {
-      const [s, c] = await Promise.all([
-        supabase
-          .from("stories")
-          .select("id, title, theme, mood, lesson, length_minutes, cover_emoji, cover_gradient, favorite, created_at, child_id")
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false }),
-        supabase.from("children").select("id, first_name").eq("user_id", user.id),
-      ]);
-      setStories((s.data ?? []) as StoryRow[]);
-      setChildren((c.data ?? []) as ChildRow[]);
-      setLoading(false);
-    })();
+    setLoading(true);
+    supabase
+      .from("stories")
+      .select("id, title, theme, mood, lesson, length_minutes, cover_emoji, cover_gradient, favorite, created_at, child_id")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .then(({ data }) => {
+        setStories((data ?? []) as StoryRow[]);
+        setLoading(false);
+      });
   }, [user]);
 
   const filtered = stories.filter((s) => {
     if (favoritesOnly && !s.favorite) return false;
-    if (child !== "all" && s.child_id !== child) return false;
+    if (scope === "active" && activeChild && s.child_id !== activeChild.id) return false;
     if (query && !s.title.toLowerCase().includes(query.toLowerCase()) && !s.theme.toLowerCase().includes(query.toLowerCase())) return false;
     return true;
   });
 
   return (
     <AppShell>
-      <header className="mb-10 animate-slide-up">
+      <header className="mb-8 animate-slide-up">
         <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.25em] text-star/80">Your collection</p>
-        <h1 className="font-display text-4xl md:text-5xl font-medium text-foreground">Story Library</h1>
+        <h1 className="font-display text-4xl md:text-5xl font-medium text-foreground">
+          {activeChild ? `${activeChild.first_name}'s Story Library` : "Story Library"}
+        </h1>
         <p className="mt-2 text-foreground/55">
-          {loading ? "Loading…" : `${stories.length} adventures saved · revisit any tale, anytime.`}
+          {loading ? "Loading…" : `${filtered.length} adventures saved · revisit any tale, anytime.`}
         </p>
+        <div className="mt-5">
+          <ChildSwitcher />
+        </div>
       </header>
 
       <div className="mb-8 flex flex-wrap items-center gap-3 animate-slide-up [animation-delay:120ms]">
@@ -83,16 +86,24 @@ function LibraryPage() {
             className="w-full rounded-full border border-hairline bg-surface/60 px-5 py-3 text-sm text-foreground placeholder:text-foreground/40 outline-none focus:border-lavender/60"
           />
         </div>
-        <select
-          value={child}
-          onChange={(e) => setChild(e.target.value)}
-          className="rounded-full border border-hairline bg-surface/60 px-4 py-3 text-sm text-foreground outline-none"
-        >
-          <option value="all">All adventurers</option>
-          {children.map((c) => (
-            <option key={c.id} value={c.id}>{c.first_name}</option>
-          ))}
-        </select>
+        {children.length > 1 && (
+          <div className="flex rounded-full border border-hairline bg-surface/60 p-1">
+            {(["active", "all"] as const).map((s) => (
+              <button
+                key={s}
+                onClick={() => setScope(s)}
+                className={cn(
+                  "rounded-full px-4 py-1.5 text-xs font-medium transition-colors",
+                  scope === s
+                    ? "bg-foreground/10 text-foreground"
+                    : "text-foreground/55 hover:text-foreground",
+                )}
+              >
+                {s === "active" ? `Just ${activeChild?.first_name ?? "active"}` : "All children"}
+              </button>
+            ))}
+          </div>
+        )}
         <button
           onClick={() => setFavoritesOnly((v) => !v)}
           className={cn(
@@ -138,16 +149,20 @@ function LibraryPage() {
           <div className="col-span-full grid place-items-center rounded-[28px] border border-dashed border-hairline bg-surface/40 p-16 text-center">
             <span className="mb-3 text-5xl opacity-50">🌙</span>
             <p className="font-display text-xl text-foreground">
-              {stories.length === 0 ? "No stories yet" : "No stories match those filters"}
+              {stories.length === 0
+                ? "No stories yet"
+                : scope === "active"
+                ? `${activeChild?.first_name ?? "This adventurer"} has no stories yet`
+                : "No stories match those filters"}
             </p>
             <p className="mt-1 text-sm text-foreground/50">
-              {stories.length === 0 ? "Create your first adventure to fill the library." : "Try clearing your search or favorites filter."}
+              {stories.length === 0
+                ? "Create your first adventure to fill the library."
+                : "Try clearing your search or favorites filter."}
             </p>
-            {stories.length === 0 && (
-              <Link to="/create" className="mt-5 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground">
-                Create Tonight's Adventure ✨
-              </Link>
-            )}
+            <Link to="/create" className="mt-5 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground">
+              Create Tonight's Adventure ✨
+            </Link>
           </div>
         )}
       </section>

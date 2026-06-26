@@ -6,11 +6,10 @@ import { CharacterAvatar } from "@/components/character-avatar";
 import { ADVENTURES, MOODS, LESSONS, LENGTHS } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/lib/auth-context";
+import { useActiveChild } from "@/lib/active-child-context";
 import { generateStory } from "@/lib/stories.functions";
 import { generateStoryPageImage } from "@/lib/story-images.functions";
 
-type ChildRow = { id: string; first_name: string; avatar_emoji: string | null; portrait_url: string | null; date_of_birth: string | null };
 function calcAge(dob: string | null) {
   if (!dob) return null;
   const d = new Date(dob);
@@ -22,26 +21,33 @@ function calcAge(dob: string | null) {
   return a;
 }
 
+function genderEmoji(g: string | null | undefined) {
+  const v = (g ?? "").toLowerCase();
+  if (v === "boy") return "👦";
+  if (v === "girl") return "👧";
+  return "🧒";
+}
+
 export const Route = createFileRoute("/_authenticated/create")({
   head: () => ({
     meta: [
       { title: "Create Tonight's Adventure — Adventure Club" },
       { name: "description", content: "Build a one-of-a-kind bedtime story in a few magical taps." },
-      { property: "og:title", content: "Create Tonight's Adventure — Adventure Club" },
-      { property: "og:description", content: "Build a personalized bedtime adventure for your child." },
     ],
   }),
   component: CreateWizard,
 });
 
-const STEPS = ["Adventurer", "World", "Mood", "Lesson", "Length", "Generate"] as const;
+const STEPS = ["Stars", "World", "Mood", "Lesson", "Length", "Generate"] as const;
 
 function CreateWizard() {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const [children, setChildren] = useState<ChildRow[]>([]);
+  const { children, activeChild } = useActiveChild();
+
   const [step, setStep] = useState(0);
-  const [child, setChild] = useState<string | null>(null);
+  const [primaryId, setPrimaryId] = useState<string | null>(null);
+  const [mode, setMode] = useState<"solo" | "multi">("solo");
+  const [coStarIds, setCoStarIds] = useState<string[]>([]);
   const [adventure, setAdventure] = useState<string | null>(null);
   const [mood, setMood] = useState<string | null>("bedtime");
   const [lesson, setLesson] = useState<string | null>(null);
@@ -54,34 +60,34 @@ function CreateWizard() {
   const generateFn = useServerFn(generateStory);
   const generateImageFn = useServerFn(generateStoryPageImage);
 
+  // Default the primary star to the currently active adventurer.
   useEffect(() => {
-    if (!user) return;
-    supabase
-      .from("children")
-      .select("id, first_name, avatar_emoji, portrait_url, date_of_birth")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: true })
-      .then(({ data }) => {
-        const list = (data ?? []) as ChildRow[];
-        setChildren(list);
-        if (list.length === 1) setChild(list[0].id);
-        // Skip "choose child" step if only one
-        if (list.length === 1) setStep((s) => (s === 0 ? 1 : s));
-      });
-  }, [user]);
+    if (!primaryId && activeChild) setPrimaryId(activeChild.id);
+  }, [activeChild, primaryId]);
 
-  const selectedChild = children.find((c) => c.id === child);
+  // Single child? Skip the Stars step.
+  useEffect(() => {
+    if (children.length === 1 && step === 0) setStep(1);
+  }, [children.length, step]);
+
+  const selectedChild = children.find((c) => c.id === primaryId);
 
   const canNext =
-    (step === 0 && !!child) ||
+    (step === 0 && !!primaryId) ||
     (step === 1 && !!adventure) ||
     (step === 2 && !!mood) ||
     (step === 3 && !!lesson) ||
     step === 4 ||
     step === 5;
 
+  function toggleCoStar(id: string) {
+    setCoStarIds((cur) =>
+      cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id],
+    );
+  }
+
   async function handleGenerate() {
-    if (!child || !adventure || !lesson || !mood) return;
+    if (!primaryId || !adventure || !lesson || !mood) return;
     setGenerating(true);
     setError(null);
     setPrepStage("writing");
@@ -93,7 +99,8 @@ function CreateWizard() {
       const lessonLabel = LESSONS.find((l) => l.id === lesson)?.label ?? lesson;
       const result = await generateFn({
         data: {
-          childId: child,
+          childId: primaryId,
+          coStarIds: mode === "multi" ? coStarIds.filter((id) => id !== primaryId) : [],
           theme: adventureLabel,
           mood: moodLabel,
           lesson: lessonLabel,
@@ -101,7 +108,6 @@ function CreateWizard() {
         },
       });
 
-      // Fetch the story to know how many pages we need to illustrate, and which already have art.
       setPrepStage("painting");
       const { data: story } = await supabase
         .from("stories")
@@ -115,17 +121,15 @@ function CreateWizard() {
       setPrepTotal(pages.length);
       setPrepDone(pages.length - missing.length);
 
-      // Generate ALL missing illustrations in parallel.
       await Promise.all(
         missing.map(({ i }) =>
           generateImageFn({ data: { storyId: result.storyId, pageIndex: i } })
-            .catch(() => null) // tolerate individual failures; reader can retry
+            .catch(() => null)
             .finally(() => setPrepDone((d) => d + 1)),
         ),
       );
 
       setPrepStage("binding");
-      // Small beat so the "binding" stage is visible.
       await new Promise((r) => setTimeout(r, 600));
       navigate({ to: "/story/$id", params: { id: result.storyId } });
     } catch (e) {
@@ -152,52 +156,114 @@ function CreateWizard() {
       <header className="mb-8 animate-slide-up">
         <Link to="/" className="text-xs text-foreground/55 hover:text-foreground">← Home</Link>
         <h1 className="mt-2 font-display text-4xl text-foreground">Create Tonight's Adventure</h1>
-        <p className="mt-1 text-foreground/55">Six small choices. One magical story.</p>
+        <p className="mt-1 text-foreground/55">A few small choices. One magical story.</p>
       </header>
 
       {/* Stepper */}
       <div className="mb-10 flex flex-wrap items-center gap-2 animate-slide-up [animation-delay:100ms]">
-        {STEPS.map((label, i) => (
-          <div key={label} className="flex items-center gap-2">
-            <button
-              onClick={() => setStep(i)}
-              className={cn(
-                "flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
-                i === step
-                  ? "border-star/60 bg-star/15 text-star"
-                  : i < step
-                  ? "border-mint/40 bg-mint/10 text-mint"
-                  : "border-hairline bg-surface/40 text-foreground/40",
-              )}
-            >
-              <span className="grid size-5 place-items-center rounded-full bg-foreground/10 text-[10px]">{i + 1}</span>
-              {label}
-            </button>
-            {i < STEPS.length - 1 && <span className="text-foreground/20">·</span>}
-          </div>
-        ))}
+        {STEPS.map((label, i) => {
+          // Hide first "Stars" pill when there is only one child.
+          if (i === 0 && children.length <= 1) return null;
+          return (
+            <div key={label} className="flex items-center gap-2">
+              <button
+                onClick={() => setStep(i)}
+                className={cn(
+                  "flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+                  i === step
+                    ? "border-star/60 bg-star/15 text-star"
+                    : i < step
+                    ? "border-mint/40 bg-mint/10 text-mint"
+                    : "border-hairline bg-surface/40 text-foreground/40",
+                )}
+              >
+                <span className="grid size-5 place-items-center rounded-full bg-foreground/10 text-[10px]">
+                  {i + 1}
+                </span>
+                {label}
+              </button>
+              {i < STEPS.length - 1 && <span className="text-foreground/20">·</span>}
+            </div>
+          );
+        })}
       </div>
 
       <div className="rounded-[32px] border border-hairline bg-surface/60 p-8 min-h-[420px] animate-slide-up [animation-delay:200ms]">
         {step === 0 && (
-          <StepWrap title="Who is tonight's adventure for?">
+          <StepWrap title="Who stars in tonight's story?">
+            <div className="mb-6 flex flex-wrap gap-2">
+              {(["solo", "multi"] as const).map((m) => (
+                <button
+                  key={m}
+                  onClick={() => {
+                    setMode(m);
+                    if (m === "solo") setCoStarIds([]);
+                  }}
+                  className={cn(
+                    "rounded-full border px-4 py-2 text-sm font-medium",
+                    mode === m
+                      ? "border-star/60 bg-star/15 text-foreground"
+                      : "border-hairline bg-surface-elevated text-foreground/70",
+                  )}
+                >
+                  {m === "solo" ? "Just this child" : "Multiple children"}
+                </button>
+              ))}
+            </div>
+
+            <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-foreground/45">
+              Tonight's hero
+            </p>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {children.map((c) => {
                 const age = calcAge(c.date_of_birth);
+                const isPrimary = primaryId === c.id;
+                const isCoStar = coStarIds.includes(c.id) && c.id !== primaryId;
                 return (
                   <button
                     key={c.id}
-                    onClick={() => setChild(c.id)}
+                    onClick={() => {
+                      if (mode === "solo") {
+                        setPrimaryId(c.id);
+                        setCoStarIds([]);
+                      } else if (isPrimary) {
+                        // primary tap is no-op; pick a different primary by selecting elsewhere
+                      } else if (isCoStar) {
+                        toggleCoStar(c.id);
+                      } else {
+                        toggleCoStar(c.id);
+                      }
+                    }}
+                    onDoubleClick={() => setPrimaryId(c.id)}
                     className={cn(
-                      "flex flex-col items-center gap-3 rounded-3xl border p-6 transition-all",
-                      child === c.id
+                      "relative flex flex-col items-center gap-3 rounded-3xl border p-6 transition-all",
+                      isPrimary
                         ? "border-star/60 bg-star/10"
+                        : isCoStar
+                        ? "border-lavender/50 bg-lavender/10"
                         : "border-hairline bg-surface-elevated hover:border-foreground/30",
                     )}
                   >
-                    <span className="overflow-hidden size-20 rounded-full bg-paper shadow-lg ring-2 ring-paper/60"><CharacterAvatar portraitPath={c.portrait_url} alt={c.first_name} className="size-full" /></span>
-                    <span className="font-display text-lg text-foreground">{c.first_name}</span>
+                    <span className="overflow-hidden size-20 rounded-full bg-paper shadow-lg ring-2 ring-paper/60">
+                      <CharacterAvatar portraitPath={c.portrait_url} alt={c.first_name} className="size-full" />
+                    </span>
+                    <span className="font-display text-lg text-foreground">
+                      {genderEmoji(c.gender)} {c.first_name}
+                    </span>
                     {age != null && <span className="text-xs text-foreground/55">Age {age}</span>}
+                    {isPrimary && (
+                      <span className="absolute top-3 right-3 rounded-full bg-star/20 px-2 py-0.5 text-[10px] font-mono uppercase tracking-widest text-star">
+                        ★ Hero
+                      </span>
+                    )}
+                    {isCoStar && (
+                      <span className="absolute top-3 right-3 rounded-full bg-lavender/20 px-2 py-0.5 text-[10px] font-mono uppercase tracking-widest text-lavender">
+                        Co-star
+                      </span>
+                    )}
+                    {mode === "multi" && !isPrimary && !isCoStar && (
+                      <span className="absolute top-3 right-3 text-foreground/30 text-xs">+ add</span>
+                    )}
                   </button>
                 );
               })}
@@ -208,6 +274,11 @@ function CreateWizard() {
                 + Add adventurer
               </Link>
             </div>
+            {mode === "multi" && (
+              <p className="mt-4 text-xs text-foreground/50">
+                Tap a card to add a co-star. Double-tap to make them the main hero.
+              </p>
+            )}
           </StepWrap>
         )}
 
@@ -308,8 +379,18 @@ function CreateWizard() {
               <p className="font-display text-2xl text-foreground mb-2">Everything looks magical.</p>
               <p className="text-foreground/55 mb-8">
                 We'll craft a {length}-minute {MOODS.find((m) => m.id === mood)?.label.toLowerCase()} adventure for{" "}
-                {selectedChild?.first_name ?? "your adventurer"} in the world of{" "}
-                {ADVENTURES.find((a) => a.id === adventure)?.label ?? "wonder"}.
+                {selectedChild?.first_name ?? "your adventurer"}
+                {mode === "multi" && coStarIds.filter((id) => id !== primaryId).length > 0 && (
+                  <>
+                    {" "}
+                    with{" "}
+                    {children
+                      .filter((c) => coStarIds.includes(c.id) && c.id !== primaryId)
+                      .map((c) => c.first_name)
+                      .join(" & ")}
+                  </>
+                )}{" "}
+                in the world of {ADVENTURES.find((a) => a.id === adventure)?.label ?? "wonder"}.
               </p>
               <button
                 onClick={handleGenerate}
@@ -332,8 +413,8 @@ function CreateWizard() {
       {!generating && (
         <div className="mt-6 flex items-center justify-between animate-fade-in">
           <button
-            onClick={() => setStep((s) => Math.max(0, s - 1))}
-            disabled={step === 0}
+            onClick={() => setStep((s) => Math.max(children.length <= 1 ? 1 : 0, s - 1))}
+            disabled={step === (children.length <= 1 ? 1 : 0)}
             className="rounded-full border border-hairline bg-surface/60 px-5 py-2.5 text-sm font-medium text-foreground/70 disabled:opacity-30"
           >
             ← Back
@@ -410,12 +491,7 @@ function StoryPreparation({
       >
         {state === "done" ? "✓" : state === "active" ? "✦" : "·"}
       </span>
-      <span
-        className={cn(
-          "font-medium",
-          state === "pending" ? "text-foreground/40" : "text-foreground",
-        )}
-      >
+      <span className={cn("font-medium", state === "pending" ? "text-foreground/40" : "text-foreground")}>
         {label}
       </span>
     </div>
@@ -451,20 +527,19 @@ function StoryPreparation({
           state={stage === "writing" ? "pending" : stage === "painting" ? "active" : "done"}
         />
         <Row
-          label="Building your adventure book"
-          state={stage === "binding" ? "active" : "pending"}
+          label="Binding your storybook"
+          state={stage === "binding" ? "active" : stage === "writing" || stage === "painting" ? "pending" : "done"}
         />
       </div>
 
-      <div className="w-full max-w-sm h-2 overflow-hidden rounded-full bg-foreground/10">
-        <div
-          className="h-full bg-gradient-to-r from-lavender via-peach to-star transition-all duration-500"
-          style={{ width: `${pct}%` }}
-        />
+      <div className="w-full max-w-sm">
+        <div className="h-2 w-full overflow-hidden rounded-full bg-foreground/10">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-star to-peach transition-all duration-500"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
       </div>
-      <p className="mt-3 text-xs text-foreground/45 font-mono uppercase tracking-widest">
-        {pct}% ready
-      </p>
     </div>
   );
 }
