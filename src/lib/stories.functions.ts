@@ -23,8 +23,8 @@ export const generateStory = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => GenerateInput.parse(input))
   .handler(async ({ data, context }) => {
-    const apiKey = process.env.LOVABLE_API_KEY;
-    if (!apiKey) throw new Error("AI service is not configured.");
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) throw new Error("OpenAI API key is not configured.");
 
     const { supabase, userId } = context;
 
