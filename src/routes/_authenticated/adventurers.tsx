@@ -1,8 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/app-shell";
+import { CharacterAvatar } from "@/components/character-avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
+import { generateChildPortrait } from "@/lib/portraits.functions";
 import { toast } from "sonner";
 
 type ChildRow = {
@@ -10,6 +12,7 @@ type ChildRow = {
   first_name: string;
   nickname: string | null;
   avatar_emoji: string | null;
+  portrait_url: string | null;
   date_of_birth: string | null;
   personality_traits: string[];
   favorite_animals: string[];
@@ -54,7 +57,7 @@ function AdventurersPage() {
     setLoading(true);
     supabase
       .from("children")
-      .select("id, first_name, nickname, avatar_emoji, date_of_birth, personality_traits, favorite_animals, favorite_foods, favorite_colors, hair_color, eye_color")
+      .select("id, first_name, nickname, avatar_emoji, portrait_url, date_of_birth, personality_traits, favorite_animals, favorite_foods, favorite_colors, hair_color, eye_color")
       .eq("user_id", user.id)
       .order("created_at", { ascending: true })
       .then(({ data, error }) => {
@@ -74,6 +77,25 @@ function AdventurersPage() {
     if (error) return toast.error(error.message);
     setChildren((cs) => cs.filter((c) => c.id !== id));
     toast.success(`${name}'s profile removed`);
+  }
+
+  async function regeneratePortrait(id: string, name: string) {
+    const t = toast.loading(`Drawing ${name}'s portrait…`);
+    try {
+      await generateChildPortrait({ data: { childId: id } });
+      // refetch
+      const { data } = await supabase
+        .from("children")
+        .select("portrait_url")
+        .eq("id", id)
+        .single();
+      setChildren((cs) =>
+        cs.map((c) => (c.id === id ? { ...c, portrait_url: data?.portrait_url ?? c.portrait_url } : c)),
+      );
+      toast.success(`${name}'s portrait is ready ✨`, { id: t });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Couldn't draw portrait", { id: t });
+    }
   }
 
   return (
@@ -117,8 +139,8 @@ function AdventurersPage() {
                   : accent === "mint" ? "from-mint/40 to-star/20"
                   : "from-star/40 to-peach/20"
                 }`}>
-                  <span className="absolute bottom-4 left-6 grid size-20 place-items-center rounded-full bg-paper text-5xl shadow-xl">
-                    {c.avatar_emoji ?? "🦁"}
+                  <span className="absolute bottom-4 left-6 overflow-hidden rounded-full bg-paper shadow-xl ring-4 ring-paper/60 size-20">
+                    <CharacterAvatar portraitPath={c.portrait_url} alt={c.first_name} className="size-full" />
                   </span>
                   {age != null && (
                     <span className="absolute top-4 right-4 rounded-full bg-ink/30 px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-paper backdrop-blur">
@@ -142,7 +164,13 @@ function AdventurersPage() {
                     ))}
                   </div>
 
-                  <div className="mt-6 flex items-center justify-end gap-2 border-t border-hairline pt-5">
+                  <div className="mt-6 flex flex-wrap items-center justify-end gap-2 border-t border-hairline pt-5">
+                    <button
+                      onClick={() => regeneratePortrait(c.id, c.first_name)}
+                      className="rounded-full border border-hairline px-4 py-2 text-xs font-medium text-foreground/70 hover:text-foreground"
+                    >
+                      {c.portrait_url ? "Redraw portrait" : "Draw portrait"}
+                    </button>
                     <button
                       onClick={() => deleteChild(c.id, c.first_name)}
                       className="rounded-full border border-hairline px-4 py-2 text-xs font-medium text-foreground/55 hover:text-destructive"

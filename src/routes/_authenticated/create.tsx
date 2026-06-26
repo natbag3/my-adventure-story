@@ -2,13 +2,14 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/app-shell";
+import { CharacterAvatar } from "@/components/character-avatar";
 import { ADVENTURES, MOODS, LESSONS, LENGTHS } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { generateStory } from "@/lib/stories.functions";
 
-type ChildRow = { id: string; first_name: string; avatar_emoji: string | null; date_of_birth: string | null };
+type ChildRow = { id: string; first_name: string; avatar_emoji: string | null; portrait_url: string | null; date_of_birth: string | null };
 function calcAge(dob: string | null) {
   if (!dob) return null;
   const d = new Date(dob);
@@ -52,7 +53,7 @@ function CreateWizard() {
     if (!user) return;
     supabase
       .from("children")
-      .select("id, first_name, avatar_emoji, date_of_birth")
+      .select("id, first_name, avatar_emoji, portrait_url, date_of_birth")
       .eq("user_id", user.id)
       .order("created_at", { ascending: true })
       .then(({ data }) => {
@@ -146,7 +147,7 @@ function CreateWizard() {
                         : "border-hairline bg-surface-elevated hover:border-foreground/30",
                     )}
                   >
-                    <span className="grid size-20 place-items-center rounded-full bg-paper text-5xl shadow-lg">{c.avatar_emoji ?? "🦁"}</span>
+                    <span className="overflow-hidden size-20 rounded-full bg-paper shadow-lg ring-2 ring-paper/60"><CharacterAvatar portraitPath={c.portrait_url} alt={c.first_name} className="size-full" /></span>
                     <span className="font-display text-lg text-foreground">{c.first_name}</span>
                     {age != null && <span className="text-xs text-foreground/55">Age {age}</span>}
                   </button>

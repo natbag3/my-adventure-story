@@ -38,6 +38,7 @@ export type Database = {
           outfit_color: string | null
           personality_answers: Json
           personality_traits: string[]
+          portrait_url: string | null
           reference_photo_url: string | null
           shoes: string | null
           skin_tone: string | null
@@ -67,6 +68,7 @@ export type Database = {
           outfit_color?: string | null
           personality_answers?: Json
           personality_traits?: string[]
+          portrait_url?: string | null
           reference_photo_url?: string | null
           shoes?: string | null
           skin_tone?: string | null
@@ -96,6 +98,7 @@ export type Database = {
           outfit_color?: string | null
           personality_answers?: Json
           personality_traits?: string[]
+          portrait_url?: string | null
           reference_photo_url?: string | null
           shoes?: string | null
           skin_tone?: string | null

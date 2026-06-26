@@ -3,6 +3,7 @@ import { useMemo, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { generateChildPortrait } from "@/lib/portraits.functions";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
   head: () => ({ meta: [{ title: "Create your adventurer — Adventure Club" }] }),
@@ -231,34 +232,44 @@ function OnboardingPage() {
         photoUrl = path;
       }
 
-      const { error } = await supabase.from("children").insert({
-        user_id: user.id,
-        first_name: form.first_name.trim(),
-        nickname: form.nickname.trim() || null,
-        date_of_birth: form.date_of_birth || null,
-        reference_photo_url: photoUrl,
-        avatar_emoji: form.avatar_emoji,
-        hair_color: form.hair_color || null,
-        hair_style: form.hair_style || null,
-        eye_color: form.eye_color || null,
-        skin_tone: form.skin_tone || null,
-        freckles: form.freckles,
-        glasses: form.glasses,
-        outfit_color: form.outfit_color || null,
-        shoes: form.shoes || null,
-        personality_answers: form.personality_answers,
-        personality_traits: form.personality_traits,
-        favorite_animals: form.favorite_animals,
-        favorite_colors: form.favorite_colors,
-        favorite_foods: form.favorite_foods,
-        favorite_toys: form.favorite_toys,
-        favorite_story_themes: form.favorite_story_themes,
-        favorite_hobbies: form.favorite_hobbies,
-        favorite_places: form.favorite_places,
-        learning_goals: form.learning_goals,
+      const { data: inserted, error } = await supabase
+        .from("children")
+        .insert({
+          user_id: user.id,
+          first_name: form.first_name.trim(),
+          nickname: form.nickname.trim() || null,
+          date_of_birth: form.date_of_birth || null,
+          reference_photo_url: photoUrl,
+          avatar_emoji: form.avatar_emoji,
+          hair_color: form.hair_color || null,
+          hair_style: form.hair_style || null,
+          eye_color: form.eye_color || null,
+          skin_tone: form.skin_tone || null,
+          freckles: form.freckles,
+          glasses: form.glasses,
+          outfit_color: form.outfit_color || null,
+          shoes: form.shoes || null,
+          personality_answers: form.personality_answers,
+          personality_traits: form.personality_traits,
+          favorite_animals: form.favorite_animals,
+          favorite_colors: form.favorite_colors,
+          favorite_foods: form.favorite_foods,
+          favorite_toys: form.favorite_toys,
+          favorite_story_themes: form.favorite_story_themes,
+          favorite_hobbies: form.favorite_hobbies,
+          favorite_places: form.favorite_places,
+          learning_goals: form.learning_goals,
+        })
+        .select("id")
+        .single();
+      if (error || !inserted) throw error ?? new Error("Could not create profile");
+
+      setStep(6); // show success screen immediately
+      // Generate AI character portrait in the background
+      void generateChildPortrait({ data: { childId: inserted.id } }).catch((e) => {
+        console.error("Portrait generation failed", e);
+        toast.message("We'll draw your adventurer's portrait shortly ✨");
       });
-      if (error) throw error;
-      setStep(6); // success screen
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Couldn't save profile");
     } finally {
