@@ -5,6 +5,7 @@ import { z } from "zod";
 const GenerateInput = z.object({
   childId: z.string().uuid(),
   coStarIds: z.array(z.string().uuid()).optional().default([]),
+  petIds: z.array(z.string().uuid()).optional().default([]),
   theme: z.string().min(1),
   mood: z.string().min(1),
   lesson: z.string().min(1),
