@@ -303,8 +303,6 @@ function OnboardingPage() {
               form={form}
               update={update}
               age={age}
-              fileRef={fileRef}
-              onPhoto={onPhoto}
               onNext={() => setStep(2)}
             />
           )}
