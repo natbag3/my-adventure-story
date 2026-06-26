@@ -45,6 +45,8 @@ function CreateWizard() {
   const [lesson, setLesson] = useState<string | null>(null);
   const [length, setLength] = useState<3 | 5 | 10>(5);
   const [generating, setGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const generateFn = useServerFn(generateStory);
 
   useEffect(() => {
     if (!user) return;
