@@ -74,9 +74,28 @@ function CreateWizard() {
     step === 4 ||
     step === 5;
 
-  function handleGenerate() {
+  async function handleGenerate() {
+    if (!child || !adventure || !lesson || !mood) return;
     setGenerating(true);
-    setTimeout(() => navigate({ to: "/story/$id", params: { id: "moon-whale" } }), 2200);
+    setError(null);
+    try {
+      const adventureLabel = ADVENTURES.find((a) => a.id === adventure)?.label ?? adventure;
+      const moodLabel = MOODS.find((m) => m.id === mood)?.label ?? mood;
+      const lessonLabel = LESSONS.find((l) => l.id === lesson)?.label ?? lesson;
+      const result = await generateFn({
+        data: {
+          childId: child,
+          theme: adventureLabel,
+          mood: moodLabel,
+          lesson: lessonLabel,
+          lengthMinutes: length,
+        },
+      });
+      navigate({ to: "/story/$id", params: { id: result.storyId } });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Something went wrong. Please try again.");
+      setGenerating(false);
+    }
   }
 
   return (
