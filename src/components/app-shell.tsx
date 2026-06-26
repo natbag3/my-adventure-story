@@ -106,10 +106,10 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <main className="relative z-10 mx-auto max-w-6xl px-5 py-10 md:py-14">{children}</main>
 
-      {/* Mobile bottom nav */}
-      <nav className="fixed bottom-3 left-1/2 z-40 -translate-x-1/2 md:hidden">
-        <div className="flex items-center gap-1 rounded-full border border-hairline bg-background/80 px-2 py-1.5 backdrop-blur-xl shadow-lg">
-          {NAV.slice(0, 5).map((item) => {
+      {/* Persistent bottom nav */}
+      <nav className="fixed bottom-3 left-1/2 z-40 -translate-x-1/2">
+        <div className="flex items-center gap-1 rounded-full border border-hairline bg-background/85 px-2 py-1.5 backdrop-blur-xl shadow-lg">
+          {NAV.map((item) => {
             const active =
               item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
             return (
@@ -117,11 +117,12 @@ export function AppShell({ children }: { children: ReactNode }) {
                 key={item.to}
                 to={item.to}
                 className={cn(
-                  "rounded-full px-3 py-1.5 text-xs font-medium",
+                  "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium",
                   active ? "bg-foreground/10 text-foreground" : "text-foreground/55",
                 )}
               >
-                {item.label}
+                <span>{item.icon}</span>
+                <span className="hidden sm:inline">{item.label}</span>
               </Link>
             );
           })}
