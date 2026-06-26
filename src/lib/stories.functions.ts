@@ -126,7 +126,7 @@ export const generateStory = createServerFn({ method: "POST" })
 
 HERO PROFILE(S):
 ${JSON.stringify(profile, null, 2)}
-${multiNote}
+${multiNote}${petNote}
 STORY SETTINGS:
 - Theme: ${data.theme}
 - Mood: ${data.mood}
