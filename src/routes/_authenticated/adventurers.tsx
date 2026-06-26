@@ -224,6 +224,48 @@ function AdventurersPage() {
           })}
         </section>
       )}
+
+      {!loading && pets.length > 0 && (
+        <section className="mt-12 animate-slide-up">
+          <div className="mb-4 flex items-end justify-between">
+            <div>
+              <p className="mb-1 font-mono text-[10px] uppercase tracking-[0.25em] text-star/80">Loyal sidekicks</p>
+              <h2 className="font-display text-3xl text-foreground">Pets</h2>
+            </div>
+            <Link
+              to="/adventurers/new-pet"
+              className="text-xs font-medium text-foreground/70 hover:text-foreground"
+            >
+              + Add another
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {pets.map((p) => (
+              <div
+                key={p.id}
+                className="flex items-center gap-4 rounded-2xl border border-hairline bg-surface p-4"
+              >
+                <span className="grid size-14 place-items-center rounded-full bg-surface-elevated text-3xl">
+                  {p.type === "cat" ? "🐱" : "🐶"}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="font-display text-lg text-foreground truncate">{p.name}</p>
+                  <p className="text-xs text-foreground/55">
+                    {p.fur_color ?? "—"}
+                    {p.eye_color && <> · {p.eye_color} eyes</>}
+                  </p>
+                </div>
+                <button
+                  onClick={() => deletePet(p.id, p.name)}
+                  className="rounded-full border border-hairline px-3 py-1 text-[11px] font-medium text-foreground/55 hover:text-destructive"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
     </AppShell>
   );
 }
