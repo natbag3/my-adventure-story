@@ -74,10 +74,10 @@ export const generateChildPortrait = createServerFn({ method: "POST" })
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "gpt-image-1-mini",
+        model: "dall-e-3",
         prompt,
         size: "1024x1024",
-        quality: "low",
+        response_format: "b64_json",
         n: 1,
       }),
     });

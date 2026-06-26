@@ -84,7 +84,7 @@ export const generateStoryPageImage = createServerFn({ method: "POST" })
     const aiRes = await fetch("https://api.openai.com/v1/images/generations", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({ model: "gpt-image-1-mini", prompt, size: "1024x1024", quality: "low", n: 1 }),
+      body: JSON.stringify({ model: "dall-e-3", prompt, size: "1024x1024", response_format: "b64_json", n: 1 }),
     });
     if (!aiRes.ok) {
       const txt = await aiRes.text();
