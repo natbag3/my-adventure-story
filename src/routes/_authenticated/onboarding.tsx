@@ -317,7 +317,7 @@ function OnboardingPage() {
               onNext={() => setStep(4)}
             />
           )}
-          {step === 4 && <ScreenFavorites form={form} update={update} onNext={() => setStep(5)} />}
+          {step === 4 && <ScreenFavorites form={form} setForm={setForm} onNext={() => setStep(5)} />}
           {step === 5 && (
             <ScreenLearning form={form} toggleGoal={toggleGoal} busy={busy} onSave={save} />
           )}
