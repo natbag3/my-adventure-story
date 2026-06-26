@@ -22,6 +22,14 @@ type ChildRow = {
   eye_color: string | null;
 };
 
+type PetRow = {
+  id: string;
+  name: string;
+  type: "cat" | "dog";
+  fur_color: string | null;
+  eye_color: string | null;
+};
+
 export const Route = createFileRoute("/_authenticated/adventurers")({
   head: () => ({
     meta: [
