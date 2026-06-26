@@ -918,3 +918,170 @@ function NextButton({ children, onClick, disabled }: { children: React.ReactNode
     </button>
   );
 }
+
+type Accent = "peach" | "lavender" | "mint" | "star";
+
+const ACCENT_ACTIVE: Record<Accent, string> = {
+  peach: "border-peach bg-peach/25 text-foreground shadow-[0_0_24px_oklch(0.82_0.12_55/0.35)]",
+  lavender: "border-lavender bg-lavender/25 text-foreground shadow-[0_0_24px_oklch(0.78_0.13_300/0.35)]",
+  mint: "border-mint bg-mint/25 text-foreground shadow-[0_0_24px_oklch(0.85_0.13_165/0.35)]",
+  star: "border-star bg-star/25 text-foreground shadow-[0_0_24px_oklch(0.85_0.16_88/0.35)]",
+};
+
+function PillMultiSelect({
+  label, hint, options, selected, onToggle, onAddCustom, accent = "lavender",
+}: {
+  label: string;
+  hint?: string;
+  options: string[];
+  selected: string[];
+  onToggle: (v: string) => void;
+  onAddCustom: (v: string) => void;
+  accent?: Accent;
+}) {
+  const [custom, setCustom] = useState("");
+  function addCustom() {
+    const v = custom.trim();
+    if (!v) return;
+    onAddCustom(v);
+    setCustom("");
+  }
+  const customSelected = selected.filter((s) => !options.includes(s));
+  return (
+    <div>
+      <div className="mb-2 flex items-baseline justify-between">
+        <p className="font-display text-lg text-foreground">{label}</p>
+        {hint && <span className="font-mono text-[10px] uppercase tracking-widest text-foreground/45">{hint} · {selected.length}</span>}
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {options.map((o) => {
+          const active = selected.includes(o);
+          return (
+            <button
+              key={o}
+              type="button"
+              onClick={() => onToggle(o)}
+              className={
+                "rounded-full border px-4 py-2 text-sm font-medium transition-all active:scale-95 " +
+                (active
+                  ? ACCENT_ACTIVE[accent] + " scale-105"
+                  : "border-hairline bg-surface-elevated text-foreground/75 hover:border-lavender/60 hover:bg-surface")
+              }
+            >
+              {o}
+            </button>
+          );
+        })}
+        {customSelected.map((o) => (
+          <button
+            key={o}
+            type="button"
+            onClick={() => onToggle(o)}
+            className={"rounded-full border px-4 py-2 text-sm font-medium scale-105 " + ACCENT_ACTIVE[accent]}
+          >
+            ✨ {o} ×
+          </button>
+        ))}
+      </div>
+      <div className="mt-3 flex gap-2">
+        <input
+          value={custom}
+          onChange={(e) => setCustom(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCustom(); } }}
+          placeholder="Add your own…"
+          className="h-10 flex-1 rounded-full border border-dashed border-hairline bg-background/40 px-4 text-sm text-foreground outline-none placeholder:text-foreground/35 focus:border-lavender/60"
+        />
+        <button
+          type="button"
+          onClick={addCustom}
+          disabled={!custom.trim()}
+          className="rounded-full bg-foreground/10 px-4 text-sm font-medium text-foreground/80 hover:bg-foreground/15 disabled:opacity-40"
+        >
+          + Add
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ColorPillMultiSelect({
+  label, hint, options, selected, onToggle, onAddCustom,
+}: {
+  label: string;
+  hint?: string;
+  options: { id: string; hex: string }[];
+  selected: string[];
+  onToggle: (v: string) => void;
+  onAddCustom: (v: string) => void;
+}) {
+  const [custom, setCustom] = useState("");
+  function addCustom() {
+    const v = custom.trim();
+    if (!v) return;
+    onAddCustom(v);
+    setCustom("");
+  }
+  const known = new Set(options.map((o) => o.id));
+  const customSelected = selected.filter((s) => !known.has(s));
+  return (
+    <div>
+      <div className="mb-2 flex items-baseline justify-between">
+        <p className="font-display text-lg text-foreground">{label}</p>
+        {hint && <span className="font-mono text-[10px] uppercase tracking-widest text-foreground/45">{hint} · {selected.length}</span>}
+      </div>
+      <div className="flex flex-wrap gap-2.5">
+        {options.map((o) => {
+          const active = selected.includes(o.id);
+          const isGradient = o.hex.startsWith("linear-gradient");
+          return (
+            <button
+              key={o.id}
+              type="button"
+              onClick={() => onToggle(o.id)}
+              className={
+                "group flex items-center gap-2 rounded-full border py-2 pl-2 pr-4 text-sm transition-all active:scale-95 " +
+                (active
+                  ? "border-star bg-star/15 text-foreground scale-105 shadow-[0_0_24px_oklch(0.85_0.16_88/0.3)]"
+                  : "border-hairline bg-surface-elevated text-foreground/80 hover:border-lavender/60")
+              }
+            >
+              <span
+                className="size-7 rounded-full ring-2 ring-background/40"
+                style={isGradient ? { backgroundImage: o.hex } : { background: o.hex }}
+              />
+              <span className="font-medium">{o.id}</span>
+            </button>
+          );
+        })}
+        {customSelected.map((o) => (
+          <button
+            key={o}
+            type="button"
+            onClick={() => onToggle(o)}
+            className="rounded-full border border-star bg-star/15 px-4 py-2 text-sm font-medium scale-105"
+          >
+            ✨ {o} ×
+          </button>
+        ))}
+      </div>
+      <div className="mt-3 flex gap-2">
+        <input
+          value={custom}
+          onChange={(e) => setCustom(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCustom(); } }}
+          placeholder="Add your own colour…"
+          className="h-10 flex-1 rounded-full border border-dashed border-hairline bg-background/40 px-4 text-sm text-foreground outline-none placeholder:text-foreground/35 focus:border-lavender/60"
+        />
+        <button
+          type="button"
+          onClick={addCustom}
+          disabled={!custom.trim()}
+          className="rounded-full bg-foreground/10 px-4 text-sm font-medium text-foreground/80 hover:bg-foreground/15 disabled:opacity-40"
+        >
+          + Add
+        </button>
+      </div>
+    </div>
+  );
+}
+
