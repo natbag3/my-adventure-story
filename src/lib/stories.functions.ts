@@ -47,8 +47,7 @@ export const generateStory = createServerFn({ method: "POST" })
       if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
     }
 
-    const pageCount = 12;
-    const targetWords = data.lengthMinutes === 3 ? 35 : data.lengthMinutes === 5 ? 55 : 90;
+    const pageCount = data.lengthMinutes === 3 ? 8 : data.lengthMinutes === 5 ? 12 : 18;
 
     const profileSummary = {
       name: child.first_name,
