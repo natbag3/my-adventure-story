@@ -583,34 +583,94 @@ function ScreenPersonality({
 }
 
 function ScreenFavorites({
-  form, update, onNext,
+  form, setForm, onNext,
 }: {
   form: FormState;
-  update: <K extends keyof FormState>(k: K, v: FormState[K]) => void;
+  setForm: React.Dispatch<React.SetStateAction<FormState>>;
   onNext: () => void;
 }) {
+  function toggleIn<K extends keyof FormState>(key: K, value: string, max?: number) {
+    setForm((f) => {
+      const arr = (f[key] as unknown as string[]) ?? [];
+      if (arr.includes(value)) {
+        return { ...f, [key]: arr.filter((x) => x !== value) } as FormState;
+      }
+      if (max && arr.length >= max) {
+        toast.message(`You can pick up to ${max} ✨`);
+        return f;
+      }
+      return { ...f, [key]: [...arr, value] } as FormState;
+    });
+  }
   return (
-    <ScreenCard title="Favourite Things" subtitle="Their world, woven into every story.">
-      <IconPicker label="Favourite animal" value={form.favorite_animal} options={FAV_ANIMALS}
-        onChange={(v) => update("favorite_animal", v)} />
-      <ColorPicker label="Favourite colour" value={form.favorite_color} options={FAV_COLORS}
-        onChange={(v) => update("favorite_color", v)} />
-      <IconPicker label="Favourite food" value={form.favorite_food} options={FAV_FOODS}
-        onChange={(v) => update("favorite_food", v)} />
-      <IconPicker label="Favourite toy" value={form.favorite_toy} options={FAV_TOYS}
-        onChange={(v) => update("favorite_toy", v)} />
-      <IconPicker label="Favourite bedtime story" value={form.favorite_story} options={FAV_STORIES}
-        onChange={(v) => update("favorite_story", v)} />
-      <IconPicker label="Favourite place" value={form.favorite_place} options={FAV_PLACES}
-        onChange={(v) => update("favorite_place", v)} />
-      <IconPicker label="Favourite season" value={form.favorite_season} options={FAV_SEASONS}
-        onChange={(v) => update("favorite_season", v)} />
-      <IconPicker label="Favourite holiday" value={form.favorite_holiday} options={FAV_HOLIDAYS}
-        onChange={(v) => update("favorite_holiday", v)} />
+    <ScreenCard title="Favourite Things" subtitle="Tap as many as you love — these sprinkle into every story.">
+      <PillMultiSelect
+        label="Favourite Animals"
+        hint="Select up to 5"
+        options={FAV_ANIMALS}
+        selected={form.favorite_animals}
+        onToggle={(v) => toggleIn("favorite_animals", v, 5)}
+        onAddCustom={(v) => toggleIn("favorite_animals", v, 5)}
+        accent="peach"
+      />
+      <ColorPillMultiSelect
+        label="Favourite Colours"
+        hint="Select up to 5"
+        options={FAV_COLORS_PILLS}
+        selected={form.favorite_colors}
+        onToggle={(v) => toggleIn("favorite_colors", v, 5)}
+        onAddCustom={(v) => toggleIn("favorite_colors", v, 5)}
+      />
+      <PillMultiSelect
+        label="Favourite Foods"
+        hint="Select up to 5"
+        options={FAV_FOODS}
+        selected={form.favorite_foods}
+        onToggle={(v) => toggleIn("favorite_foods", v, 5)}
+        onAddCustom={(v) => toggleIn("favorite_foods", v, 5)}
+        accent="mint"
+      />
+      <PillMultiSelect
+        label="Favourite Toys"
+        hint="Select up to 5"
+        options={FAV_TOYS}
+        selected={form.favorite_toys}
+        onToggle={(v) => toggleIn("favorite_toys", v, 5)}
+        onAddCustom={(v) => toggleIn("favorite_toys", v, 5)}
+        accent="star"
+      />
+      <PillMultiSelect
+        label="Favourite Story Themes"
+        hint="Select as many as you'd like"
+        options={FAV_STORY_THEMES}
+        selected={form.favorite_story_themes}
+        onToggle={(v) => toggleIn("favorite_story_themes", v)}
+        onAddCustom={(v) => toggleIn("favorite_story_themes", v)}
+        accent="lavender"
+      />
+      <PillMultiSelect
+        label="Favourite Hobbies"
+        hint="Select multiple"
+        options={FAV_HOBBIES}
+        selected={form.favorite_hobbies}
+        onToggle={(v) => toggleIn("favorite_hobbies", v)}
+        onAddCustom={(v) => toggleIn("favorite_hobbies", v)}
+        accent="peach"
+      />
+      <PillMultiSelect
+        label="Favourite Places"
+        hint="Select multiple"
+        options={FAV_PLACES}
+        selected={form.favorite_places}
+        onToggle={(v) => toggleIn("favorite_places", v)}
+        onAddCustom={(v) => toggleIn("favorite_places", v)}
+        accent="mint"
+      />
       <NextButton onClick={onNext}>Continue</NextButton>
     </ScreenCard>
   );
 }
+
 
 function ScreenLearning({
   form, toggleGoal, onSave, busy,
