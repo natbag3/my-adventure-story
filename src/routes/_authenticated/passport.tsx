@@ -1,7 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { PASSPORT_STAMPS, ACHIEVEMENTS, REWARDS, CHILDREN } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth-context";
 
 export const Route = createFileRoute("/_authenticated/passport")({
   head: () => ({
@@ -16,9 +19,49 @@ export const Route = createFileRoute("/_authenticated/passport")({
 });
 
 function PassportPage() {
+  const { user } = useAuth();
+  const [storyCount, setStoryCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("stories")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .then(({ count }) => setStoryCount(count ?? 0));
+  }, [user]);
+
   const unlocked = PASSPORT_STAMPS.filter((s) => s.unlockedAt);
   const locked = PASSPORT_STAMPS.filter((s) => !s.unlockedAt);
   const progress = REWARDS.points / REWARDS.nextLevelAt;
+
+  if (storyCount === 0) {
+    return (
+      <AppShell>
+        <header className="mb-10 animate-slide-up">
+          <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.25em] text-star/80">Worlds explored</p>
+          <h1 className="font-display text-4xl md:text-5xl font-medium text-foreground">Adventure Passport</h1>
+        </header>
+        <section className="rounded-[32px] border border-hairline bg-surface/60 p-12 text-center card-glow animate-slide-up [animation-delay:100ms]">
+          <div className="mx-auto mb-6 grid size-24 place-items-center rounded-full bg-gradient-to-br from-star/30 to-peach/20 text-5xl shadow-[0_0_30px_oklch(0.85_0.16_88/0.3)] animate-float">
+            🗺️
+          </div>
+          <h2 className="font-display text-3xl text-foreground">Your passport awaits</h2>
+          <p className="mt-3 text-foreground/60 max-w-md mx-auto">
+            Every bedtime story unlocks a new stamp — countries visited, worlds explored, creatures met. Start your first adventure to collect your first stamp.
+          </p>
+          <Link
+            to="/create"
+            className="mt-8 inline-flex items-center gap-2 rounded-full bg-primary px-7 py-4 font-display text-lg font-bold text-primary-foreground shadow-[0_20px_50px_-20px_oklch(0.85_0.16_88/0.6)] hover:scale-[1.02] transition-transform"
+          >
+            ✨ Start First Adventure
+          </Link>
+        </section>
+      </AppShell>
+    );
+  }
+
+
 
   return (
     <AppShell>
