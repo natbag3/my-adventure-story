@@ -1,10 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/app-shell";
 import { StoryCover } from "@/components/cover";
 import { StoryImage } from "@/components/story-image";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { generateStoryPageImage } from "@/lib/story-images.functions";
 
 type StoryPage = { text: string; illustration_prompt?: string; image_url?: string | null };
 type StoryRow = {
