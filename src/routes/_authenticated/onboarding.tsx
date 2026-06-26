@@ -91,14 +91,27 @@ const TRAITS = [
   "Gentle", "Adventurous", "Helpful", "Confident", "Thoughtful",
 ];
 
-const FAV_ANIMALS = ["🐶 Dog","🐱 Cat","🦄 Unicorn","🐉 Dragon","🦁 Lion","🐘 Elephant","🐢 Turtle","🐙 Octopus","🦋 Butterfly","🐸 Frog","🦒 Giraffe","🐬 Dolphin"];
-const FAV_COLORS = OUTFIT_COLORS;
-const FAV_FOODS = ["🥞 Pancakes","🍓 Strawberries","🍕 Pizza","🍦 Ice cream","🍝 Pasta","🥪 Sandwich","🍪 Cookies","🍎 Apples","🥕 Carrots","🍣 Sushi"];
-const FAV_TOYS = ["🧸 Plushie","🪀 Yoyo","🧩 Puzzle","⚔️ Sword","🪄 Wand","🎨 Paints","🚗 Cars","🪁 Kite","🧱 Blocks","🎸 Music"];
-const FAV_STORIES = ["🌙 Goodnight Moon","🐰 Peter Rabbit","🧙 Wizards","🐉 Dragons","🚀 Space","🏰 Princesses","🦖 Dinosaurs","🌊 Mermaids"];
-const FAV_PLACES = ["🏖️ Beach","🌲 Forest","🏔️ Mountains","🏰 Castle","🌃 City","🏡 Home","🚂 Train station","🌌 Outer space"];
-const FAV_SEASONS = ["🌸 Spring","☀️ Summer","🍂 Autumn","❄️ Winter"];
-const FAV_HOLIDAYS = ["🎄 Christmas","🎃 Halloween","🐰 Easter","🎂 Birthday","🎆 New Year","🦃 Thanksgiving"];
+const FAV_ANIMALS = ["🐶 Dog","🐱 Cat","🐉 Dragon","🦄 Unicorn","🦖 Dinosaur","🐼 Panda","🐘 Elephant","🦁 Lion","🐯 Tiger","🐬 Dolphin","🦈 Shark","🦊 Fox","🐨 Koala","🐧 Penguin","🐰 Rabbit","🐴 Horse","🐦 Bird","🐻 Bear"];
+const FAV_COLORS_PILLS = [
+  { id: "Red", hex: "#ef4444" },
+  { id: "Orange", hex: "#f97316" },
+  { id: "Yellow", hex: "#facc15" },
+  { id: "Green", hex: "#22c55e" },
+  { id: "Blue", hex: "#3b82f6" },
+  { id: "Purple", hex: "#a855f7" },
+  { id: "Pink", hex: "#ec4899" },
+  { id: "Turquoise", hex: "#14b8a6" },
+  { id: "Gold", hex: "#eab308" },
+  { id: "Silver", hex: "#cbd5e1" },
+  { id: "Rainbow", hex: "linear-gradient(135deg,#ef4444,#facc15,#22c55e,#3b82f6,#a855f7)" },
+  { id: "Black", hex: "#1c1917" },
+  { id: "White", hex: "#f8fafc" },
+];
+const FAV_FOODS = ["🥞 Pancakes","🍓 Strawberries","🍕 Pizza","🍦 Ice cream","🍝 Pasta","🥪 Sandwich","🍪 Cookies","🍎 Apples","🥕 Carrots","🍣 Sushi","🍩 Donuts","🍌 Bananas","🥦 Broccoli","🍇 Grapes","🥨 Pretzels","🌮 Tacos"];
+const FAV_TOYS = ["🧸 Plushie","🪀 Yoyo","🧩 Puzzle","⚔️ Sword","🪄 Wand","🎨 Paints","🚗 Cars","🪁 Kite","🧱 Blocks","🎸 Music","🚂 Train","🎲 Board game","🪅 Piñata","🏀 Ball","🛼 Skates"];
+const FAV_STORY_THEMES = ["🦖 Dinosaurs","🚀 Space","🏴‍☠️ Pirates","🐉 Dragons","🧚 Fairies","👸 Princesses","🤖 Robots","🌊 Ocean","🏕️ Camping","💰 Treasure Hunts","🌴 Jungle","🪄 Magic","🎄 Christmas","🎃 Halloween","⏳ Time Travel","🏰 Castles"];
+const FAV_HOBBIES = ["📖 Reading","🎨 Drawing","⚽ Soccer","🏊 Swimming","💃 Dancing","🎵 Music","🧱 Building","✂️ Crafts","🍳 Cooking","🔬 Science","🌿 Nature","🐾 Animals","🎮 Video Games"];
+const FAV_PLACES = ["🏖️ Beach","🌲 Forest","🏔️ Mountains","🦒 Zoo","🚜 Farm","🚀 Space","🏰 Castle","🌳 Treehouse","🏛️ Museum","🐠 Aquarium","🏡 Grandma's House"];
 
 const LEARNING_GOALS = [
   { id: "Confidence", emoji: "✨" },
