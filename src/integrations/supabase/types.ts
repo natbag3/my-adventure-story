@@ -14,7 +14,120 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      children: {
+        Row: {
+          avatar_emoji: string | null
+          created_at: string
+          date_of_birth: string | null
+          eye_color: string | null
+          favorite_animal: string | null
+          favorite_color: string | null
+          favorite_food: string | null
+          favorite_holiday: string | null
+          favorite_place: string | null
+          favorite_season: string | null
+          favorite_story: string | null
+          favorite_toy: string | null
+          first_name: string
+          freckles: boolean | null
+          glasses: boolean | null
+          hair_color: string | null
+          hair_style: string | null
+          id: string
+          learning_goals: string[]
+          nickname: string | null
+          outfit_color: string | null
+          personality_answers: Json
+          personality_traits: string[]
+          reference_photo_url: string | null
+          shoes: string | null
+          skin_tone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_emoji?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          eye_color?: string | null
+          favorite_animal?: string | null
+          favorite_color?: string | null
+          favorite_food?: string | null
+          favorite_holiday?: string | null
+          favorite_place?: string | null
+          favorite_season?: string | null
+          favorite_story?: string | null
+          favorite_toy?: string | null
+          first_name: string
+          freckles?: boolean | null
+          glasses?: boolean | null
+          hair_color?: string | null
+          hair_style?: string | null
+          id?: string
+          learning_goals?: string[]
+          nickname?: string | null
+          outfit_color?: string | null
+          personality_answers?: Json
+          personality_traits?: string[]
+          reference_photo_url?: string | null
+          shoes?: string | null
+          skin_tone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_emoji?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          eye_color?: string | null
+          favorite_animal?: string | null
+          favorite_color?: string | null
+          favorite_food?: string | null
+          favorite_holiday?: string | null
+          favorite_place?: string | null
+          favorite_season?: string | null
+          favorite_story?: string | null
+          favorite_toy?: string | null
+          first_name?: string
+          freckles?: boolean | null
+          glasses?: boolean | null
+          hair_color?: string | null
+          hair_style?: string | null
+          id?: string
+          learning_goals?: string[]
+          nickname?: string | null
+          outfit_color?: string | null
+          personality_answers?: Json
+          personality_traits?: string[]
+          reference_photo_url?: string | null
+          shoes?: string | null
+          skin_tone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
