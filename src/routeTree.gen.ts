@@ -21,6 +21,7 @@ import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedCreateRouteImport } from './routes/_authenticated/create'
 import { Route as AuthenticatedAdventurersRouteImport } from './routes/_authenticated/adventurers'
 import { Route as AuthenticatedStoryIdRouteImport } from './routes/_authenticated/story.$id'
+import { Route as AuthenticatedAdventurersNewPetRouteImport } from './routes/_authenticated/adventurers.new-pet'
 import { Route as AuthenticatedAdventurersNewRouteImport } from './routes/_authenticated/adventurers.new'
 
 const AuthRoute = AuthRouteImport.update({
@@ -84,6 +85,12 @@ const AuthenticatedStoryIdRoute = AuthenticatedStoryIdRouteImport.update({
   path: '/story/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdventurersNewPetRoute =
+  AuthenticatedAdventurersNewPetRouteImport.update({
+    id: '/new-pet',
+    path: '/new-pet',
+    getParentRoute: () => AuthenticatedAdventurersRoute,
+  } as any)
 const AuthenticatedAdventurersNewRoute =
   AuthenticatedAdventurersNewRouteImport.update({
     id: '/new',
@@ -103,6 +110,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/subscription': typeof AuthenticatedSubscriptionRoute
   '/adventurers/new': typeof AuthenticatedAdventurersNewRoute
+  '/adventurers/new-pet': typeof AuthenticatedAdventurersNewPetRoute
   '/story/$id': typeof AuthenticatedStoryIdRoute
 }
 export interface FileRoutesByTo {
@@ -117,6 +125,7 @@ export interface FileRoutesByTo {
   '/subscription': typeof AuthenticatedSubscriptionRoute
   '/': typeof AuthenticatedIndexRoute
   '/adventurers/new': typeof AuthenticatedAdventurersNewRoute
+  '/adventurers/new-pet': typeof AuthenticatedAdventurersNewPetRoute
   '/story/$id': typeof AuthenticatedStoryIdRoute
 }
 export interface FileRoutesById {
@@ -133,6 +142,7 @@ export interface FileRoutesById {
   '/_authenticated/subscription': typeof AuthenticatedSubscriptionRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/adventurers/new': typeof AuthenticatedAdventurersNewRoute
+  '/_authenticated/adventurers/new-pet': typeof AuthenticatedAdventurersNewPetRoute
   '/_authenticated/story/$id': typeof AuthenticatedStoryIdRoute
 }
 export interface FileRouteTypes {
@@ -149,6 +159,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/subscription'
     | '/adventurers/new'
+    | '/adventurers/new-pet'
     | '/story/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -163,6 +174,7 @@ export interface FileRouteTypes {
     | '/subscription'
     | '/'
     | '/adventurers/new'
+    | '/adventurers/new-pet'
     | '/story/$id'
   id:
     | '__root__'
@@ -178,6 +190,7 @@ export interface FileRouteTypes {
     | '/_authenticated/subscription'
     | '/_authenticated/'
     | '/_authenticated/adventurers/new'
+    | '/_authenticated/adventurers/new-pet'
     | '/_authenticated/story/$id'
   fileRoutesById: FileRoutesById
 }
@@ -272,6 +285,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedStoryIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/adventurers/new-pet': {
+      id: '/_authenticated/adventurers/new-pet'
+      path: '/new-pet'
+      fullPath: '/adventurers/new-pet'
+      preLoaderRoute: typeof AuthenticatedAdventurersNewPetRouteImport
+      parentRoute: typeof AuthenticatedAdventurersRoute
+    }
     '/_authenticated/adventurers/new': {
       id: '/_authenticated/adventurers/new'
       path: '/new'
@@ -284,11 +304,13 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAdventurersRouteChildren {
   AuthenticatedAdventurersNewRoute: typeof AuthenticatedAdventurersNewRoute
+  AuthenticatedAdventurersNewPetRoute: typeof AuthenticatedAdventurersNewPetRoute
 }
 
 const AuthenticatedAdventurersRouteChildren: AuthenticatedAdventurersRouteChildren =
   {
     AuthenticatedAdventurersNewRoute: AuthenticatedAdventurersNewRoute,
+    AuthenticatedAdventurersNewPetRoute: AuthenticatedAdventurersNewPetRoute,
   }
 
 const AuthenticatedAdventurersRouteWithChildren =
