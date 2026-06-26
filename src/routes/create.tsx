@@ -1,0 +1,277 @@
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { AppShell } from "@/components/app-shell";
+import {
+  CHILDREN,
+  ADVENTURES,
+  MOODS,
+  LESSONS,
+  LENGTHS,
+} from "@/lib/mock-data";
+import { cn } from "@/lib/utils";
+
+export const Route = createFileRoute("/create")({
+  head: () => ({
+    meta: [
+      { title: "Create Tonight's Adventure — Adventure Club" },
+      { name: "description", content: "Build a one-of-a-kind bedtime story in a few magical taps." },
+      { property: "og:title", content: "Create Tonight's Adventure — Adventure Club" },
+      { property: "og:description", content: "Build a personalized bedtime adventure for your child." },
+    ],
+  }),
+  component: CreateWizard,
+});
+
+const STEPS = ["Adventurer", "World", "Mood", "Lesson", "Length", "Generate"] as const;
+
+function CreateWizard() {
+  const navigate = useNavigate();
+  const [step, setStep] = useState(0);
+  const [child, setChild] = useState(CHILDREN[0].id);
+  const [adventure, setAdventure] = useState<string | null>(null);
+  const [mood, setMood] = useState<string | null>("bedtime");
+  const [lesson, setLesson] = useState<string | null>(null);
+  const [length, setLength] = useState<3 | 5 | 10>(5);
+  const [generating, setGenerating] = useState(false);
+
+  const canNext =
+    (step === 0 && !!child) ||
+    (step === 1 && !!adventure) ||
+    (step === 2 && !!mood) ||
+    (step === 3 && !!lesson) ||
+    step === 4 ||
+    step === 5;
+
+  function handleGenerate() {
+    setGenerating(true);
+    setTimeout(() => navigate({ to: "/story/$id", params: { id: "moon-whale" } }), 2200);
+  }
+
+  return (
+    <AppShell>
+      <header className="mb-8 animate-slide-up">
+        <Link to="/" className="text-xs text-foreground/55 hover:text-foreground">← Home</Link>
+        <h1 className="mt-2 font-display text-4xl text-foreground">Create Tonight's Adventure</h1>
+        <p className="mt-1 text-foreground/55">Six small choices. One magical story.</p>
+      </header>
+
+      {/* Stepper */}
+      <div className="mb-10 flex flex-wrap items-center gap-2 animate-slide-up [animation-delay:100ms]">
+        {STEPS.map((label, i) => (
+          <div key={label} className="flex items-center gap-2">
+            <button
+              onClick={() => setStep(i)}
+              className={cn(
+                "flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+                i === step
+                  ? "border-star/60 bg-star/15 text-star"
+                  : i < step
+                  ? "border-mint/40 bg-mint/10 text-mint"
+                  : "border-hairline bg-surface/40 text-foreground/40",
+              )}
+            >
+              <span className="grid size-5 place-items-center rounded-full bg-foreground/10 text-[10px]">{i + 1}</span>
+              {label}
+            </button>
+            {i < STEPS.length - 1 && <span className="text-foreground/20">·</span>}
+          </div>
+        ))}
+      </div>
+
+      <div className="rounded-[32px] border border-hairline bg-surface/60 p-8 min-h-[420px] animate-slide-up [animation-delay:200ms]">
+        {step === 0 && (
+          <StepWrap title="Who's the hero tonight?">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {CHILDREN.map((c) => (
+                <button
+                  key={c.id}
+                  onClick={() => setChild(c.id)}
+                  className={cn(
+                    "flex flex-col items-center gap-3 rounded-3xl border p-6 transition-all",
+                    child === c.id
+                      ? "border-star/60 bg-star/10"
+                      : "border-hairline bg-surface-elevated hover:border-foreground/30",
+                  )}
+                >
+                  <span className="grid size-20 place-items-center rounded-full bg-paper text-5xl shadow-lg">{c.avatarEmoji}</span>
+                  <span className="font-display text-lg text-foreground">{c.name}</span>
+                  <span className="text-xs text-foreground/55">Age {c.age}</span>
+                </button>
+              ))}
+              <Link
+                to="/adventurers/new"
+                className="grid place-items-center rounded-3xl border-2 border-dashed border-hairline text-foreground/55 hover:text-foreground p-6"
+              >
+                + Add adventurer
+              </Link>
+            </div>
+          </StepWrap>
+        )}
+
+        {step === 1 && (
+          <StepWrap title="Where shall we go?">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+              {ADVENTURES.map((a) => (
+                <button
+                  key={a.id}
+                  onClick={() => setAdventure(a.id)}
+                  className={cn(
+                    "flex flex-col items-center gap-2 rounded-2xl border p-4 transition-all hover:-translate-y-0.5",
+                    adventure === a.id
+                      ? "border-star/60 bg-star/10"
+                      : "border-hairline bg-surface-elevated",
+                  )}
+                >
+                  <span className="text-3xl">{a.emoji}</span>
+                  <span className="text-sm text-foreground">{a.label}</span>
+                </button>
+              ))}
+            </div>
+          </StepWrap>
+        )}
+
+        {step === 2 && (
+          <StepWrap title="What kind of story?">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {MOODS.map((m) => (
+                <button
+                  key={m.id}
+                  onClick={() => setMood(m.id)}
+                  className={cn(
+                    "flex items-center gap-3 rounded-2xl border p-5 text-left transition-all",
+                    mood === m.id
+                      ? "border-lavender/60 bg-lavender/10"
+                      : "border-hairline bg-surface-elevated hover:border-foreground/30",
+                  )}
+                >
+                  <span className="text-3xl">{m.emoji}</span>
+                  <span className="font-display text-lg text-foreground">{m.label}</span>
+                </button>
+              ))}
+            </div>
+          </StepWrap>
+        )}
+
+        {step === 3 && (
+          <StepWrap title="What should they learn?">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+              {LESSONS.map((l) => (
+                <button
+                  key={l.id}
+                  onClick={() => setLesson(l.id)}
+                  className={cn(
+                    "flex flex-col items-center gap-2 rounded-2xl border p-4 transition-all hover:-translate-y-0.5",
+                    lesson === l.id
+                      ? "border-peach/60 bg-peach/10"
+                      : "border-hairline bg-surface-elevated",
+                  )}
+                >
+                  <span className="text-3xl">{l.emoji}</span>
+                  <span className="text-sm text-foreground text-center">{l.label}</span>
+                </button>
+              ))}
+            </div>
+          </StepWrap>
+        )}
+
+        {step === 4 && (
+          <StepWrap title="How long should it be?">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {LENGTHS.map((l) => (
+                <button
+                  key={l.id}
+                  onClick={() => setLength(l.id)}
+                  className={cn(
+                    "flex flex-col items-start gap-2 rounded-3xl border p-6 transition-all text-left",
+                    length === l.id
+                      ? "border-mint/60 bg-mint/10"
+                      : "border-hairline bg-surface-elevated hover:border-foreground/30",
+                  )}
+                >
+                  <span className="font-display text-3xl text-foreground">{l.label}</span>
+                  <span className="text-sm text-foreground/55">{l.helper}</span>
+                </button>
+              ))}
+            </div>
+          </StepWrap>
+        )}
+
+        {step === 5 && (
+          <StepWrap title="Ready when you are">
+            {!generating ? (
+              <div className="text-center py-10">
+                <div className="mx-auto mb-6 grid size-28 place-items-center rounded-full bg-gradient-to-br from-star to-peach text-5xl shadow-[0_0_40px_oklch(0.85_0.16_88/0.5)] animate-float">
+                  ✨
+                </div>
+                <p className="font-display text-2xl text-foreground mb-2">Everything looks magical.</p>
+                <p className="text-foreground/55 mb-8">
+                  We'll craft a {length}-minute {MOODS.find((m) => m.id === mood)?.label.toLowerCase()} adventure for{" "}
+                  {CHILDREN.find((c) => c.id === child)?.name} in the world of{" "}
+                  {ADVENTURES.find((a) => a.id === adventure)?.label ?? "wonder"}.
+                </p>
+                <button
+                  onClick={handleGenerate}
+                  disabled={!adventure || !lesson}
+                  className="rounded-full bg-primary px-8 py-4 font-display text-lg font-bold text-primary-foreground shadow-[0_20px_50px_-20px_oklch(0.85_0.16_88/0.6)] disabled:opacity-40 hover:scale-[1.02] transition-transform"
+                >
+                  Generate Adventure ✨
+                </button>
+              </div>
+            ) : (
+              <GeneratingState />
+            )}
+          </StepWrap>
+        )}
+      </div>
+
+      {/* Navigation */}
+      {!generating && (
+        <div className="mt-6 flex items-center justify-between animate-fade-in">
+          <button
+            onClick={() => setStep((s) => Math.max(0, s - 1))}
+            disabled={step === 0}
+            className="rounded-full border border-hairline bg-surface/60 px-5 py-2.5 text-sm font-medium text-foreground/70 disabled:opacity-30"
+          >
+            ← Back
+          </button>
+          {step < STEPS.length - 1 && (
+            <button
+              onClick={() => setStep((s) => s + 1)}
+              disabled={!canNext}
+              className="rounded-full bg-foreground/10 px-6 py-2.5 text-sm font-semibold text-foreground disabled:opacity-30 hover:bg-foreground/15"
+            >
+              Next →
+            </button>
+          )}
+        </div>
+      )}
+    </AppShell>
+  );
+}
+
+function StepWrap({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <h2 className="mb-6 font-display text-2xl text-foreground">{title}</h2>
+      {children}
+    </div>
+  );
+}
+
+function GeneratingState() {
+  return (
+    <div className="grid place-items-center py-16 text-center">
+      <div className="relative mb-8">
+        <div className="grid size-32 place-items-center rounded-full bg-gradient-to-br from-lavender via-peach to-star text-5xl shadow-[0_0_60px_oklch(0.7_0.18_295/0.5)] animate-float">
+          🌙
+        </div>
+        <span className="absolute -top-2 -left-4 text-2xl animate-twinkle">✦</span>
+        <span className="absolute top-6 -right-6 text-xl animate-twinkle" style={{ animationDelay: "0.6s" }}>✦</span>
+        <span className="absolute -bottom-3 left-6 text-2xl animate-twinkle" style={{ animationDelay: "1.2s" }}>✦</span>
+        <span className="absolute -bottom-1 right-2 text-lg animate-twinkle" style={{ animationDelay: "1.8s" }}>☁️</span>
+      </div>
+      <p className="font-display text-2xl text-foreground mb-2">Spinning starlight into a story…</p>
+      <p className="text-foreground/55">Drawing illustrations · choosing words · sprinkling magic</p>
+    </div>
+  );
+}
