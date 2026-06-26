@@ -74,7 +74,7 @@ export const generateChildPortrait = createServerFn({ method: "POST" })
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "dall-e-3",
+        model: "gpt-image-1-mini",
         prompt,
         size: "1024x1024",
         n: 1,
