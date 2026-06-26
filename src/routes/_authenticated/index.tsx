@@ -10,7 +10,7 @@ import {
   SUBSCRIPTION,
 } from "@/lib/mock-data";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/_authenticated/_authenticated/")({
   head: () => ({
     meta: [
       { title: "Adventure Club — Tonight's Bedtime Story" },

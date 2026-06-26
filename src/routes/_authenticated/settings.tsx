@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/app-shell";
 import { PARENT_NAME } from "@/lib/mock-data";
 
-export const Route = createFileRoute("/settings")({
+export const Route = createFileRoute("/_authenticated/_authenticated/settings")({
   head: () => ({
     meta: [
       { title: "Settings — Adventure Club" },
