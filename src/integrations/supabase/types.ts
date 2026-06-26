@@ -125,6 +125,68 @@ export type Database = {
         }
         Relationships: []
       }
+      stories: {
+        Row: {
+          child_id: string
+          cover_emoji: string
+          cover_gradient: string
+          created_at: string
+          favorite: boolean
+          id: string
+          length_minutes: number
+          lesson: string
+          mood: string
+          pages: Json
+          progress: number
+          theme: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          child_id: string
+          cover_emoji?: string
+          cover_gradient?: string
+          created_at?: string
+          favorite?: boolean
+          id?: string
+          length_minutes?: number
+          lesson: string
+          mood: string
+          pages?: Json
+          progress?: number
+          theme: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          child_id?: string
+          cover_emoji?: string
+          cover_gradient?: string
+          created_at?: string
+          favorite?: boolean
+          id?: string
+          length_minutes?: number
+          lesson?: string
+          mood?: string
+          pages?: Json
+          progress?: number
+          theme?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stories_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
