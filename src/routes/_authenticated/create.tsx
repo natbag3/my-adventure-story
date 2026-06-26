@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/app-shell";
+import { CharacterAvatar } from "@/components/character-avatar";
 import { ADVENTURES, MOODS, LESSONS, LENGTHS } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
