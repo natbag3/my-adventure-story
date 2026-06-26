@@ -70,7 +70,7 @@ const PLANS: readonly Plan[] = [
       "Everything in Premium",
     ],
   },
-] as const;
+];
 
 function SubscriptionPage() {
   return (
