@@ -54,7 +54,7 @@ function AdventurersPage() {
     setLoading(true);
     supabase
       .from("children")
-      .select("id, first_name, nickname, avatar_emoji, date_of_birth, personality_traits, favorite_animal, favorite_food, favorite_color, hair_color, eye_color")
+      .select("id, first_name, nickname, avatar_emoji, date_of_birth, personality_traits, favorite_animals, favorite_foods, favorite_colors, hair_color, eye_color")
       .eq("user_id", user.id)
       .order("created_at", { ascending: true })
       .then(({ data, error }) => {
