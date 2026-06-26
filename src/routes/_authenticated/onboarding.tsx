@@ -15,8 +15,6 @@ type FormState = {
   nickname: string;
   gender: "" | "girl" | "boy";
   date_of_birth: string;
-  reference_photo: File | null;
-  reference_photo_preview: string | null;
   
   hair_color: string;
   hair_style: string;
@@ -148,15 +146,13 @@ function OnboardingPage() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [busy, setBusy] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState<FormState>({
     first_name: "",
     nickname: "",
     gender: "",
     date_of_birth: "",
-    reference_photo: null,
-    reference_photo_preview: null,
+
     
     hair_color: "",
     hair_style: "",
@@ -203,16 +199,6 @@ function OnboardingPage() {
     }));
   }
 
-  function onPhoto(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Photo must be under 5 MB");
-      return;
-    }
-    const url = URL.createObjectURL(file);
-    setForm((f) => ({ ...f, reference_photo: file, reference_photo_preview: url }));
-  }
 
   async function save() {
     if (!user) return;
