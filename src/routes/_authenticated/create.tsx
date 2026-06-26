@@ -52,7 +52,7 @@ function CreateWizard() {
     if (!user) return;
     supabase
       .from("children")
-      .select("id, first_name, avatar_emoji, date_of_birth")
+      .select("id, first_name, avatar_emoji, portrait_url, date_of_birth")
       .eq("user_id", user.id)
       .order("created_at", { ascending: true })
       .then(({ data }) => {
