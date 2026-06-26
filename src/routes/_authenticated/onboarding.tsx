@@ -31,14 +31,13 @@ type FormState = {
     curious: string;
   };
   personality_traits: string[];
-  favorite_animal: string;
-  favorite_color: string;
-  favorite_food: string;
-  favorite_toy: string;
-  favorite_story: string;
-  favorite_place: string;
-  favorite_season: string;
-  favorite_holiday: string;
+  favorite_animals: string[];
+  favorite_colors: string[];
+  favorite_foods: string[];
+  favorite_toys: string[];
+  favorite_story_themes: string[];
+  favorite_hobbies: string[];
+  favorite_places: string[];
   learning_goals: string[];
 };
 
@@ -92,14 +91,27 @@ const TRAITS = [
   "Gentle", "Adventurous", "Helpful", "Confident", "Thoughtful",
 ];
 
-const FAV_ANIMALS = ["🐶 Dog","🐱 Cat","🦄 Unicorn","🐉 Dragon","🦁 Lion","🐘 Elephant","🐢 Turtle","🐙 Octopus","🦋 Butterfly","🐸 Frog","🦒 Giraffe","🐬 Dolphin"];
-const FAV_COLORS = OUTFIT_COLORS;
-const FAV_FOODS = ["🥞 Pancakes","🍓 Strawberries","🍕 Pizza","🍦 Ice cream","🍝 Pasta","🥪 Sandwich","🍪 Cookies","🍎 Apples","🥕 Carrots","🍣 Sushi"];
-const FAV_TOYS = ["🧸 Plushie","🪀 Yoyo","🧩 Puzzle","⚔️ Sword","🪄 Wand","🎨 Paints","🚗 Cars","🪁 Kite","🧱 Blocks","🎸 Music"];
-const FAV_STORIES = ["🌙 Goodnight Moon","🐰 Peter Rabbit","🧙 Wizards","🐉 Dragons","🚀 Space","🏰 Princesses","🦖 Dinosaurs","🌊 Mermaids"];
-const FAV_PLACES = ["🏖️ Beach","🌲 Forest","🏔️ Mountains","🏰 Castle","🌃 City","🏡 Home","🚂 Train station","🌌 Outer space"];
-const FAV_SEASONS = ["🌸 Spring","☀️ Summer","🍂 Autumn","❄️ Winter"];
-const FAV_HOLIDAYS = ["🎄 Christmas","🎃 Halloween","🐰 Easter","🎂 Birthday","🎆 New Year","🦃 Thanksgiving"];
+const FAV_ANIMALS = ["🐶 Dog","🐱 Cat","🐉 Dragon","🦄 Unicorn","🦖 Dinosaur","🐼 Panda","🐘 Elephant","🦁 Lion","🐯 Tiger","🐬 Dolphin","🦈 Shark","🦊 Fox","🐨 Koala","🐧 Penguin","🐰 Rabbit","🐴 Horse","🐦 Bird","🐻 Bear"];
+const FAV_COLORS_PILLS = [
+  { id: "Red", hex: "#ef4444" },
+  { id: "Orange", hex: "#f97316" },
+  { id: "Yellow", hex: "#facc15" },
+  { id: "Green", hex: "#22c55e" },
+  { id: "Blue", hex: "#3b82f6" },
+  { id: "Purple", hex: "#a855f7" },
+  { id: "Pink", hex: "#ec4899" },
+  { id: "Turquoise", hex: "#14b8a6" },
+  { id: "Gold", hex: "#eab308" },
+  { id: "Silver", hex: "#cbd5e1" },
+  { id: "Rainbow", hex: "linear-gradient(135deg,#ef4444,#facc15,#22c55e,#3b82f6,#a855f7)" },
+  { id: "Black", hex: "#1c1917" },
+  { id: "White", hex: "#f8fafc" },
+];
+const FAV_FOODS = ["🥞 Pancakes","🍓 Strawberries","🍕 Pizza","🍦 Ice cream","🍝 Pasta","🥪 Sandwich","🍪 Cookies","🍎 Apples","🥕 Carrots","🍣 Sushi","🍩 Donuts","🍌 Bananas","🥦 Broccoli","🍇 Grapes","🥨 Pretzels","🌮 Tacos"];
+const FAV_TOYS = ["🧸 Plushie","🪀 Yoyo","🧩 Puzzle","⚔️ Sword","🪄 Wand","🎨 Paints","🚗 Cars","🪁 Kite","🧱 Blocks","🎸 Music","🚂 Train","🎲 Board game","🪅 Piñata","🏀 Ball","🛼 Skates"];
+const FAV_STORY_THEMES = ["🦖 Dinosaurs","🚀 Space","🏴‍☠️ Pirates","🐉 Dragons","🧚 Fairies","👸 Princesses","🤖 Robots","🌊 Ocean","🏕️ Camping","💰 Treasure Hunts","🌴 Jungle","🪄 Magic","🎄 Christmas","🎃 Halloween","⏳ Time Travel","🏰 Castles"];
+const FAV_HOBBIES = ["📖 Reading","🎨 Drawing","⚽ Soccer","🏊 Swimming","💃 Dancing","🎵 Music","🧱 Building","✂️ Crafts","🍳 Cooking","🔬 Science","🌿 Nature","🐾 Animals","🎮 Video Games"];
+const FAV_PLACES = ["🏖️ Beach","🌲 Forest","🏔️ Mountains","🦒 Zoo","🚜 Farm","🚀 Space","🏰 Castle","🌳 Treehouse","🏛️ Museum","🐠 Aquarium","🏡 Grandma's House"];
 
 const LEARNING_GOALS = [
   { id: "Confidence", emoji: "✨" },
@@ -153,14 +165,13 @@ function OnboardingPage() {
     shoes: "",
     personality_answers: { smile: "", good_at: "", brave: "", curious: "" },
     personality_traits: [],
-    favorite_animal: "",
-    favorite_color: "",
-    favorite_food: "",
-    favorite_toy: "",
-    favorite_story: "",
-    favorite_place: "",
-    favorite_season: "",
-    favorite_holiday: "",
+    favorite_animals: [],
+    favorite_colors: [],
+    favorite_foods: [],
+    favorite_toys: [],
+    favorite_story_themes: [],
+    favorite_hobbies: [],
+    favorite_places: [],
     learning_goals: [],
   });
 
@@ -237,14 +248,13 @@ function OnboardingPage() {
         shoes: form.shoes || null,
         personality_answers: form.personality_answers,
         personality_traits: form.personality_traits,
-        favorite_animal: form.favorite_animal || null,
-        favorite_color: form.favorite_color || null,
-        favorite_food: form.favorite_food || null,
-        favorite_toy: form.favorite_toy || null,
-        favorite_story: form.favorite_story || null,
-        favorite_place: form.favorite_place || null,
-        favorite_season: form.favorite_season || null,
-        favorite_holiday: form.favorite_holiday || null,
+        favorite_animals: form.favorite_animals,
+        favorite_colors: form.favorite_colors,
+        favorite_foods: form.favorite_foods,
+        favorite_toys: form.favorite_toys,
+        favorite_story_themes: form.favorite_story_themes,
+        favorite_hobbies: form.favorite_hobbies,
+        favorite_places: form.favorite_places,
         learning_goals: form.learning_goals,
       });
       if (error) throw error;
@@ -307,7 +317,7 @@ function OnboardingPage() {
               onNext={() => setStep(4)}
             />
           )}
-          {step === 4 && <ScreenFavorites form={form} update={update} onNext={() => setStep(5)} />}
+          {step === 4 && <ScreenFavorites form={form} setForm={setForm} onNext={() => setStep(5)} />}
           {step === 5 && (
             <ScreenLearning form={form} toggleGoal={toggleGoal} busy={busy} onSave={save} />
           )}
@@ -573,34 +583,94 @@ function ScreenPersonality({
 }
 
 function ScreenFavorites({
-  form, update, onNext,
+  form, setForm, onNext,
 }: {
   form: FormState;
-  update: <K extends keyof FormState>(k: K, v: FormState[K]) => void;
+  setForm: React.Dispatch<React.SetStateAction<FormState>>;
   onNext: () => void;
 }) {
+  function toggleIn<K extends keyof FormState>(key: K, value: string, max?: number) {
+    setForm((f) => {
+      const arr = (f[key] as unknown as string[]) ?? [];
+      if (arr.includes(value)) {
+        return { ...f, [key]: arr.filter((x) => x !== value) } as FormState;
+      }
+      if (max && arr.length >= max) {
+        toast.message(`You can pick up to ${max} ✨`);
+        return f;
+      }
+      return { ...f, [key]: [...arr, value] } as FormState;
+    });
+  }
   return (
-    <ScreenCard title="Favourite Things" subtitle="Their world, woven into every story.">
-      <IconPicker label="Favourite animal" value={form.favorite_animal} options={FAV_ANIMALS}
-        onChange={(v) => update("favorite_animal", v)} />
-      <ColorPicker label="Favourite colour" value={form.favorite_color} options={FAV_COLORS}
-        onChange={(v) => update("favorite_color", v)} />
-      <IconPicker label="Favourite food" value={form.favorite_food} options={FAV_FOODS}
-        onChange={(v) => update("favorite_food", v)} />
-      <IconPicker label="Favourite toy" value={form.favorite_toy} options={FAV_TOYS}
-        onChange={(v) => update("favorite_toy", v)} />
-      <IconPicker label="Favourite bedtime story" value={form.favorite_story} options={FAV_STORIES}
-        onChange={(v) => update("favorite_story", v)} />
-      <IconPicker label="Favourite place" value={form.favorite_place} options={FAV_PLACES}
-        onChange={(v) => update("favorite_place", v)} />
-      <IconPicker label="Favourite season" value={form.favorite_season} options={FAV_SEASONS}
-        onChange={(v) => update("favorite_season", v)} />
-      <IconPicker label="Favourite holiday" value={form.favorite_holiday} options={FAV_HOLIDAYS}
-        onChange={(v) => update("favorite_holiday", v)} />
+    <ScreenCard title="Favourite Things" subtitle="Tap as many as you love — these sprinkle into every story.">
+      <PillMultiSelect
+        label="Favourite Animals"
+        hint="Select up to 5"
+        options={FAV_ANIMALS}
+        selected={form.favorite_animals}
+        onToggle={(v) => toggleIn("favorite_animals", v, 5)}
+        onAddCustom={(v) => toggleIn("favorite_animals", v, 5)}
+        accent="peach"
+      />
+      <ColorPillMultiSelect
+        label="Favourite Colours"
+        hint="Select up to 5"
+        options={FAV_COLORS_PILLS}
+        selected={form.favorite_colors}
+        onToggle={(v) => toggleIn("favorite_colors", v, 5)}
+        onAddCustom={(v) => toggleIn("favorite_colors", v, 5)}
+      />
+      <PillMultiSelect
+        label="Favourite Foods"
+        hint="Select up to 5"
+        options={FAV_FOODS}
+        selected={form.favorite_foods}
+        onToggle={(v) => toggleIn("favorite_foods", v, 5)}
+        onAddCustom={(v) => toggleIn("favorite_foods", v, 5)}
+        accent="mint"
+      />
+      <PillMultiSelect
+        label="Favourite Toys"
+        hint="Select up to 5"
+        options={FAV_TOYS}
+        selected={form.favorite_toys}
+        onToggle={(v) => toggleIn("favorite_toys", v, 5)}
+        onAddCustom={(v) => toggleIn("favorite_toys", v, 5)}
+        accent="star"
+      />
+      <PillMultiSelect
+        label="Favourite Story Themes"
+        hint="Select as many as you'd like"
+        options={FAV_STORY_THEMES}
+        selected={form.favorite_story_themes}
+        onToggle={(v) => toggleIn("favorite_story_themes", v)}
+        onAddCustom={(v) => toggleIn("favorite_story_themes", v)}
+        accent="lavender"
+      />
+      <PillMultiSelect
+        label="Favourite Hobbies"
+        hint="Select multiple"
+        options={FAV_HOBBIES}
+        selected={form.favorite_hobbies}
+        onToggle={(v) => toggleIn("favorite_hobbies", v)}
+        onAddCustom={(v) => toggleIn("favorite_hobbies", v)}
+        accent="peach"
+      />
+      <PillMultiSelect
+        label="Favourite Places"
+        hint="Select multiple"
+        options={FAV_PLACES}
+        selected={form.favorite_places}
+        onToggle={(v) => toggleIn("favorite_places", v)}
+        onAddCustom={(v) => toggleIn("favorite_places", v)}
+        accent="mint"
+      />
       <NextButton onClick={onNext}>Continue</NextButton>
     </ScreenCard>
   );
 }
+
 
 function ScreenLearning({
   form, toggleGoal, onSave, busy,
@@ -848,3 +918,170 @@ function NextButton({ children, onClick, disabled }: { children: React.ReactNode
     </button>
   );
 }
+
+type Accent = "peach" | "lavender" | "mint" | "star";
+
+const ACCENT_ACTIVE: Record<Accent, string> = {
+  peach: "border-peach bg-peach/25 text-foreground shadow-[0_0_24px_oklch(0.82_0.12_55/0.35)]",
+  lavender: "border-lavender bg-lavender/25 text-foreground shadow-[0_0_24px_oklch(0.78_0.13_300/0.35)]",
+  mint: "border-mint bg-mint/25 text-foreground shadow-[0_0_24px_oklch(0.85_0.13_165/0.35)]",
+  star: "border-star bg-star/25 text-foreground shadow-[0_0_24px_oklch(0.85_0.16_88/0.35)]",
+};
+
+function PillMultiSelect({
+  label, hint, options, selected, onToggle, onAddCustom, accent = "lavender",
+}: {
+  label: string;
+  hint?: string;
+  options: string[];
+  selected: string[];
+  onToggle: (v: string) => void;
+  onAddCustom: (v: string) => void;
+  accent?: Accent;
+}) {
+  const [custom, setCustom] = useState("");
+  function addCustom() {
+    const v = custom.trim();
+    if (!v) return;
+    onAddCustom(v);
+    setCustom("");
+  }
+  const customSelected = selected.filter((s) => !options.includes(s));
+  return (
+    <div>
+      <div className="mb-2 flex items-baseline justify-between">
+        <p className="font-display text-lg text-foreground">{label}</p>
+        {hint && <span className="font-mono text-[10px] uppercase tracking-widest text-foreground/45">{hint} · {selected.length}</span>}
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {options.map((o) => {
+          const active = selected.includes(o);
+          return (
+            <button
+              key={o}
+              type="button"
+              onClick={() => onToggle(o)}
+              className={
+                "rounded-full border px-4 py-2 text-sm font-medium transition-all active:scale-95 " +
+                (active
+                  ? ACCENT_ACTIVE[accent] + " scale-105"
+                  : "border-hairline bg-surface-elevated text-foreground/75 hover:border-lavender/60 hover:bg-surface")
+              }
+            >
+              {o}
+            </button>
+          );
+        })}
+        {customSelected.map((o) => (
+          <button
+            key={o}
+            type="button"
+            onClick={() => onToggle(o)}
+            className={"rounded-full border px-4 py-2 text-sm font-medium scale-105 " + ACCENT_ACTIVE[accent]}
+          >
+            ✨ {o} ×
+          </button>
+        ))}
+      </div>
+      <div className="mt-3 flex gap-2">
+        <input
+          value={custom}
+          onChange={(e) => setCustom(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCustom(); } }}
+          placeholder="Add your own…"
+          className="h-10 flex-1 rounded-full border border-dashed border-hairline bg-background/40 px-4 text-sm text-foreground outline-none placeholder:text-foreground/35 focus:border-lavender/60"
+        />
+        <button
+          type="button"
+          onClick={addCustom}
+          disabled={!custom.trim()}
+          className="rounded-full bg-foreground/10 px-4 text-sm font-medium text-foreground/80 hover:bg-foreground/15 disabled:opacity-40"
+        >
+          + Add
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ColorPillMultiSelect({
+  label, hint, options, selected, onToggle, onAddCustom,
+}: {
+  label: string;
+  hint?: string;
+  options: { id: string; hex: string }[];
+  selected: string[];
+  onToggle: (v: string) => void;
+  onAddCustom: (v: string) => void;
+}) {
+  const [custom, setCustom] = useState("");
+  function addCustom() {
+    const v = custom.trim();
+    if (!v) return;
+    onAddCustom(v);
+    setCustom("");
+  }
+  const known = new Set(options.map((o) => o.id));
+  const customSelected = selected.filter((s) => !known.has(s));
+  return (
+    <div>
+      <div className="mb-2 flex items-baseline justify-between">
+        <p className="font-display text-lg text-foreground">{label}</p>
+        {hint && <span className="font-mono text-[10px] uppercase tracking-widest text-foreground/45">{hint} · {selected.length}</span>}
+      </div>
+      <div className="flex flex-wrap gap-2.5">
+        {options.map((o) => {
+          const active = selected.includes(o.id);
+          const isGradient = o.hex.startsWith("linear-gradient");
+          return (
+            <button
+              key={o.id}
+              type="button"
+              onClick={() => onToggle(o.id)}
+              className={
+                "group flex items-center gap-2 rounded-full border py-2 pl-2 pr-4 text-sm transition-all active:scale-95 " +
+                (active
+                  ? "border-star bg-star/15 text-foreground scale-105 shadow-[0_0_24px_oklch(0.85_0.16_88/0.3)]"
+                  : "border-hairline bg-surface-elevated text-foreground/80 hover:border-lavender/60")
+              }
+            >
+              <span
+                className="size-7 rounded-full ring-2 ring-background/40"
+                style={isGradient ? { backgroundImage: o.hex } : { background: o.hex }}
+              />
+              <span className="font-medium">{o.id}</span>
+            </button>
+          );
+        })}
+        {customSelected.map((o) => (
+          <button
+            key={o}
+            type="button"
+            onClick={() => onToggle(o)}
+            className="rounded-full border border-star bg-star/15 px-4 py-2 text-sm font-medium scale-105"
+          >
+            ✨ {o} ×
+          </button>
+        ))}
+      </div>
+      <div className="mt-3 flex gap-2">
+        <input
+          value={custom}
+          onChange={(e) => setCustom(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCustom(); } }}
+          placeholder="Add your own colour…"
+          className="h-10 flex-1 rounded-full border border-dashed border-hairline bg-background/40 px-4 text-sm text-foreground outline-none placeholder:text-foreground/35 focus:border-lavender/60"
+        />
+        <button
+          type="button"
+          onClick={addCustom}
+          disabled={!custom.trim()}
+          className="rounded-full bg-foreground/10 px-4 text-sm font-medium text-foreground/80 hover:bg-foreground/15 disabled:opacity-40"
+        >
+          + Add
+        </button>
+      </div>
+    </div>
+  );
+}
+

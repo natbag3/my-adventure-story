@@ -1,0 +1,22 @@
+
+ALTER TABLE public.children
+  ALTER COLUMN favorite_animal TYPE text[] USING CASE WHEN favorite_animal IS NULL OR favorite_animal = '' THEN '{}'::text[] ELSE ARRAY[favorite_animal] END,
+  ALTER COLUMN favorite_animal SET DEFAULT '{}'::text[],
+  ALTER COLUMN favorite_animal SET NOT NULL,
+  ALTER COLUMN favorite_color TYPE text[] USING CASE WHEN favorite_color IS NULL OR favorite_color = '' THEN '{}'::text[] ELSE ARRAY[favorite_color] END,
+  ALTER COLUMN favorite_color SET DEFAULT '{}'::text[],
+  ALTER COLUMN favorite_color SET NOT NULL,
+  ALTER COLUMN favorite_food TYPE text[] USING CASE WHEN favorite_food IS NULL OR favorite_food = '' THEN '{}'::text[] ELSE ARRAY[favorite_food] END,
+  ALTER COLUMN favorite_food SET DEFAULT '{}'::text[],
+  ALTER COLUMN favorite_food SET NOT NULL,
+  ALTER COLUMN favorite_toy TYPE text[] USING CASE WHEN favorite_toy IS NULL OR favorite_toy = '' THEN '{}'::text[] ELSE ARRAY[favorite_toy] END,
+  ALTER COLUMN favorite_toy SET DEFAULT '{}'::text[],
+  ALTER COLUMN favorite_toy SET NOT NULL,
+  ALTER COLUMN favorite_story TYPE text[] USING CASE WHEN favorite_story IS NULL OR favorite_story = '' THEN '{}'::text[] ELSE ARRAY[favorite_story] END,
+  ALTER COLUMN favorite_story SET DEFAULT '{}'::text[],
+  ALTER COLUMN favorite_story SET NOT NULL,
+  ALTER COLUMN favorite_place TYPE text[] USING CASE WHEN favorite_place IS NULL OR favorite_place = '' THEN '{}'::text[] ELSE ARRAY[favorite_place] END,
+  ALTER COLUMN favorite_place SET DEFAULT '{}'::text[],
+  ALTER COLUMN favorite_place SET NOT NULL,
+  ADD COLUMN IF NOT EXISTS favorite_hobbies text[] NOT NULL DEFAULT '{}'::text[],
+  ADD COLUMN IF NOT EXISTS favorite_story_themes text[] NOT NULL DEFAULT '{}'::text[];

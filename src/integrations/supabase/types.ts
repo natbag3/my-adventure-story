@@ -20,14 +20,13 @@ export type Database = {
           created_at: string
           date_of_birth: string | null
           eye_color: string | null
-          favorite_animal: string | null
-          favorite_color: string | null
-          favorite_food: string | null
-          favorite_holiday: string | null
-          favorite_place: string | null
-          favorite_season: string | null
-          favorite_story: string | null
-          favorite_toy: string | null
+          favorite_animals: string[]
+          favorite_colors: string[]
+          favorite_foods: string[]
+          favorite_hobbies: string[]
+          favorite_places: string[]
+          favorite_story_themes: string[]
+          favorite_toys: string[]
           first_name: string
           freckles: boolean | null
           glasses: boolean | null
@@ -50,14 +49,13 @@ export type Database = {
           created_at?: string
           date_of_birth?: string | null
           eye_color?: string | null
-          favorite_animal?: string | null
-          favorite_color?: string | null
-          favorite_food?: string | null
-          favorite_holiday?: string | null
-          favorite_place?: string | null
-          favorite_season?: string | null
-          favorite_story?: string | null
-          favorite_toy?: string | null
+          favorite_animals?: string[]
+          favorite_colors?: string[]
+          favorite_foods?: string[]
+          favorite_hobbies?: string[]
+          favorite_places?: string[]
+          favorite_story_themes?: string[]
+          favorite_toys?: string[]
           first_name: string
           freckles?: boolean | null
           glasses?: boolean | null
@@ -80,14 +78,13 @@ export type Database = {
           created_at?: string
           date_of_birth?: string | null
           eye_color?: string | null
-          favorite_animal?: string | null
-          favorite_color?: string | null
-          favorite_food?: string | null
-          favorite_holiday?: string | null
-          favorite_place?: string | null
-          favorite_season?: string | null
-          favorite_story?: string | null
-          favorite_toy?: string | null
+          favorite_animals?: string[]
+          favorite_colors?: string[]
+          favorite_foods?: string[]
+          favorite_hobbies?: string[]
+          favorite_places?: string[]
+          favorite_story_themes?: string[]
+          favorite_toys?: string[]
           first_name?: string
           freckles?: boolean | null
           glasses?: boolean | null
