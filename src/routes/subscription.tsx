@@ -15,7 +15,17 @@ export const Route = createFileRoute("/subscription")({
   component: SubscriptionPage,
 });
 
-const PLANS = [
+type Plan = {
+  id: string;
+  name: string;
+  price: string;
+  cadence: string;
+  accent: string;
+  featured?: boolean;
+  features: readonly string[];
+};
+
+const PLANS: readonly Plan[] = [
   {
     id: "free",
     name: "Free",
