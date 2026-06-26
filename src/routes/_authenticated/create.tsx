@@ -301,33 +301,29 @@ function CreateWizard() {
 
         {step === 5 && (
           <StepWrap title="Ready when you are">
-            {!generating ? (
-              <div className="text-center py-10">
-                <div className="mx-auto mb-6 grid size-28 place-items-center rounded-full bg-gradient-to-br from-star to-peach text-5xl shadow-[0_0_40px_oklch(0.85_0.16_88/0.5)] animate-float">
-                  ✨
-                </div>
-                <p className="font-display text-2xl text-foreground mb-2">Everything looks magical.</p>
-                <p className="text-foreground/55 mb-8">
-                  We'll craft a {length}-minute {MOODS.find((m) => m.id === mood)?.label.toLowerCase()} adventure for{" "}
-                  {selectedChild?.first_name ?? "your adventurer"} in the world of{" "}
-                  {ADVENTURES.find((a) => a.id === adventure)?.label ?? "wonder"}.
-                </p>
-                <button
-                  onClick={handleGenerate}
-                  disabled={!adventure || !lesson}
-                  className="rounded-full bg-primary px-8 py-4 font-display text-lg font-bold text-primary-foreground shadow-[0_20px_50px_-20px_oklch(0.85_0.16_88/0.6)] disabled:opacity-40 hover:scale-[1.02] transition-transform"
-                >
-                  Generate Adventure ✨
-                </button>
-                {error && (
-                  <p className="mt-6 text-sm text-red-300/90 bg-red-500/10 border border-red-400/30 rounded-2xl px-4 py-3 max-w-md mx-auto">
-                    {error}
-                  </p>
-                )}
+            <div className="text-center py-10">
+              <div className="mx-auto mb-6 grid size-28 place-items-center rounded-full bg-gradient-to-br from-star to-peach text-5xl shadow-[0_0_40px_oklch(0.85_0.16_88/0.5)] animate-float">
+                ✨
               </div>
-            ) : (
-              <GeneratingState />
-            )}
+              <p className="font-display text-2xl text-foreground mb-2">Everything looks magical.</p>
+              <p className="text-foreground/55 mb-8">
+                We'll craft a {length}-minute {MOODS.find((m) => m.id === mood)?.label.toLowerCase()} adventure for{" "}
+                {selectedChild?.first_name ?? "your adventurer"} in the world of{" "}
+                {ADVENTURES.find((a) => a.id === adventure)?.label ?? "wonder"}.
+              </p>
+              <button
+                onClick={handleGenerate}
+                disabled={!adventure || !lesson}
+                className="rounded-full bg-primary px-8 py-4 font-display text-lg font-bold text-primary-foreground shadow-[0_20px_50px_-20px_oklch(0.85_0.16_88/0.6)] disabled:opacity-40 hover:scale-[1.02] transition-transform"
+              >
+                Generate Adventure ✨
+              </button>
+              {error && (
+                <p className="mt-6 text-sm text-red-300/90 bg-red-500/10 border border-red-400/30 rounded-2xl px-4 py-3 max-w-md mx-auto">
+                  {error}
+                </p>
+              )}
+            </div>
           </StepWrap>
         )}
       </div>
