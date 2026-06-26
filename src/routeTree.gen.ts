@@ -9,38 +9,207 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SubscriptionRouteImport } from './routes/subscription'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as RewardsRouteImport } from './routes/rewards'
+import { Route as PassportRouteImport } from './routes/passport'
+import { Route as LibraryRouteImport } from './routes/library'
+import { Route as CreateRouteImport } from './routes/create'
+import { Route as AdventurersRouteImport } from './routes/adventurers'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as StoryIdRouteImport } from './routes/story.$id'
+import { Route as AdventurersNewRouteImport } from './routes/adventurers.new'
 
+const SubscriptionRoute = SubscriptionRouteImport.update({
+  id: '/subscription',
+  path: '/subscription',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RewardsRoute = RewardsRouteImport.update({
+  id: '/rewards',
+  path: '/rewards',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PassportRoute = PassportRouteImport.update({
+  id: '/passport',
+  path: '/passport',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LibraryRoute = LibraryRouteImport.update({
+  id: '/library',
+  path: '/library',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CreateRoute = CreateRouteImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdventurersRoute = AdventurersRouteImport.update({
+  id: '/adventurers',
+  path: '/adventurers',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StoryIdRoute = StoryIdRouteImport.update({
+  id: '/story/$id',
+  path: '/story/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdventurersNewRoute = AdventurersNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AdventurersRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/adventurers': typeof AdventurersRouteWithChildren
+  '/create': typeof CreateRoute
+  '/library': typeof LibraryRoute
+  '/passport': typeof PassportRoute
+  '/rewards': typeof RewardsRoute
+  '/settings': typeof SettingsRoute
+  '/subscription': typeof SubscriptionRoute
+  '/adventurers/new': typeof AdventurersNewRoute
+  '/story/$id': typeof StoryIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/adventurers': typeof AdventurersRouteWithChildren
+  '/create': typeof CreateRoute
+  '/library': typeof LibraryRoute
+  '/passport': typeof PassportRoute
+  '/rewards': typeof RewardsRoute
+  '/settings': typeof SettingsRoute
+  '/subscription': typeof SubscriptionRoute
+  '/adventurers/new': typeof AdventurersNewRoute
+  '/story/$id': typeof StoryIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/adventurers': typeof AdventurersRouteWithChildren
+  '/create': typeof CreateRoute
+  '/library': typeof LibraryRoute
+  '/passport': typeof PassportRoute
+  '/rewards': typeof RewardsRoute
+  '/settings': typeof SettingsRoute
+  '/subscription': typeof SubscriptionRoute
+  '/adventurers/new': typeof AdventurersNewRoute
+  '/story/$id': typeof StoryIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/adventurers'
+    | '/create'
+    | '/library'
+    | '/passport'
+    | '/rewards'
+    | '/settings'
+    | '/subscription'
+    | '/adventurers/new'
+    | '/story/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/adventurers'
+    | '/create'
+    | '/library'
+    | '/passport'
+    | '/rewards'
+    | '/settings'
+    | '/subscription'
+    | '/adventurers/new'
+    | '/story/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/adventurers'
+    | '/create'
+    | '/library'
+    | '/passport'
+    | '/rewards'
+    | '/settings'
+    | '/subscription'
+    | '/adventurers/new'
+    | '/story/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdventurersRoute: typeof AdventurersRouteWithChildren
+  CreateRoute: typeof CreateRoute
+  LibraryRoute: typeof LibraryRoute
+  PassportRoute: typeof PassportRoute
+  RewardsRoute: typeof RewardsRoute
+  SettingsRoute: typeof SettingsRoute
+  SubscriptionRoute: typeof SubscriptionRoute
+  StoryIdRoute: typeof StoryIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/subscription': {
+      id: '/subscription'
+      path: '/subscription'
+      fullPath: '/subscription'
+      preLoaderRoute: typeof SubscriptionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rewards': {
+      id: '/rewards'
+      path: '/rewards'
+      fullPath: '/rewards'
+      preLoaderRoute: typeof RewardsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/passport': {
+      id: '/passport'
+      path: '/passport'
+      fullPath: '/passport'
+      preLoaderRoute: typeof PassportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/library': {
+      id: '/library'
+      path: '/library'
+      fullPath: '/library'
+      preLoaderRoute: typeof LibraryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/create': {
+      id: '/create'
+      path: '/create'
+      fullPath: '/create'
+      preLoaderRoute: typeof CreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/adventurers': {
+      id: '/adventurers'
+      path: '/adventurers'
+      fullPath: '/adventurers'
+      preLoaderRoute: typeof AdventurersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +217,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/story/$id': {
+      id: '/story/$id'
+      path: '/story/$id'
+      fullPath: '/story/$id'
+      preLoaderRoute: typeof StoryIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/adventurers/new': {
+      id: '/adventurers/new'
+      path: '/new'
+      fullPath: '/adventurers/new'
+      preLoaderRoute: typeof AdventurersNewRouteImport
+      parentRoute: typeof AdventurersRoute
+    }
   }
 }
 
+interface AdventurersRouteChildren {
+  AdventurersNewRoute: typeof AdventurersNewRoute
+}
+
+const AdventurersRouteChildren: AdventurersRouteChildren = {
+  AdventurersNewRoute: AdventurersNewRoute,
+}
+
+const AdventurersRouteWithChildren = AdventurersRoute._addFileChildren(
+  AdventurersRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdventurersRoute: AdventurersRouteWithChildren,
+  CreateRoute: CreateRoute,
+  LibraryRoute: LibraryRoute,
+  PassportRoute: PassportRoute,
+  RewardsRoute: RewardsRoute,
+  SettingsRoute: SettingsRoute,
+  SubscriptionRoute: SubscriptionRoute,
+  StoryIdRoute: StoryIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
