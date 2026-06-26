@@ -550,30 +550,12 @@ function ScreenAppearance({
             <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-foreground/45">
               Preview
             </p>
-            <div className="mx-auto grid size-28 place-items-center rounded-full"
-              style={{ background: form.skin_tone ? skinHex(form.skin_tone) : "var(--surface)" }}>
-              <span className="text-5xl">{form.avatar_emoji}</span>
-            </div>
+            <CartoonFacePreview form={form} />
             <p className="mt-3 font-display text-lg text-foreground">{form.hair_color || "—"}</p>
             <p className="text-xs text-foreground/55">{form.hair_style || "Choose a style"}</p>
             <div className="mt-3 flex justify-center gap-2 text-xs text-foreground/55">
               {form.freckles && <span>· freckles</span>}
               {form.glasses && <span>· glasses</span>}
-            </div>
-            <div className="mt-4 grid grid-cols-5 gap-1">
-              {AVATARS.slice(0, 10).map((e) => (
-                <button
-                  key={e}
-                  type="button"
-                  onClick={() => update("avatar_emoji", e)}
-                  className={
-                    "grid aspect-square place-items-center rounded-lg text-lg transition-colors " +
-                    (form.avatar_emoji === e ? "bg-lavender/30 ring-1 ring-lavender" : "hover:bg-foreground/5")
-                  }
-                >
-                  {e}
-                </button>
-              ))}
             </div>
           </div>
         </div>
