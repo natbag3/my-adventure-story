@@ -1,10 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { ADVENTURES, MOODS, LESSONS, LENGTHS } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
+import { generateStory } from "@/lib/stories.functions";
 
 type ChildRow = { id: string; first_name: string; avatar_emoji: string | null; date_of_birth: string | null };
 function calcAge(dob: string | null) {
@@ -43,6 +45,8 @@ function CreateWizard() {
   const [lesson, setLesson] = useState<string | null>(null);
   const [length, setLength] = useState<3 | 5 | 10>(5);
   const [generating, setGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const generateFn = useServerFn(generateStory);
 
   useEffect(() => {
     if (!user) return;
@@ -70,9 +74,28 @@ function CreateWizard() {
     step === 4 ||
     step === 5;
 
-  function handleGenerate() {
+  async function handleGenerate() {
+    if (!child || !adventure || !lesson || !mood) return;
     setGenerating(true);
-    setTimeout(() => navigate({ to: "/story/$id", params: { id: "moon-whale" } }), 2200);
+    setError(null);
+    try {
+      const adventureLabel = ADVENTURES.find((a) => a.id === adventure)?.label ?? adventure;
+      const moodLabel = MOODS.find((m) => m.id === mood)?.label ?? mood;
+      const lessonLabel = LESSONS.find((l) => l.id === lesson)?.label ?? lesson;
+      const result = await generateFn({
+        data: {
+          childId: child,
+          theme: adventureLabel,
+          mood: moodLabel,
+          lesson: lessonLabel,
+          lengthMinutes: length,
+        },
+      });
+      navigate({ to: "/story/$id", params: { id: result.storyId } });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Something went wrong. Please try again.");
+      setGenerating(false);
+    }
   }
 
   return (
@@ -247,6 +270,11 @@ function CreateWizard() {
                 >
                   Generate Adventure ✨
                 </button>
+                {error && (
+                  <p className="mt-6 text-sm text-red-300/90 bg-red-500/10 border border-red-400/30 rounded-2xl px-4 py-3 max-w-md mx-auto">
+                    {error}
+                  </p>
+                )}
               </div>
             ) : (
               <GeneratingState />
