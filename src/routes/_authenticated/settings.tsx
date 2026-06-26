@@ -1,20 +1,31 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { AppShell } from "@/components/app-shell";
-import { PARENT_NAME } from "@/lib/mock-data";
+import { useAuth } from "@/lib/auth-context";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/settings")({
-  head: () => ({
-    meta: [
-      { title: "Settings — Adventure Club" },
-      { name: "description", content: "Account, notifications, and bedtime preferences." },
-      { property: "og:title", content: "Settings — Adventure Club" },
-      { property: "og:description", content: "Manage your Adventure Club account preferences." },
-    ],
-  }),
+  head: () => ({ meta: [{ title: "Settings — Adventure Club" }] }),
   component: SettingsPage,
 });
 
 function SettingsPage() {
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  const [displayName, setDisplayName] = useState<string>("");
+
+  useEffect(() => {
+    if (user) {
+      setDisplayName((user.user_metadata?.display_name as string) || user.email?.split("@")[0] || "");
+    }
+  }, [user]);
+
+  async function handleSignOut() {
+    await signOut();
+    toast.success("See you tomorrow night ✨");
+    navigate({ to: "/auth", replace: true });
+  }
+
   return (
     <AppShell>
       <header className="mb-10 animate-slide-up">
@@ -24,36 +35,34 @@ function SettingsPage() {
 
       <div className="grid gap-6">
         <Card title="Parent Profile">
-          <Row label="Name" value={PARENT_NAME} />
-          <Row label="Email" value="sarah@example.com" />
-          <Row label="Password" value="••••••••" actionLabel="Change" />
+          <Row label="Name" value={displayName} />
+          <Row label="Email" value={user?.email ?? "—"} />
         </Card>
 
-        <Card title="Bedtime Preferences">
-          <Toggle label="Quiet mode after 9pm" defaultOn />
-          <Toggle label="Auto-narrate new stories" defaultOn />
-          <Toggle label="Daily reminder at 7:30pm" />
-        </Card>
-
-        <Card title="Educational Goals">
+        <Card title="Adventurers">
           <p className="text-sm text-foreground/55 mb-3">
-            We'll gently weave these themes into Leo's stories more often.
+            Manage every child profile — edit, add another, or remove.
           </p>
-          <div className="flex flex-wrap gap-2">
-            {["Reading confidence", "Empathy", "Numbers & counting", "Nature & science", "Emotional resilience"].map((t) => (
-              <span key={t} className="rounded-full border border-hairline bg-surface-elevated px-3 py-1.5 text-xs text-foreground/80">
-                {t}
-              </span>
-            ))}
+          <div className="flex gap-3">
+            <button
+              onClick={() => navigate({ to: "/adventurers" })}
+              className="rounded-full border border-hairline bg-surface-elevated px-4 py-2 text-sm font-medium text-foreground"
+            >
+              Manage adventurers
+            </button>
+            <button
+              onClick={() => navigate({ to: "/onboarding" })}
+              className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
+            >
+              + Add another
+            </button>
           </div>
         </Card>
 
-        <Card title="Privacy & Data">
-          <Row label="Download my data" value="" actionLabel="Request" />
-          <Row label="Delete account" value="" actionLabel="Delete" destructive />
-        </Card>
-
-        <button className="mx-auto mt-2 rounded-full border border-hairline bg-surface/60 px-6 py-2.5 text-sm font-medium text-foreground/70">
+        <button
+          onClick={handleSignOut}
+          className="mx-auto mt-2 rounded-full border border-hairline bg-surface/60 px-6 py-2.5 text-sm font-medium text-foreground/70 hover:text-foreground"
+        >
           Sign out
         </button>
       </div>
@@ -70,45 +79,11 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
   );
 }
 
-function Row({
-  label,
-  value,
-  actionLabel,
-  destructive,
-}: {
-  label: string;
-  value: string;
-  actionLabel?: string;
-  destructive?: boolean;
-}) {
+function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between gap-4 border-b border-hairline pb-4 last:border-0 last:pb-0">
-      <div>
-        <p className="text-sm text-foreground">{label}</p>
-        {value && <p className="text-xs text-foreground/55">{value}</p>}
-      </div>
-      {actionLabel && (
-        <button
-          className={
-            "text-sm font-medium " +
-            (destructive ? "text-destructive hover:underline" : "text-lavender hover:underline")
-          }
-        >
-          {actionLabel}
-        </button>
-      )}
+      <p className="text-sm text-foreground">{label}</p>
+      <p className="text-xs text-foreground/70">{value}</p>
     </div>
-  );
-}
-
-function Toggle({ label, defaultOn = false }: { label: string; defaultOn?: boolean }) {
-  return (
-    <label className="flex items-center justify-between gap-4 cursor-pointer border-b border-hairline pb-4 last:border-0 last:pb-0">
-      <span className="text-sm text-foreground">{label}</span>
-      <input type="checkbox" defaultChecked={defaultOn} className="peer sr-only" />
-      <span className="relative h-6 w-11 rounded-full bg-foreground/15 transition-colors peer-checked:bg-primary">
-        <span className="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-paper transition-transform peer-checked:translate-x-5" />
-      </span>
-    </label>
   );
 }
