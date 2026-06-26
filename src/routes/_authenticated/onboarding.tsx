@@ -214,17 +214,6 @@ function OnboardingPage() {
     }
     setBusy(true);
     try {
-      let photoUrl: string | null = null;
-      if (form.reference_photo) {
-        const ext = form.reference_photo.name.split(".").pop() ?? "jpg";
-        const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
-        const { error: upErr } = await supabase.storage
-          .from("adventurer-photos")
-          .upload(path, form.reference_photo, { upsert: true });
-        if (upErr) throw upErr;
-        photoUrl = path;
-      }
-
       const { data: inserted, error } = await supabase
         .from("children")
         .insert({
@@ -233,7 +222,8 @@ function OnboardingPage() {
           nickname: form.nickname.trim() || null,
           gender: form.gender,
           date_of_birth: form.date_of_birth || null,
-          reference_photo_url: photoUrl,
+          reference_photo_url: null,
+          
           
           hair_color: form.hair_color || null,
           hair_style: form.hair_style || null,
