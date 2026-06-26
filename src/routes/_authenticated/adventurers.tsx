@@ -79,6 +79,25 @@ function AdventurersPage() {
     toast.success(`${name}'s profile removed`);
   }
 
+  async function regeneratePortrait(id: string, name: string) {
+    const t = toast.loading(`Drawing ${name}'s portrait…`);
+    try {
+      await generateChildPortrait({ data: { childId: id } });
+      // refetch
+      const { data } = await supabase
+        .from("children")
+        .select("portrait_url")
+        .eq("id", id)
+        .single();
+      setChildren((cs) =>
+        cs.map((c) => (c.id === id ? { ...c, portrait_url: data?.portrait_url ?? c.portrait_url } : c)),
+      );
+      toast.success(`${name}'s portrait is ready ✨`, { id: t });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Couldn't draw portrait", { id: t });
+    }
+  }
+
   return (
     <AppShell>
       <header className="mb-10 flex flex-wrap items-end justify-between gap-4 animate-slide-up">
