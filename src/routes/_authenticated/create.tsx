@@ -1,10 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { ADVENTURES, MOODS, LESSONS, LENGTHS } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
+import { generateStory } from "@/lib/stories.functions";
 
 type ChildRow = { id: string; first_name: string; avatar_emoji: string | null; date_of_birth: string | null };
 function calcAge(dob: string | null) {
