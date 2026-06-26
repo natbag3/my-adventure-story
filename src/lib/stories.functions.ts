@@ -156,7 +156,8 @@ The "pages" array MUST contain exactly ${pageCount} items, numbered 1 to ${pageC
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: "gpt-4o",
+        temperature: 0.9,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
