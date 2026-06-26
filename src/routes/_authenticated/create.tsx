@@ -121,13 +121,24 @@ function CreateWizard() {
       setPrepTotal(pages.length);
       setPrepDone(pages.length - missing.length);
 
-      await Promise.all(
+      const results = await Promise.all(
         missing.map(({ i }) =>
           generateImageFn({ data: { storyId: result.storyId, pageIndex: i } })
-            .catch(() => null)
+            .catch((e) => {
+              console.error("Image failed", e);
+              return null;
+            })
             .finally(() => setPrepDone((d) => d + 1)),
         ),
       );
+      const failedCount = results.filter((r) => r === null).length;
+      if (failedCount > 0) {
+        try {
+          sessionStorage.setItem(`story-img-failed-${result.storyId}`, String(failedCount));
+        } catch {
+          /* ignore */
+        }
+      }
 
       setPrepStage("binding");
       await new Promise((r) => setTimeout(r, 600));

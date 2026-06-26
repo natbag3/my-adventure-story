@@ -1,10 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/app-shell";
 import { StoryCover } from "@/components/cover";
 import { StoryImage } from "@/components/story-image";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { generateStoryPageImage } from "@/lib/story-images.functions";
 
 type StoryPage = { text: string; illustration_prompt?: string; image_url?: string | null };
 type StoryRow = {
@@ -34,9 +36,12 @@ export const Route = createFileRoute("/_authenticated/story/$id")({
 function StoryReader() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
+  const generateImageFn = useServerFn(generateStoryPageImage);
   const [story, setStory] = useState<StoryRow | null>(null);
   const [childName, setChildName] = useState<string>("");
   const [loading, setLoading] = useState(true);
+  const [finishingImages, setFinishingImages] = useState(false);
+  const [imageFailures, setImageFailures] = useState(0);
   const [notFound, setNotFound] = useState(false);
   const [page, setPage] = useState(0);
   const [favorite, setFavorite] = useState(false);
@@ -65,11 +70,48 @@ function StoryReader() {
         .eq("id", row.child_id)
         .maybeSingle();
       if (!cancelled) setChildName(child?.first_name ?? "");
-      setLoading(false);
+
+      // Backfill any missing page illustrations before the user starts reading.
+      const missing = row.pages
+        .map((p, i) => ({ p, i }))
+        .filter(({ p }) => !p.image_url);
+      if (missing.length > 0) {
+        if (!cancelled) setFinishingImages(true);
+        const results = await Promise.all(
+          missing.map(({ i }) =>
+            generateImageFn({ data: { storyId: row.id, pageIndex: i } }).catch((e) => {
+              console.error("Image failed", e);
+              return null;
+            }),
+          ),
+        );
+        const failed = results.filter((r) => r === null).length;
+        // Refetch the row so updated image_url values are reflected.
+        const { data: refreshed } = await supabase
+          .from("stories")
+          .select("id, title, theme, mood, lesson, length_minutes, cover_emoji, cover_gradient, pages, favorite, child_id")
+          .eq("id", id)
+          .maybeSingle();
+        if (!cancelled) {
+          if (refreshed) setStory(refreshed as unknown as StoryRow);
+          setImageFailures(failed);
+          setFinishingImages(false);
+        }
+      } else {
+        try {
+          const cached = sessionStorage.getItem(`story-img-failed-${row.id}`);
+          if (cached && !cancelled) setImageFailures(Number(cached) || 0);
+        } catch {
+          /* ignore */
+        }
+      }
+
+      if (!cancelled) setLoading(false);
     })();
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   async function toggleFavorite() {
@@ -83,8 +125,10 @@ function StoryReader() {
     return (
       <AppShell>
         <div className="grid place-items-center py-24 text-center">
-          <span className="text-5xl animate-float">🌙</span>
-          <p className="mt-4 font-display text-xl text-foreground/70">Opening your storybook…</p>
+          <span className="text-5xl animate-float">{finishingImages ? "🎨" : "🌙"}</span>
+          <p className="mt-4 font-display text-xl text-foreground/70">
+            {finishingImages ? "Finishing illustrations…" : "Opening your storybook…"}
+          </p>
         </div>
       </AppShell>
     );
@@ -116,6 +160,12 @@ function StoryReader() {
           <IconBtn label="Favorite" onClick={toggleFavorite} active={favorite}>★</IconBtn>
         </div>
       </div>
+
+      {imageFailures > 0 && (
+        <div className="mx-auto mb-4 max-w-3xl rounded-2xl border border-peach/40 bg-peach/10 px-4 py-3 text-sm text-foreground/80 animate-fade-in">
+          ✨ {imageFailures} illustration{imageFailures === 1 ? "" : "s"} couldn't be drawn this time. The story is still ready to read — tap a page to retry its artwork.
+        </div>
+      )}
 
       <div className="relative mx-auto max-w-3xl">
         <div
