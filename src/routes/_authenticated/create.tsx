@@ -146,7 +146,7 @@ function CreateWizard() {
                         : "border-hairline bg-surface-elevated hover:border-foreground/30",
                     )}
                   >
-                    <span className="grid size-20 place-items-center rounded-full bg-paper text-5xl shadow-lg">{c.avatar_emoji ?? "🦁"}</span>
+                    <span className="overflow-hidden size-20 rounded-full bg-paper shadow-lg ring-2 ring-paper/60"><CharacterAvatar portraitPath={c.portrait_url} alt={c.first_name} className="size-full" /></span>
                     <span className="font-display text-lg text-foreground">{c.first_name}</span>
                     {age != null && <span className="text-xs text-foreground/55">Age {age}</span>}
                   </button>
