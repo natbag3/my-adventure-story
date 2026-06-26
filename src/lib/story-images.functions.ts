@@ -84,17 +84,24 @@ export const generateStoryPageImage = createServerFn({ method: "POST" })
     const aiRes = await fetch("https://api.openai.com/v1/images/generations", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({ model: "dall-e-3", prompt, size: "1024x1024", response_format: "b64_json", n: 1 }),
+      body: JSON.stringify({ model: "dall-e-3", prompt, size: "1024x1024", n: 1 }),
     });
     if (!aiRes.ok) {
       const txt = await aiRes.text();
       throw new Error(`Illustration generation failed: ${aiRes.status} ${txt.slice(0, 200)}`);
     }
     const aiJson = await aiRes.json();
-    const b64: string | undefined = aiJson?.data?.[0]?.b64_json;
-    if (!b64) throw new Error("Illustration generation returned no image.");
-
-    const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+    const first = aiJson?.data?.[0] ?? {};
+    let bytes: Uint8Array;
+    if (first.b64_json) {
+      bytes = Uint8Array.from(atob(first.b64_json), (c) => c.charCodeAt(0));
+    } else if (first.url) {
+      const imgRes = await fetch(first.url);
+      if (!imgRes.ok) throw new Error(`Could not download illustration: ${imgRes.status}`);
+      bytes = new Uint8Array(await imgRes.arrayBuffer());
+    } else {
+      throw new Error("Illustration generation returned no image.");
+    }
     const path = `${userId}/stories/${data.storyId}/${data.pageIndex}.png`;
     const { error: upErr } = await supabase.storage
       .from("adventurer-photos")
