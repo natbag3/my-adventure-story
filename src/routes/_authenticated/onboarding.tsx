@@ -13,6 +13,7 @@ export const Route = createFileRoute("/_authenticated/onboarding")({
 type FormState = {
   first_name: string;
   nickname: string;
+  gender: "" | "girl" | "boy";
   date_of_birth: string;
   reference_photo: File | null;
   reference_photo_preview: string | null;
@@ -152,6 +153,7 @@ function OnboardingPage() {
   const [form, setForm] = useState<FormState>({
     first_name: "",
     nickname: "",
+    gender: "",
     date_of_birth: "",
     reference_photo: null,
     reference_photo_preview: null,
@@ -219,6 +221,11 @@ function OnboardingPage() {
       setStep(1);
       return;
     }
+    if (!form.gender) {
+      toast.error("Please choose girl or boy so stories match perfectly");
+      setStep(1);
+      return;
+    }
     setBusy(true);
     try {
       let photoUrl: string | null = null;
@@ -238,6 +245,7 @@ function OnboardingPage() {
           user_id: user.id,
           first_name: form.first_name.trim(),
           nickname: form.nickname.trim() || null,
+          gender: form.gender,
           date_of_birth: form.date_of_birth || null,
           reference_photo_url: photoUrl,
           avatar_emoji: form.avatar_emoji,
@@ -264,8 +272,13 @@ function OnboardingPage() {
         .single();
       if (error || !inserted) throw error ?? new Error("Could not create profile");
 
-      setStep(6); // show success screen immediately
-      // Generate AI character portrait in the background
+      // Make the newly created adventurer the active one.
+      await supabase
+        .from("profiles")
+        .update({ active_child_id: inserted.id })
+        .eq("id", user.id);
+
+      setStep(6); // success
       void generateChildPortrait({ data: { childId: inserted.id } }).catch((e) => {
         console.error("Portrait generation failed", e);
         toast.message("We'll draw your adventurer's portrait shortly ✨");
@@ -372,17 +385,20 @@ function ScreenIntro({ onStart }: { onStart: () => void }) {
   return (
     <div className="grid min-h-[70vh] place-items-center text-center">
       <div className="max-w-lg">
-        <div className="mb-8 flex justify-center gap-3 text-5xl">
+        <div className="mb-6 flex justify-center gap-3 text-5xl">
           <span className="animate-float">⭐</span>
           <span className="animate-float [animation-delay:300ms]">🌙</span>
           <span className="animate-float [animation-delay:600ms]">☁️</span>
         </div>
+        <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.3em] text-star/80">
+          🧒 Create Your Adventurer
+        </p>
         <h1 className="font-display text-4xl md:text-5xl text-foreground text-balance leading-tight">
-          Let's create your little adventurer! <span className="text-star">✨</span>
+          Now let's meet your little hero <span className="text-star">✨</span>
         </h1>
         <p className="mt-5 text-lg text-foreground/65 text-balance leading-relaxed">
-          Every magical adventure begins with your child. Tell us a little about them
-          so we can make them the hero of every bedtime story.
+          Your Parent Account is ready. Next, let's create the little hero who will
+          star in every bedtime adventure — their name, looks, and the things they love.
         </p>
         <button
           onClick={onStart}
@@ -406,9 +422,12 @@ function ScreenBasics({
   onPhoto: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onNext: () => void;
 }) {
-  const valid = form.first_name.trim().length > 0;
+  const valid = form.first_name.trim().length > 0 && form.gender !== "";
   return (
-    <ScreenCard title="Basic Information" subtitle="Tell us about your little hero.">
+    <ScreenCard
+      title="About your child"
+      subtitle="Tell us about your little hero. These details power every story."
+    >
       <div className="flex flex-col items-center">
         <button
           type="button"
@@ -430,12 +449,43 @@ function ScreenBasics({
         <p className="mt-3 text-xs text-foreground/45">Optional — helps us draw them consistently</p>
       </div>
 
-      <Field label="First name">
-        <Input value={form.first_name} onChange={(v) => update("first_name", v)} placeholder="Leo" />
+      <Field label="Child's first name">
+        <Input value={form.first_name} onChange={(v) => update("first_name", v)} placeholder="Natalie" />
       </Field>
       <Field label="Nickname (optional)">
         <Input value={form.nickname} onChange={(v) => update("nickname", v)} placeholder="Little Bear" />
       </Field>
+
+      <div>
+        <p className="mb-2 font-mono text-[10px] uppercase tracking-widest text-foreground/50">
+          Gender <span className="text-foreground/40 normal-case">— guides story wording &amp; illustrations</span>
+        </p>
+        <div className="grid grid-cols-2 gap-3">
+          {([
+            { id: "girl", label: "Girl", emoji: "👧" },
+            { id: "boy", label: "Boy", emoji: "👦" },
+          ] as const).map((g) => {
+            const active = form.gender === g.id;
+            return (
+              <button
+                key={g.id}
+                type="button"
+                onClick={() => update("gender", g.id)}
+                className={
+                  "flex items-center justify-center gap-3 rounded-2xl border p-4 text-base font-medium transition-all " +
+                  (active
+                    ? "border-star bg-star/15 text-foreground scale-[1.02] shadow-[0_0_25px_oklch(0.85_0.16_88/0.2)]"
+                    : "border-hairline bg-surface-elevated text-foreground/70 hover:border-lavender/60")
+                }
+              >
+                <span className="text-2xl">{g.emoji}</span>
+                {g.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       <div className="grid grid-cols-2 gap-4">
         <Field label="Date of birth">
           <Input
