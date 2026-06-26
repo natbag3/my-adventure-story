@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -15,8 +15,6 @@ type FormState = {
   nickname: string;
   gender: "" | "girl" | "boy";
   date_of_birth: string;
-  reference_photo: File | null;
-  reference_photo_preview: string | null;
   
   hair_color: string;
   hair_style: string;
@@ -148,15 +146,13 @@ function OnboardingPage() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [busy, setBusy] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState<FormState>({
     first_name: "",
     nickname: "",
     gender: "",
     date_of_birth: "",
-    reference_photo: null,
-    reference_photo_preview: null,
+
     
     hair_color: "",
     hair_style: "",
@@ -203,16 +199,6 @@ function OnboardingPage() {
     }));
   }
 
-  function onPhoto(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Photo must be under 5 MB");
-      return;
-    }
-    const url = URL.createObjectURL(file);
-    setForm((f) => ({ ...f, reference_photo: file, reference_photo_preview: url }));
-  }
 
   async function save() {
     if (!user) return;
@@ -228,17 +214,6 @@ function OnboardingPage() {
     }
     setBusy(true);
     try {
-      let photoUrl: string | null = null;
-      if (form.reference_photo) {
-        const ext = form.reference_photo.name.split(".").pop() ?? "jpg";
-        const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
-        const { error: upErr } = await supabase.storage
-          .from("adventurer-photos")
-          .upload(path, form.reference_photo, { upsert: true });
-        if (upErr) throw upErr;
-        photoUrl = path;
-      }
-
       const { data: inserted, error } = await supabase
         .from("children")
         .insert({
@@ -247,7 +222,8 @@ function OnboardingPage() {
           nickname: form.nickname.trim() || null,
           gender: form.gender,
           date_of_birth: form.date_of_birth || null,
-          reference_photo_url: photoUrl,
+          reference_photo_url: null,
+          
           
           hair_color: form.hair_color || null,
           hair_style: form.hair_style || null,
@@ -327,8 +303,6 @@ function OnboardingPage() {
               form={form}
               update={update}
               age={age}
-              fileRef={fileRef}
-              onPhoto={onPhoto}
               onNext={() => setStep(2)}
             />
           )}
@@ -413,13 +387,11 @@ function ScreenIntro({ onStart }: { onStart: () => void }) {
 }
 
 function ScreenBasics({
-  form, update, age, fileRef, onPhoto, onNext,
+  form, update, age, onNext,
 }: {
   form: FormState;
   update: <K extends keyof FormState>(k: K, v: FormState[K]) => void;
   age: number | null;
-  fileRef: React.RefObject<HTMLInputElement | null>;
-  onPhoto: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onNext: () => void;
 }) {
   const valid = form.first_name.trim().length > 0 && form.gender !== "";
@@ -428,26 +400,7 @@ function ScreenBasics({
       title="About your child"
       subtitle="Tell us about your little hero. These details power every story."
     >
-      <div className="flex flex-col items-center">
-        <button
-          type="button"
-          onClick={() => fileRef.current?.click()}
-          className="relative grid size-36 place-items-center rounded-full border-2 border-dashed border-hairline bg-surface-elevated overflow-hidden hover:border-lavender/60 transition-colors"
-        >
-          {form.reference_photo_preview ? (
-            <img src={form.reference_photo_preview} alt="" className="size-full object-cover" />
-          ) : (
-            <div className="text-center">
-              <div className="text-3xl">📷</div>
-              <div className="mt-1 text-[10px] font-mono uppercase tracking-widest text-foreground/45">
-                Add photo
-              </div>
-            </div>
-          )}
-        </button>
-        <input ref={fileRef} type="file" accept="image/*" className="sr-only" onChange={onPhoto} />
-        <p className="mt-3 text-xs text-foreground/45">Optional — helps us draw them consistently</p>
-      </div>
+
 
       <Field label="Child's first name">
         <Input value={form.first_name} onChange={(v) => update("first_name", v)} placeholder="Natalie" />
