@@ -1,11 +1,12 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { StoryCover } from "@/components/cover";
+import { StoryImage } from "@/components/story-image";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 
-type StoryPage = { text: string; illustration_prompt?: string; sceneEmoji?: string };
+type StoryPage = { text: string; illustration_prompt?: string; image_url?: string | null };
 type StoryRow = {
   id: string;
   title: string;
@@ -32,6 +33,7 @@ export const Route = createFileRoute("/_authenticated/story/$id")({
 
 function StoryReader() {
   const { id } = Route.useParams();
+  const navigate = useNavigate();
   const [story, setStory] = useState<StoryRow | null>(null);
   const [childName, setChildName] = useState<string>("");
   const [loading, setLoading] = useState(true);
@@ -99,9 +101,12 @@ function StoryReader() {
     );
   }
 
+  // Pages layout: 0 = cover, 1..N = story pages, N+1 = End screen
+  const totalPages = story.pages.length;
   const isCover = page === 0;
-  const currentPage = story.pages[page - 1];
-  const totalPages = story.pages.length + 1;
+  const isEnd = page === totalPages + 1;
+  const storyPageIdx = page - 1; // 0-based index into pages[]
+  const currentPage = !isCover && !isEnd ? story.pages[storyPageIdx] : null;
 
   return (
     <AppShell>
@@ -130,15 +135,46 @@ function StoryReader() {
                 </p>
               </div>
             </div>
-          ) : (
+          ) : isEnd ? (
             <div className="p-2">
               <div className={cn("aspect-[4/3] relative overflow-hidden rounded-3xl bg-gradient-to-br", story.cover_gradient)}>
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,oklch(1_0_0/0.15),transparent_60%)]" />
-                <div className="absolute inset-0 grid place-items-center p-8">
-                  <span className="text-8xl drop-shadow-[0_8px_24px_rgba(0,0,0,0.4)] animate-float">
-                    {story.cover_emoji}
-                  </span>
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,oklch(1_0_0/0.2),transparent_60%)]" />
+                <div className="absolute inset-0 grid place-items-center">
+                  <span className="text-8xl animate-float drop-shadow-[0_8px_24px_rgba(0,0,0,0.4)]">🌙</span>
                 </div>
+              </div>
+              <div className="px-8 py-10 text-center">
+                <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink/45">The End</p>
+                <h2 className="mt-3 font-display text-4xl text-ink">Sweet dreams, {childName} 🌙</h2>
+                <p className="mt-3 text-ink/60 max-w-md mx-auto">
+                  Your adventure is safely saved in the Story Library. Ready for another tale?
+                </p>
+                <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+                  <button
+                    onClick={() => navigate({ to: "/create" })}
+                    className="rounded-full bg-primary px-8 py-4 font-display text-lg font-bold text-primary-foreground shadow-[0_20px_50px_-20px_oklch(0.85_0.16_88/0.6)] hover:scale-[1.02] transition-transform"
+                  >
+                    ✨ Create Another Adventure
+                  </button>
+                  <button
+                    onClick={() => navigate({ to: "/" })}
+                    className="rounded-full border border-ink/15 bg-paper px-6 py-4 font-medium text-ink/70 hover:text-ink"
+                  >
+                    🏠 Back to Home
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="p-2">
+              <div className="aspect-[4/3] relative overflow-hidden rounded-3xl">
+                <StoryImage
+                  storyId={story.id}
+                  pageIndex={storyPageIdx}
+                  initialPath={currentPage?.image_url ?? null}
+                  alt={currentPage?.illustration_prompt ?? `Page ${page}`}
+                  className="absolute inset-0 size-full"
+                />
               </div>
               <div className="px-8 py-10">
                 <p className="font-display text-2xl md:text-3xl leading-relaxed text-ink text-balance">
@@ -158,15 +194,23 @@ function StoryReader() {
             ← Previous
           </button>
           <span className="font-mono text-[10px] uppercase tracking-widest text-foreground/45">
-            {page === 0 ? "Cover" : `Page ${page} of ${totalPages - 1}`}
+            {isCover ? "Cover" : isEnd ? "The End" : `Page ${page} of ${totalPages}`}
           </span>
-          <button
-            onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-            disabled={page === totalPages - 1}
-            className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-30"
-          >
-            Next →
-          </button>
+          {!isEnd ? (
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages + 1, p + 1))}
+              className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground"
+            >
+              Next →
+            </button>
+          ) : (
+            <button
+              onClick={() => navigate({ to: "/create" })}
+              className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground"
+            >
+              New Adventure ✨
+            </button>
+          )}
         </div>
       </div>
     </AppShell>
