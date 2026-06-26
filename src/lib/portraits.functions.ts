@@ -77,6 +77,7 @@ export const generateChildPortrait = createServerFn({ method: "POST" })
         model: "dall-e-3",
         prompt,
         size: "1024x1024",
+        response_format: "b64_json",
         n: 1,
       }),
     });
