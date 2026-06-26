@@ -1,6 +1,8 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { useActiveChild } from "@/lib/active-child-context";
+import { CharacterAvatar } from "@/components/character-avatar";
 
 const NAV = [
   { to: "/", label: "Home", icon: "🏠" },
@@ -16,7 +18,6 @@ function AmbientSky() {
       <div className="absolute -top-[10%] -right-[10%] h-[60%] w-[60%] rounded-full bg-lavender/15 blur-[140px]" />
       <div className="absolute -bottom-[10%] -left-[10%] h-[55%] w-[55%] rounded-full bg-peach/12 blur-[120px]" />
       <div className="absolute top-1/3 left-1/2 h-[30%] w-[30%] -translate-x-1/2 rounded-full bg-mint/8 blur-[120px]" />
-      {/* Twinkling stars */}
       <div className="absolute inset-0">
         {Array.from({ length: 28 }).map((_, i) => {
           const top = (i * 53) % 100;
@@ -44,6 +45,7 @@ function AmbientSky() {
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { activeChild } = useActiveChild();
 
   return (
     <div className="relative min-h-screen magical-bg">
@@ -84,15 +86,21 @@ export function AppShell({ children }: { children: ReactNode }) {
           </nav>
 
           <div className="flex items-center gap-2">
-            <Link
-              to="/settings"
-              className="hidden sm:flex items-center gap-2 rounded-full border border-hairline bg-surface/60 px-3 py-1.5 text-xs font-medium text-foreground/70 hover:text-foreground transition-colors"
-            >
-              <span className="grid size-5 place-items-center rounded-full bg-mint/30 ring-1 ring-mint/40 text-[10px]">
-                🦁
-              </span>
-              Leo's Profile
-            </Link>
+            {activeChild && (
+              <Link
+                to="/settings"
+                className="hidden sm:flex items-center gap-2 rounded-full border border-hairline bg-surface/60 px-2.5 py-1 text-xs font-medium text-foreground/70 hover:text-foreground transition-colors"
+              >
+                <span className="overflow-hidden grid size-6 place-items-center rounded-full bg-mint/20 ring-1 ring-mint/30 text-[10px]">
+                  <CharacterAvatar
+                    portraitPath={activeChild.portrait_url}
+                    alt={activeChild.first_name}
+                    className="size-full"
+                  />
+                </span>
+                {activeChild.first_name}
+              </Link>
+            )}
             <Link
               to="/settings"
               className="grid size-9 place-items-center rounded-full border border-hairline bg-surface/60 text-foreground/60 hover:text-foreground transition-colors"
@@ -106,7 +114,6 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <main className="relative z-10 mx-auto max-w-6xl px-5 py-10 md:py-14">{children}</main>
 
-      {/* Persistent bottom nav */}
       <nav className="fixed bottom-3 left-1/2 z-40 -translate-x-1/2">
         <div className="flex items-center gap-1 rounded-full border border-hairline bg-background/85 px-2 py-1.5 backdrop-blur-xl shadow-lg">
           {NAV.map((item) => {

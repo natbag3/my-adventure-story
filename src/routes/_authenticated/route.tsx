@@ -2,6 +2,7 @@ import { createFileRoute, Outlet, useNavigate, useRouterState } from "@tanstack/
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
+import { ActiveChildProvider } from "@/lib/active-child-context";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -15,14 +16,12 @@ function AuthenticatedLayout() {
   const [checking, setChecking] = useState(true);
   const [hasChildren, setHasChildren] = useState<boolean | null>(null);
 
-  // Redirect to /auth if not signed in
   useEffect(() => {
     if (!loading && !user) {
       navigate({ to: "/auth", replace: true });
     }
   }, [loading, user, navigate]);
 
-  // Check whether user has at least one child (= onboarded)
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
@@ -41,7 +40,6 @@ function AuthenticatedLayout() {
     };
   }, [user, pathname]);
 
-  // Gate: if onboarded === false and not already on onboarding, send there
   useEffect(() => {
     if (!user || hasChildren === null) return;
     const onOnboarding = pathname.startsWith("/onboarding");
@@ -63,5 +61,9 @@ function AuthenticatedLayout() {
     );
   }
 
-  return <Outlet />;
+  return (
+    <ActiveChildProvider>
+      <Outlet />
+    </ActiveChildProvider>
+  );
 }

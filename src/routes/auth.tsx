@@ -31,7 +31,7 @@ function AuthPage() {
     setBusy(true);
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -40,7 +40,17 @@ function AuthPage() {
           },
         });
         if (error) throw error;
-        toast.success("Welcome to Adventure Club ✨");
+        // Persist parent first name on profile (trigger created the row).
+        if (data.user) {
+          await supabase
+            .from("profiles")
+            .update({
+              first_name: name || null,
+              display_name: name || email.split("@")[0],
+            })
+            .eq("id", data.user.id);
+        }
+        toast.success("Parent account created ✨");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
@@ -63,9 +73,10 @@ function AuthPage() {
     }
   }
 
+  const isSignup = mode === "signup";
+
   return (
     <div className="relative grid min-h-screen place-items-center magical-bg px-4 py-12">
-      {/* Twinkles */}
       <div aria-hidden className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute -top-[10%] -right-[10%] h-[60%] w-[60%] rounded-full bg-lavender/20 blur-[140px]" />
         <div className="absolute -bottom-[10%] -left-[10%] h-[55%] w-[55%] rounded-full bg-peach/15 blur-[120px]" />
@@ -95,12 +106,17 @@ function AuthPage() {
           <div className="mx-auto mb-4 grid size-14 place-items-center rounded-2xl bg-gradient-to-tr from-star to-peach shadow-[0_0_30px_oklch(0.85_0.16_88/0.45)]">
             <span className="font-display text-2xl font-bold text-ink">A</span>
           </div>
-          <h1 className="font-display text-3xl text-foreground">
-            {mode === "signup" ? "Begin the adventure" : "Welcome back"}
+          <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.3em] text-star/80">
+            ✨ Welcome to Adventure Club
+          </p>
+          <h1 className="font-display text-3xl text-foreground text-balance">
+            {isSignup
+              ? "👨‍👩‍👧 Let's create your Parent Account"
+              : "Welcome back"}
           </h1>
-          <p className="mt-2 text-sm text-foreground/55">
-            {mode === "signup"
-              ? "Create an account to write your child into magical bedtime stories."
+          <p className="mt-3 text-sm text-foreground/60 text-balance">
+            {isSignup
+              ? "This account lets you manage your children's adventures and story library."
               : "Sign in to continue tonight's adventure."}
           </p>
         </div>
@@ -127,8 +143,8 @@ function AuthPage() {
           </div>
 
           <form onSubmit={submit} className="space-y-4">
-            {mode === "signup" && (
-              <Field label="Your name">
+            {isSignup && (
+              <Field label="Parent's first name">
                 <input
                   required
                   value={name}
@@ -138,7 +154,7 @@ function AuthPage() {
                 />
               </Field>
             )}
-            <Field label="Email">
+            <Field label={isSignup ? "Parent's email" : "Email"}>
               <input
                 required
                 type="email"
@@ -165,17 +181,26 @@ function AuthPage() {
               disabled={busy}
               className="w-full rounded-2xl bg-primary px-5 py-3.5 text-sm font-semibold text-primary-foreground shadow-[0_10px_30px_-12px_oklch(0.85_0.16_88/0.6)] transition-transform hover:scale-[1.01] disabled:opacity-60"
             >
-              {busy ? "Just a moment…" : mode === "signup" ? "Create account" : "Sign in"}
+              {busy
+                ? "Just a moment…"
+                : isSignup
+                ? "Create Parent Account"
+                : "Sign in"}
             </button>
+            {isSignup && (
+              <p className="text-center text-xs text-foreground/45">
+                Next, you'll create your child's Adventurer profile.
+              </p>
+            )}
           </form>
 
           <p className="mt-5 text-center text-xs text-foreground/55">
-            {mode === "signup" ? "Already have an account?" : "New to Adventure Club?"}{" "}
+            {isSignup ? "Already have an account?" : "New to Adventure Club?"}{" "}
             <button
-              onClick={() => setMode(mode === "signup" ? "signin" : "signup")}
+              onClick={() => setMode(isSignup ? "signin" : "signup")}
               className="font-medium text-lavender hover:underline"
             >
-              {mode === "signup" ? "Sign in" : "Create one"}
+              {isSignup ? "Sign in" : "Create one"}
             </button>
           </p>
         </div>

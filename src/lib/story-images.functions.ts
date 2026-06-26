@@ -14,6 +14,36 @@ type PageObj = {
   [k: string]: unknown;
 };
 
+function describeChild(child: {
+  first_name: string;
+  gender?: string | null;
+  hair_color?: string | null;
+  hair_style?: string | null;
+  eye_color?: string | null;
+  skin_tone?: string | null;
+  freckles?: boolean | null;
+  glasses?: boolean | null;
+  outfit_color?: string | null;
+}) {
+  const subject =
+    (child.gender ?? "").toLowerCase() === "boy"
+      ? "boy"
+      : (child.gender ?? "").toLowerCase() === "girl"
+      ? "girl"
+      : "child";
+  const traits = [
+    child.hair_color && `${child.hair_color.toLowerCase()} ${child.hair_style?.toLowerCase() ?? ""} hair`.trim(),
+    child.eye_color && `${child.eye_color.toLowerCase()} eyes`,
+    child.skin_tone && `${child.skin_tone.toLowerCase()} skin`,
+    child.freckles && "soft freckles",
+    child.glasses && "round glasses",
+    child.outfit_color && `${child.outfit_color.toLowerCase()} outfit`,
+  ]
+    .filter(Boolean)
+    .join(", ");
+  return `${child.first_name} (a ${subject}${traits ? `, ${traits}` : ""})`;
+}
+
 export const generateStoryPageImage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => Input.parse(i))
@@ -24,7 +54,7 @@ export const generateStoryPageImage = createServerFn({ method: "POST" })
 
     const { data: story, error } = await supabase
       .from("stories")
-      .select("id, pages, child_id")
+      .select("id, pages, child_id, co_star_ids")
       .eq("id", data.storyId)
       .eq("user_id", userId)
       .single();
@@ -35,28 +65,20 @@ export const generateStoryPageImage = createServerFn({ method: "POST" })
     if (!page) throw new Error("Page not found.");
     if (page.image_url) return { imagePath: page.image_url as string };
 
-    // Enrich with child appearance for consistent character look
-    const { data: child } = await supabase
+    const heroIds = [story.child_id, ...((story.co_star_ids as string[] | null) ?? [])];
+    const { data: kids } = await supabase
       .from("children")
-      .select("first_name, hair_color, hair_style, eye_color, skin_tone, freckles, glasses, outfit_color")
-      .eq("id", story.child_id)
-      .single();
+      .select("id, first_name, gender, hair_color, hair_style, eye_color, skin_tone, freckles, glasses, outfit_color")
+      .in("id", heroIds);
+    const orderedKids = heroIds
+      .map((id) => (kids ?? []).find((k) => k.id === id))
+      .filter(Boolean) as NonNullable<typeof kids>;
 
-    const appearance = child
-      ? [
-          child.hair_color && `${child.hair_color.toLowerCase()} ${child.hair_style?.toLowerCase() ?? ""} hair`.trim(),
-          child.eye_color && `${child.eye_color.toLowerCase()} eyes`,
-          child.skin_tone && `${child.skin_tone.toLowerCase()} skin`,
-          child.freckles && "soft freckles",
-          child.glasses && "round glasses",
-          child.outfit_color && `${child.outfit_color.toLowerCase()} outfit`,
-        ].filter(Boolean).join(", ")
-      : "";
-
+    const heroDescriptions = orderedKids.map(describeChild).join("; ");
     const sceneDesc = page.illustration_prompt || page.text || "magical bedtime scene";
 
     const prompt = `Pixar-style children's picture book illustration. Scene: ${sceneDesc}. ${
-      child ? `The hero is ${child.first_name}: ${appearance}. Keep this character design consistent.` : ""
+      heroDescriptions ? `Heroes featured: ${heroDescriptions}. Keep every character design consistent across pages.` : ""
     } Warm magical lighting, soft painterly Pixar/Disney style, gentle bedtime atmosphere, premium children's book art, no text, no logos, no watermarks.`;
 
     const aiRes = await fetch("https://api.openai.com/v1/images/generations", {
