@@ -29,6 +29,7 @@ export type Database = {
           favorite_toys: string[]
           first_name: string
           freckles: boolean | null
+          gender: string | null
           glasses: boolean | null
           hair_color: string | null
           hair_style: string | null
@@ -59,6 +60,7 @@ export type Database = {
           favorite_toys?: string[]
           first_name: string
           freckles?: boolean | null
+          gender?: string | null
           glasses?: boolean | null
           hair_color?: string | null
           hair_style?: string | null
@@ -89,6 +91,7 @@ export type Database = {
           favorite_toys?: string[]
           first_name?: string
           freckles?: boolean | null
+          gender?: string | null
           glasses?: boolean | null
           hair_color?: string | null
           hair_style?: string | null
@@ -109,28 +112,43 @@ export type Database = {
       }
       profiles: {
         Row: {
+          active_child_id: string | null
           created_at: string
           display_name: string | null
+          first_name: string | null
           id: string
           updated_at: string
         }
         Insert: {
+          active_child_id?: string | null
           created_at?: string
           display_name?: string | null
+          first_name?: string | null
           id: string
           updated_at?: string
         }
         Update: {
+          active_child_id?: string | null
           created_at?: string
           display_name?: string | null
+          first_name?: string | null
           id?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_active_child_id_fkey"
+            columns: ["active_child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       stories: {
         Row: {
           child_id: string
+          co_star_ids: string[]
           cover_emoji: string
           cover_gradient: string
           created_at: string
@@ -148,6 +166,7 @@ export type Database = {
         }
         Insert: {
           child_id: string
+          co_star_ids?: string[]
           cover_emoji?: string
           cover_gradient?: string
           created_at?: string
@@ -165,6 +184,7 @@ export type Database = {
         }
         Update: {
           child_id?: string
+          co_star_ids?: string[]
           cover_emoji?: string
           cover_gradient?: string
           created_at?: string

@@ -4,6 +4,7 @@ import { z } from "zod";
 
 const GenerateInput = z.object({
   childId: z.string().uuid(),
+  coStarIds: z.array(z.string().uuid()).optional().default([]),
   theme: z.string().min(1),
   mood: z.string().min(1),
   lesson: z.string().min(1),
@@ -19,6 +20,45 @@ const COVER_GRADIENTS: Record<string, string> = {
   mystery: "from-[oklch(0.3_0.12_300)] via-[oklch(0.24_0.09_280)] to-[oklch(0.18_0.05_290)]",
 };
 
+function calcAge(dob: string | null): number | null {
+  if (!dob) return null;
+  const d = new Date(dob);
+  if (isNaN(d.getTime())) return null;
+  const now = new Date();
+  let age = now.getFullYear() - d.getFullYear();
+  const m = now.getMonth() - d.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
+  return age;
+}
+
+function summariseChild(child: Record<string, unknown>) {
+  return {
+    name: child.first_name,
+    nickname: child.nickname ?? undefined,
+    gender: child.gender ?? undefined,
+    age: calcAge(child.date_of_birth as string | null),
+    appearance: {
+      hair_color: child.hair_color,
+      hair_style: child.hair_style,
+      eye_color: child.eye_color,
+      skin_tone: child.skin_tone,
+      freckles: child.freckles,
+      glasses: child.glasses,
+      outfit_color: child.outfit_color,
+      shoes: child.shoes,
+    },
+    personality_traits: child.personality_traits,
+    favorite_animals: child.favorite_animals,
+    favorite_colors: child.favorite_colors,
+    favorite_foods: child.favorite_foods,
+    favorite_toys: child.favorite_toys,
+    favorite_places: child.favorite_places,
+    favorite_hobbies: child.favorite_hobbies,
+    favorite_story_themes: child.favorite_story_themes,
+    learning_goals: child.learning_goals,
+  };
+}
+
 export const generateStory = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => GenerateInput.parse(input))
@@ -28,59 +68,45 @@ export const generateStory = createServerFn({ method: "POST" })
 
     const { supabase, userId } = context;
 
-    // Load child profile
-    const { data: child, error: childErr } = await supabase
+    const allIds = Array.from(new Set([data.childId, ...data.coStarIds]));
+    const { data: kids, error: childErr } = await supabase
       .from("children")
       .select("*")
-      .eq("id", data.childId)
-      .eq("user_id", userId)
-      .single();
-    if (childErr || !child) throw new Error("Adventurer not found.");
+      .in("id", allIds)
+      .eq("user_id", userId);
+    if (childErr || !kids || kids.length === 0) throw new Error("Adventurer not found.");
 
-    // Age
-    let age: number | null = null;
-    if (child.date_of_birth) {
-      const d = new Date(child.date_of_birth);
-      const now = new Date();
-      age = now.getFullYear() - d.getFullYear();
-      const m = now.getMonth() - d.getMonth();
-      if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
-    }
+    const primary = kids.find((k) => k.id === data.childId);
+    if (!primary) throw new Error("Adventurer not found.");
+    const coStars = kids.filter((k) => k.id !== data.childId);
+
+    const heroNames = [primary.first_name, ...coStars.map((c) => c.first_name)];
+    const heroLabel =
+      heroNames.length === 1
+        ? heroNames[0]
+        : heroNames.length === 2
+        ? `${heroNames[0]} and ${heroNames[1]}`
+        : `${heroNames.slice(0, -1).join(", ")}, and ${heroNames[heroNames.length - 1]}`;
 
     const pageCount = data.lengthMinutes === 3 ? 8 : data.lengthMinutes === 5 ? 12 : 18;
 
-    const profileSummary = {
-      name: child.first_name,
-      nickname: child.nickname ?? undefined,
-      age,
-      appearance: {
-        hair_color: child.hair_color,
-        hair_style: child.hair_style,
-        eye_color: child.eye_color,
-        skin_tone: child.skin_tone,
-        freckles: child.freckles,
-        glasses: child.glasses,
-        outfit_color: child.outfit_color,
-        shoes: child.shoes,
-      },
-      personality_traits: child.personality_traits,
-      favorite_animals: child.favorite_animals,
-      favorite_colors: child.favorite_colors,
-      favorite_foods: child.favorite_foods,
-      favorite_toys: child.favorite_toys,
-      favorite_places: child.favorite_places,
-      favorite_hobbies: child.favorite_hobbies,
-      favorite_story_themes: child.favorite_story_themes,
-      learning_goals: child.learning_goals,
+    const profile = {
+      primary_hero: summariseChild(primary),
+      co_stars: coStars.map(summariseChild),
     };
 
-    const systemPrompt = `You are a world-class children's picture book author for Adventure Club, writing in the rhythm and style of Julia Donaldson (The Gruffalo, Room on the Broom) and Lynley Dodd (Hairy Maclary). You craft magical, gently rhyming bedtime picture books — short, lyrical, easy to read aloud. The named child is ALWAYS the hero. You silently follow a two-stage process and only return the final story as valid JSON. No markdown. No commentary.`;
+    const systemPrompt = `You are a world-class children's picture book author for Adventure Club, writing in the rhythm and style of Julia Donaldson (The Gruffalo, Room on the Broom) and Lynley Dodd (Hairy Maclary). You craft magical, gently rhyming bedtime picture books — short, lyrical, easy to read aloud. The named child(ren) are ALWAYS the heroes. You silently follow a two-stage process and only return the final story as valid JSON. No markdown. No commentary.`;
+
+    const multiNote =
+      coStars.length > 0
+        ? `\nMULTI-HERO STORY: ${heroLabel} go on this adventure TOGETHER. Each child appears on most pages, with their own moments to shine. Use each child's gender pronouns correctly (girl → she/her, boy → he/him). Keep every child's appearance and personality consistent across pages.\n`
+        : "";
 
     const userPrompt = `Write a personalised rhyming bedtime picture book.
 
-CHILD PROFILE:
-${JSON.stringify(profileSummary, null, 2)}
-
+HERO PROFILE(S):
+${JSON.stringify(profile, null, 2)}
+${multiNote}
 STORY SETTINGS:
 - Theme: ${data.theme}
 - Mood: ${data.mood}
@@ -91,7 +117,7 @@ STORY SETTINGS:
 STAGE 1 — SILENT BLUEPRINT (do NOT output)
 ═══════════════════════════════════════════
 Internally plan the arc before writing:
-  1. Beginning — ${child.first_name} enters a magical world.
+  1. Beginning — ${heroLabel} enter${heroNames.length > 1 ? "" : "s"} a magical world.
   2. Three magical discoveries or events.
   3. One gentle challenge or problem.
   4. Resolution of the challenge.
@@ -105,6 +131,7 @@ WRITING STYLE:
 - Short, lyrical lines with a clear sing-song rhythm.
 - Maximum 2–3 sentences per page. HARD CAP: 60 words per page.
 - One clear idea per page. No long paragraphs.
+- Use correct gendered pronouns for each hero based on their "gender" field.
 
 LANGUAGE SAFETY (STRICT — bedtime-safe only):
 - Use ONLY simple children's vocabulary suitable for ages 3–7.
@@ -116,20 +143,20 @@ LANGUAGE SAFETY (STRICT — bedtime-safe only):
 - If ANY adult or complex word slips in during drafting, silently rewrite that line before output.
 
 STRUCTURE across ${pageCount} pages:
-- Page 1: Introduce ${child.first_name} and the magical setting.
+- Page 1: Introduce ${heroLabel} and the magical setting.
 - Middle pages: The three magical discoveries unfold, then the gentle problem.
 - Penultimate page: The problem is gently solved.
 - Final page: Calm return home, peaceful, sleepy ending.
 
 HERO RULES:
-- ${child.first_name} is the main character on every page.
-- Use their name naturally in the rhyme.
+- ${heroLabel} ${heroNames.length > 1 ? "are" : "is"} the main character${heroNames.length > 1 ? "s" : ""} on every page.
+- Use ${heroNames.length > 1 ? "their names" : "their name"} naturally in the rhyme.
 - Weave in 2–4 of their favourites/personality traits where they fit.
 
 ILLUSTRATION PROMPTS:
 - Pure visual description — no storytelling words.
 - Pixar-style children's picture book illustration.
-- ALWAYS describe ${child.first_name}'s consistent appearance (hair, eyes, outfit) so the character looks identical across every page.
+- ALWAYS describe each hero's consistent appearance (gender, hair, eyes, outfit) on every page so the character${heroNames.length > 1 ? "s look" : " looks"} identical across the whole book.
 
 ═══════════════════════════════════════════
 STAGE 3 — SILENT SELF-CHECK (do NOT output)
@@ -139,7 +166,8 @@ Before returning, silently verify:
   ✓ Every page is ≤ 60 words
   ✓ Language is gentle and age-appropriate
   ✓ Reads aloud beautifully
-  ✓ ${child.first_name} is the hero on every page
+  ✓ ${heroLabel} ${heroNames.length > 1 ? "are heroes" : "is the hero"} on every page
+  ✓ Pronouns match each hero's gender
   ✓ Story follows the blueprint arc
 If ANY check fails, silently rewrite before responding.
 
@@ -150,12 +178,11 @@ OUTPUT — VALID JSON ONLY, this exact shape:
   "title": "short magical title (3–6 words)",
   "cover_emoji": "single emoji capturing the story",
   "pages": [
-    { "page_number": 1, "text": "rhyming page text ≤60 words", "illustration_prompt": "visual scene with ${child.first_name}'s consistent appearance" }
+    { "page_number": 1, "text": "rhyming page text ≤60 words", "illustration_prompt": "visual scene with each hero's consistent appearance" }
   ]
 }
 The "pages" array MUST contain exactly ${pageCount} items, numbered 1 to ${pageCount}.`;
 
-    // OpenAI Chat Completions API
     const aiRes = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -196,12 +223,12 @@ The "pages" array MUST contain exactly ${pageCount} items, numbered 1 to ${pageC
 
     const coverGradient = COVER_GRADIENTS[data.mood.toLowerCase()] ?? COVER_GRADIENTS.bedtime;
 
-    // Save to DB (RLS: own user)
     const { data: inserted, error: insErr } = await supabase
       .from("stories")
       .insert({
         user_id: userId,
         child_id: data.childId,
+        co_star_ids: coStars.map((c) => c.id),
         title: parsed.title,
         theme: data.theme,
         mood: data.mood,

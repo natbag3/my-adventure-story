@@ -22,6 +22,12 @@ function cleanList(arr: unknown): string[] {
     .filter(Boolean);
 }
 
+function genderWord(gender: string | null | undefined, age: number | null): string {
+  const g = (gender ?? "").toLowerCase();
+  const noun = age != null && age <= 10 ? (g === "boy" ? "boy" : g === "girl" ? "girl" : "child") : (g === "boy" ? "young boy" : g === "girl" ? "young girl" : "child");
+  return noun;
+}
+
 export const generateChildPortrait = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => Input.parse(input))
@@ -42,6 +48,7 @@ export const generateChildPortrait = createServerFn({ method: "POST" })
     const age = calcAge(child.date_of_birth);
     const traits = cleanList(child.personality_traits).slice(0, 4).join(", ") || "kind, curious";
     const themes = cleanList(child.favorite_story_themes).slice(0, 3).join(", ");
+    const subject = genderWord(child.gender, age);
 
     const appearance = [
       child.hair_color && `${child.hair_color.toLowerCase()} ${child.hair_style?.toLowerCase() ?? ""} hair`.trim(),
@@ -56,11 +63,10 @@ export const generateChildPortrait = createServerFn({ method: "POST" })
 
     const prompt = `A friendly Pixar-style children's storybook character portrait of a ${
       age ? `${age}-year-old` : "young"
-    } child${age && age < 6 ? "" : ""}, ${appearance || "warm friendly appearance"}. Personality: ${traits}.${
+    } ${subject}, ${appearance || "warm friendly appearance"}. Personality: ${traits}.${
       themes ? ` Loves ${themes}.` : ""
     } Soft warm magical lighting, gentle smile, looking at viewer, head-and-shoulders portrait, centered, painterly Pixar/Disney style, premium children's book illustration, cozy bedtime atmosphere, deep indigo midnight background with subtle glowing stars, consistent protagonist character design suitable for an entire storybook series. No text, no logos, no watermarks.`;
 
-    // OpenAI Images API
     const aiRes = await fetch("https://api.openai.com/v1/images/generations", {
       method: "POST",
       headers: {
