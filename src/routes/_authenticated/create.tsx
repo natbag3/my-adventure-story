@@ -131,6 +131,7 @@ function CreateWizard() {
           mood: moodLabel,
           lesson: lessonLabel,
           lengthMinutes: length,
+          petIds,
         },
       });
 
