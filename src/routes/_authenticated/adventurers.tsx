@@ -12,9 +12,9 @@ type ChildRow = {
   avatar_emoji: string | null;
   date_of_birth: string | null;
   personality_traits: string[];
-  favorite_animal: string | null;
-  favorite_food: string | null;
-  favorite_color: string | null;
+  favorite_animals: string[];
+  favorite_foods: string[];
+  favorite_colors: string[];
   hair_color: string | null;
   eye_color: string | null;
 };
