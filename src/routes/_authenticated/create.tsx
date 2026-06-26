@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { generateStory } from "@/lib/stories.functions";
+import { generateStoryPageImage } from "@/lib/story-images.functions";
 
 type ChildRow = { id: string; first_name: string; avatar_emoji: string | null; portrait_url: string | null; date_of_birth: string | null };
 function calcAge(dob: string | null) {
@@ -46,8 +47,12 @@ function CreateWizard() {
   const [lesson, setLesson] = useState<string | null>(null);
   const [length, setLength] = useState<3 | 5 | 10>(5);
   const [generating, setGenerating] = useState(false);
+  const [prepTotal, setPrepTotal] = useState(0);
+  const [prepDone, setPrepDone] = useState(0);
+  const [prepStage, setPrepStage] = useState<"writing" | "painting" | "binding">("writing");
   const [error, setError] = useState<string | null>(null);
   const generateFn = useServerFn(generateStory);
+  const generateImageFn = useServerFn(generateStoryPageImage);
 
   useEffect(() => {
     if (!user) return;
@@ -79,6 +84,9 @@ function CreateWizard() {
     if (!child || !adventure || !lesson || !mood) return;
     setGenerating(true);
     setError(null);
+    setPrepStage("writing");
+    setPrepDone(0);
+    setPrepTotal(0);
     try {
       const adventureLabel = ADVENTURES.find((a) => a.id === adventure)?.label ?? adventure;
       const moodLabel = MOODS.find((m) => m.id === mood)?.label ?? mood;
@@ -92,11 +100,51 @@ function CreateWizard() {
           lengthMinutes: length,
         },
       });
+
+      // Fetch the story to know how many pages we need to illustrate, and which already have art.
+      setPrepStage("painting");
+      const { data: story } = await supabase
+        .from("stories")
+        .select("pages")
+        .eq("id", result.storyId)
+        .single();
+      const pages = (story?.pages as Array<{ image_url?: string | null }> | null) ?? [];
+      const missing = pages
+        .map((p, i) => ({ p, i }))
+        .filter(({ p }) => !p.image_url);
+      setPrepTotal(pages.length);
+      setPrepDone(pages.length - missing.length);
+
+      // Generate ALL missing illustrations in parallel.
+      await Promise.all(
+        missing.map(({ i }) =>
+          generateImageFn({ data: { storyId: result.storyId, pageIndex: i } })
+            .catch(() => null) // tolerate individual failures; reader can retry
+            .finally(() => setPrepDone((d) => d + 1)),
+        ),
+      );
+
+      setPrepStage("binding");
+      // Small beat so the "binding" stage is visible.
+      await new Promise((r) => setTimeout(r, 600));
       navigate({ to: "/story/$id", params: { id: result.storyId } });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong. Please try again.");
       setGenerating(false);
     }
+  }
+
+  if (generating) {
+    return (
+      <AppShell>
+        <StoryPreparation
+          total={prepTotal}
+          done={prepDone}
+          stage={prepStage}
+          childName={selectedChild?.first_name ?? "your adventurer"}
+        />
+      </AppShell>
+    );
   }
 
   return (
@@ -253,33 +301,29 @@ function CreateWizard() {
 
         {step === 5 && (
           <StepWrap title="Ready when you are">
-            {!generating ? (
-              <div className="text-center py-10">
-                <div className="mx-auto mb-6 grid size-28 place-items-center rounded-full bg-gradient-to-br from-star to-peach text-5xl shadow-[0_0_40px_oklch(0.85_0.16_88/0.5)] animate-float">
-                  ✨
-                </div>
-                <p className="font-display text-2xl text-foreground mb-2">Everything looks magical.</p>
-                <p className="text-foreground/55 mb-8">
-                  We'll craft a {length}-minute {MOODS.find((m) => m.id === mood)?.label.toLowerCase()} adventure for{" "}
-                  {selectedChild?.first_name ?? "your adventurer"} in the world of{" "}
-                  {ADVENTURES.find((a) => a.id === adventure)?.label ?? "wonder"}.
-                </p>
-                <button
-                  onClick={handleGenerate}
-                  disabled={!adventure || !lesson}
-                  className="rounded-full bg-primary px-8 py-4 font-display text-lg font-bold text-primary-foreground shadow-[0_20px_50px_-20px_oklch(0.85_0.16_88/0.6)] disabled:opacity-40 hover:scale-[1.02] transition-transform"
-                >
-                  Generate Adventure ✨
-                </button>
-                {error && (
-                  <p className="mt-6 text-sm text-red-300/90 bg-red-500/10 border border-red-400/30 rounded-2xl px-4 py-3 max-w-md mx-auto">
-                    {error}
-                  </p>
-                )}
+            <div className="text-center py-10">
+              <div className="mx-auto mb-6 grid size-28 place-items-center rounded-full bg-gradient-to-br from-star to-peach text-5xl shadow-[0_0_40px_oklch(0.85_0.16_88/0.5)] animate-float">
+                ✨
               </div>
-            ) : (
-              <GeneratingState />
-            )}
+              <p className="font-display text-2xl text-foreground mb-2">Everything looks magical.</p>
+              <p className="text-foreground/55 mb-8">
+                We'll craft a {length}-minute {MOODS.find((m) => m.id === mood)?.label.toLowerCase()} adventure for{" "}
+                {selectedChild?.first_name ?? "your adventurer"} in the world of{" "}
+                {ADVENTURES.find((a) => a.id === adventure)?.label ?? "wonder"}.
+              </p>
+              <button
+                onClick={handleGenerate}
+                disabled={!adventure || !lesson}
+                className="rounded-full bg-primary px-8 py-4 font-display text-lg font-bold text-primary-foreground shadow-[0_20px_50px_-20px_oklch(0.85_0.16_88/0.6)] disabled:opacity-40 hover:scale-[1.02] transition-transform"
+              >
+                Generate Adventure ✨
+              </button>
+              {error && (
+                <p className="mt-6 text-sm text-red-300/90 bg-red-500/10 border border-red-400/30 rounded-2xl px-4 py-3 max-w-md mx-auto">
+                  {error}
+                </p>
+              )}
+            </div>
           </StepWrap>
         )}
       </div>
@@ -318,20 +362,109 @@ function StepWrap({ title, children }: { title: string; children: React.ReactNod
   );
 }
 
-function GeneratingState() {
+const MAGIC_MESSAGES = [
+  "Painting enchanted forests…",
+  "Waking sleepy dragons…",
+  "Sprinkling fairy dust…",
+  "Filling the skies with stars…",
+  "Opening magical portals…",
+  "Tucking in friendly clouds…",
+  "Polishing the moonlight…",
+];
+
+function StoryPreparation({
+  total,
+  done,
+  stage,
+  childName,
+}: {
+  total: number;
+  done: number;
+  stage: "writing" | "painting" | "binding";
+  childName: string;
+}) {
+  const [msgIdx, setMsgIdx] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setMsgIdx((i) => (i + 1) % MAGIC_MESSAGES.length), 2400);
+    return () => clearInterval(id);
+  }, []);
+
+  const pct =
+    stage === "writing"
+      ? 8
+      : stage === "binding"
+      ? 100
+      : total > 0
+      ? Math.max(10, Math.round((done / total) * 92) + 8)
+      : 12;
+
+  const Row = ({ label, state }: { label: string; state: "done" | "active" | "pending" }) => (
+    <div className="flex items-center gap-3 text-left">
+      <span
+        className={cn(
+          "grid size-6 place-items-center rounded-full text-xs",
+          state === "done" && "bg-mint/20 text-mint",
+          state === "active" && "bg-star/20 text-star animate-pulse",
+          state === "pending" && "bg-foreground/10 text-foreground/40",
+        )}
+      >
+        {state === "done" ? "✓" : state === "active" ? "✦" : "·"}
+      </span>
+      <span
+        className={cn(
+          "font-medium",
+          state === "pending" ? "text-foreground/40" : "text-foreground",
+        )}
+      >
+        {label}
+      </span>
+    </div>
+  );
+
   return (
-    <div className="grid place-items-center py-16 text-center">
+    <div className="grid place-items-center py-12 text-center animate-fade-in">
       <div className="relative mb-8">
         <div className="grid size-32 place-items-center rounded-full bg-gradient-to-br from-lavender via-peach to-star text-5xl shadow-[0_0_60px_oklch(0.7_0.18_295/0.5)] animate-float">
-          🌙
+          📖
         </div>
         <span className="absolute -top-2 -left-4 text-2xl animate-twinkle">✦</span>
         <span className="absolute top-6 -right-6 text-xl animate-twinkle" style={{ animationDelay: "0.6s" }}>✦</span>
         <span className="absolute -bottom-3 left-6 text-2xl animate-twinkle" style={{ animationDelay: "1.2s" }}>✦</span>
         <span className="absolute -bottom-1 right-2 text-lg animate-twinkle" style={{ animationDelay: "1.8s" }}>☁️</span>
       </div>
-      <p className="font-display text-2xl text-foreground mb-2">Spinning starlight into a story…</p>
-      <p className="text-foreground/55">Drawing illustrations · choosing words · sprinkling magic</p>
+
+      <p className="font-display text-3xl text-foreground mb-2">
+        ✨ Creating {childName}'s magical adventure…
+      </p>
+      <p key={msgIdx} className="text-foreground/60 mb-8 animate-fade-in">
+        {MAGIC_MESSAGES[msgIdx]}
+      </p>
+
+      <div className="w-full max-w-sm space-y-3 rounded-2xl border border-hairline bg-surface/60 p-5 mb-6">
+        <Row label="Writing your story" state={stage === "writing" ? "active" : "done"} />
+        <Row
+          label={
+            stage === "painting" && total > 0
+              ? `Painting illustrations (${done}/${total})`
+              : "Painting illustrations"
+          }
+          state={stage === "writing" ? "pending" : stage === "painting" ? "active" : "done"}
+        />
+        <Row
+          label="Building your adventure book"
+          state={stage === "binding" ? "active" : "pending"}
+        />
+      </div>
+
+      <div className="w-full max-w-sm h-2 overflow-hidden rounded-full bg-foreground/10">
+        <div
+          className="h-full bg-gradient-to-r from-lavender via-peach to-star transition-all duration-500"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <p className="mt-3 text-xs text-foreground/45 font-mono uppercase tracking-widest">
+        {pct}% ready
+      </p>
     </div>
   );
 }
