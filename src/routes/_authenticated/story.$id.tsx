@@ -36,9 +36,12 @@ export const Route = createFileRoute("/_authenticated/story/$id")({
 function StoryReader() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
+  const generateImageFn = useServerFn(generateStoryPageImage);
   const [story, setStory] = useState<StoryRow | null>(null);
   const [childName, setChildName] = useState<string>("");
   const [loading, setLoading] = useState(true);
+  const [finishingImages, setFinishingImages] = useState(false);
+  const [imageFailures, setImageFailures] = useState(0);
   const [notFound, setNotFound] = useState(false);
   const [page, setPage] = useState(0);
   const [favorite, setFavorite] = useState(false);
@@ -67,11 +70,48 @@ function StoryReader() {
         .eq("id", row.child_id)
         .maybeSingle();
       if (!cancelled) setChildName(child?.first_name ?? "");
-      setLoading(false);
+
+      // Backfill any missing page illustrations before the user starts reading.
+      const missing = row.pages
+        .map((p, i) => ({ p, i }))
+        .filter(({ p }) => !p.image_url);
+      if (missing.length > 0) {
+        if (!cancelled) setFinishingImages(true);
+        const results = await Promise.all(
+          missing.map(({ i }) =>
+            generateImageFn({ data: { storyId: row.id, pageIndex: i } }).catch((e) => {
+              console.error("Image failed", e);
+              return null;
+            }),
+          ),
+        );
+        const failed = results.filter((r) => r === null).length;
+        // Refetch the row so updated image_url values are reflected.
+        const { data: refreshed } = await supabase
+          .from("stories")
+          .select("id, title, theme, mood, lesson, length_minutes, cover_emoji, cover_gradient, pages, favorite, child_id")
+          .eq("id", id)
+          .maybeSingle();
+        if (!cancelled) {
+          if (refreshed) setStory(refreshed as unknown as StoryRow);
+          setImageFailures(failed);
+          setFinishingImages(false);
+        }
+      } else {
+        try {
+          const cached = sessionStorage.getItem(`story-img-failed-${row.id}`);
+          if (cached && !cancelled) setImageFailures(Number(cached) || 0);
+        } catch {
+          /* ignore */
+        }
+      }
+
+      if (!cancelled) setLoading(false);
     })();
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   async function toggleFavorite() {
