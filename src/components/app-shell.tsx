@@ -3,13 +3,12 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 const NAV = [
-  { to: "/", label: "Home" },
-  { to: "/library", label: "Library" },
-  { to: "/passport", label: "Passport" },
-  { to: "/adventurers", label: "Adventurers" },
-  { to: "/rewards", label: "Rewards" },
-  { to: "/subscription", label: "Plan" },
-];
+  { to: "/", label: "Home", icon: "🏠" },
+  { to: "/create", label: "Create", icon: "✨" },
+  { to: "/library", label: "Library", icon: "📚" },
+  { to: "/passport", label: "Passport", icon: "🗺️" },
+  { to: "/settings", label: "Profile", icon: "👤" },
+] as const;
 
 function AmbientSky() {
   return (
