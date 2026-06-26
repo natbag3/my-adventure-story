@@ -84,6 +84,9 @@ function CreateWizard() {
     if (!child || !adventure || !lesson || !mood) return;
     setGenerating(true);
     setError(null);
+    setPrepStage("writing");
+    setPrepDone(0);
+    setPrepTotal(0);
     try {
       const adventureLabel = ADVENTURES.find((a) => a.id === adventure)?.label ?? adventure;
       const moodLabel = MOODS.find((m) => m.id === mood)?.label ?? mood;
@@ -97,6 +100,33 @@ function CreateWizard() {
           lengthMinutes: length,
         },
       });
+
+      // Fetch the story to know how many pages we need to illustrate, and which already have art.
+      setPrepStage("painting");
+      const { data: story } = await supabase
+        .from("stories")
+        .select("pages")
+        .eq("id", result.storyId)
+        .single();
+      const pages = (story?.pages as Array<{ image_url?: string | null }> | null) ?? [];
+      const missing = pages
+        .map((p, i) => ({ p, i }))
+        .filter(({ p }) => !p.image_url);
+      setPrepTotal(pages.length);
+      setPrepDone(pages.length - missing.length);
+
+      // Generate ALL missing illustrations in parallel.
+      await Promise.all(
+        missing.map(({ i }) =>
+          generateImageFn({ data: { storyId: result.storyId, pageIndex: i } })
+            .catch(() => null) // tolerate individual failures; reader can retry
+            .finally(() => setPrepDone((d) => d + 1)),
+        ),
+      );
+
+      setPrepStage("binding");
+      // Small beat so the "binding" stage is visible.
+      await new Promise((r) => setTimeout(r, 600));
       navigate({ to: "/story/$id", params: { id: result.storyId } });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong. Please try again.");
