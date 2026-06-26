@@ -3,7 +3,7 @@ import { AppShell } from "@/components/app-shell";
 import { REWARDS } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/rewards")({
+export const Route = createFileRoute("/_authenticated/rewards")({
   head: () => ({
     meta: [
       { title: "Rewards & Stars — Adventure Club" },

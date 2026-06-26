@@ -5,7 +5,7 @@ import { StoryCover } from "@/components/cover";
 import { STORIES, CHILDREN, ADVENTURES } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/library")({
+export const Route = createFileRoute("/_authenticated/library")({
   head: () => ({
     meta: [
       { title: "Story Library — Adventure Club" },

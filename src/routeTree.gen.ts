@@ -9,112 +9,141 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SubscriptionRouteImport } from './routes/subscription'
-import { Route as SettingsRouteImport } from './routes/settings'
-import { Route as RewardsRouteImport } from './routes/rewards'
-import { Route as PassportRouteImport } from './routes/passport'
-import { Route as LibraryRouteImport } from './routes/library'
-import { Route as CreateRouteImport } from './routes/create'
-import { Route as AdventurersRouteImport } from './routes/adventurers'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as StoryIdRouteImport } from './routes/story.$id'
-import { Route as AdventurersNewRouteImport } from './routes/adventurers.new'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedSubscriptionRouteImport } from './routes/_authenticated/subscription'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedRewardsRouteImport } from './routes/_authenticated/rewards'
+import { Route as AuthenticatedPassportRouteImport } from './routes/_authenticated/passport'
+import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
+import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticated/library'
+import { Route as AuthenticatedCreateRouteImport } from './routes/_authenticated/create'
+import { Route as AuthenticatedAdventurersRouteImport } from './routes/_authenticated/adventurers'
+import { Route as AuthenticatedStoryIdRouteImport } from './routes/_authenticated/story.$id'
+import { Route as AuthenticatedAdventurersNewRouteImport } from './routes/_authenticated/adventurers.new'
 
-const SubscriptionRoute = SubscriptionRouteImport.update({
-  id: '/subscription',
-  path: '/subscription',
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SettingsRoute = SettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RewardsRoute = RewardsRouteImport.update({
-  id: '/rewards',
-  path: '/rewards',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PassportRoute = PassportRouteImport.update({
-  id: '/passport',
-  path: '/passport',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LibraryRoute = LibraryRouteImport.update({
-  id: '/library',
-  path: '/library',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CreateRoute = CreateRouteImport.update({
-  id: '/create',
-  path: '/create',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdventurersRoute = AdventurersRouteImport.update({
-  id: '/adventurers',
-  path: '/adventurers',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IndexRoute = IndexRouteImport.update({
+const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const StoryIdRoute = StoryIdRouteImport.update({
+const AuthenticatedSubscriptionRoute =
+  AuthenticatedSubscriptionRouteImport.update({
+    id: '/subscription',
+    path: '/subscription',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedRewardsRoute = AuthenticatedRewardsRouteImport.update({
+  id: '/rewards',
+  path: '/rewards',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPassportRoute = AuthenticatedPassportRouteImport.update({
+  id: '/passport',
+  path: '/passport',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedLibraryRoute = AuthenticatedLibraryRouteImport.update({
+  id: '/library',
+  path: '/library',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCreateRoute = AuthenticatedCreateRouteImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAdventurersRoute =
+  AuthenticatedAdventurersRouteImport.update({
+    id: '/adventurers',
+    path: '/adventurers',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedStoryIdRoute = AuthenticatedStoryIdRouteImport.update({
   id: '/story/$id',
   path: '/story/$id',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AdventurersNewRoute = AdventurersNewRouteImport.update({
-  id: '/new',
-  path: '/new',
-  getParentRoute: () => AdventurersRoute,
-} as any)
+const AuthenticatedAdventurersNewRoute =
+  AuthenticatedAdventurersNewRouteImport.update({
+    id: '/new',
+    path: '/new',
+    getParentRoute: () => AuthenticatedAdventurersRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/adventurers': typeof AdventurersRouteWithChildren
-  '/create': typeof CreateRoute
-  '/library': typeof LibraryRoute
-  '/passport': typeof PassportRoute
-  '/rewards': typeof RewardsRoute
-  '/settings': typeof SettingsRoute
-  '/subscription': typeof SubscriptionRoute
-  '/adventurers/new': typeof AdventurersNewRoute
-  '/story/$id': typeof StoryIdRoute
+  '/': typeof AuthenticatedIndexRoute
+  '/auth': typeof AuthRoute
+  '/adventurers': typeof AuthenticatedAdventurersRouteWithChildren
+  '/create': typeof AuthenticatedCreateRoute
+  '/library': typeof AuthenticatedLibraryRoute
+  '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/passport': typeof AuthenticatedPassportRoute
+  '/rewards': typeof AuthenticatedRewardsRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/subscription': typeof AuthenticatedSubscriptionRoute
+  '/adventurers/new': typeof AuthenticatedAdventurersNewRoute
+  '/story/$id': typeof AuthenticatedStoryIdRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/adventurers': typeof AdventurersRouteWithChildren
-  '/create': typeof CreateRoute
-  '/library': typeof LibraryRoute
-  '/passport': typeof PassportRoute
-  '/rewards': typeof RewardsRoute
-  '/settings': typeof SettingsRoute
-  '/subscription': typeof SubscriptionRoute
-  '/adventurers/new': typeof AdventurersNewRoute
-  '/story/$id': typeof StoryIdRoute
+  '/auth': typeof AuthRoute
+  '/adventurers': typeof AuthenticatedAdventurersRouteWithChildren
+  '/create': typeof AuthenticatedCreateRoute
+  '/library': typeof AuthenticatedLibraryRoute
+  '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/passport': typeof AuthenticatedPassportRoute
+  '/rewards': typeof AuthenticatedRewardsRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/subscription': typeof AuthenticatedSubscriptionRoute
+  '/': typeof AuthenticatedIndexRoute
+  '/adventurers/new': typeof AuthenticatedAdventurersNewRoute
+  '/story/$id': typeof AuthenticatedStoryIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/adventurers': typeof AdventurersRouteWithChildren
-  '/create': typeof CreateRoute
-  '/library': typeof LibraryRoute
-  '/passport': typeof PassportRoute
-  '/rewards': typeof RewardsRoute
-  '/settings': typeof SettingsRoute
-  '/subscription': typeof SubscriptionRoute
-  '/adventurers/new': typeof AdventurersNewRoute
-  '/story/$id': typeof StoryIdRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/_authenticated/adventurers': typeof AuthenticatedAdventurersRouteWithChildren
+  '/_authenticated/create': typeof AuthenticatedCreateRoute
+  '/_authenticated/library': typeof AuthenticatedLibraryRoute
+  '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/_authenticated/passport': typeof AuthenticatedPassportRoute
+  '/_authenticated/rewards': typeof AuthenticatedRewardsRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/subscription': typeof AuthenticatedSubscriptionRoute
+  '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/adventurers/new': typeof AuthenticatedAdventurersNewRoute
+  '/_authenticated/story/$id': typeof AuthenticatedStoryIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/auth'
     | '/adventurers'
     | '/create'
     | '/library'
+    | '/onboarding'
     | '/passport'
     | '/rewards'
     | '/settings'
@@ -123,150 +152,183 @@ export interface FileRouteTypes {
     | '/story/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
+    | '/auth'
     | '/adventurers'
     | '/create'
     | '/library'
+    | '/onboarding'
     | '/passport'
     | '/rewards'
     | '/settings'
     | '/subscription'
+    | '/'
     | '/adventurers/new'
     | '/story/$id'
   id:
     | '__root__'
-    | '/'
-    | '/adventurers'
-    | '/create'
-    | '/library'
-    | '/passport'
-    | '/rewards'
-    | '/settings'
-    | '/subscription'
-    | '/adventurers/new'
-    | '/story/$id'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/adventurers'
+    | '/_authenticated/create'
+    | '/_authenticated/library'
+    | '/_authenticated/onboarding'
+    | '/_authenticated/passport'
+    | '/_authenticated/rewards'
+    | '/_authenticated/settings'
+    | '/_authenticated/subscription'
+    | '/_authenticated/'
+    | '/_authenticated/adventurers/new'
+    | '/_authenticated/story/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  AdventurersRoute: typeof AdventurersRouteWithChildren
-  CreateRoute: typeof CreateRoute
-  LibraryRoute: typeof LibraryRoute
-  PassportRoute: typeof PassportRoute
-  RewardsRoute: typeof RewardsRoute
-  SettingsRoute: typeof SettingsRoute
-  SubscriptionRoute: typeof SubscriptionRoute
-  StoryIdRoute: typeof StoryIdRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/subscription': {
-      id: '/subscription'
-      path: '/subscription'
-      fullPath: '/subscription'
-      preLoaderRoute: typeof SubscriptionRouteImport
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteImport
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/rewards': {
-      id: '/rewards'
-      path: '/rewards'
-      fullPath: '/rewards'
-      preLoaderRoute: typeof RewardsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/passport': {
-      id: '/passport'
-      path: '/passport'
-      fullPath: '/passport'
-      preLoaderRoute: typeof PassportRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/library': {
-      id: '/library'
-      path: '/library'
-      fullPath: '/library'
-      preLoaderRoute: typeof LibraryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/create': {
-      id: '/create'
-      path: '/create'
-      fullPath: '/create'
-      preLoaderRoute: typeof CreateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/adventurers': {
-      id: '/adventurers'
-      path: '/adventurers'
-      fullPath: '/adventurers'
-      preLoaderRoute: typeof AdventurersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
+    '/_authenticated/': {
+      id: '/_authenticated/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/story/$id': {
-      id: '/story/$id'
+    '/_authenticated/subscription': {
+      id: '/_authenticated/subscription'
+      path: '/subscription'
+      fullPath: '/subscription'
+      preLoaderRoute: typeof AuthenticatedSubscriptionRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/rewards': {
+      id: '/_authenticated/rewards'
+      path: '/rewards'
+      fullPath: '/rewards'
+      preLoaderRoute: typeof AuthenticatedRewardsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/passport': {
+      id: '/_authenticated/passport'
+      path: '/passport'
+      fullPath: '/passport'
+      preLoaderRoute: typeof AuthenticatedPassportRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/onboarding': {
+      id: '/_authenticated/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/library': {
+      id: '/_authenticated/library'
+      path: '/library'
+      fullPath: '/library'
+      preLoaderRoute: typeof AuthenticatedLibraryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/create': {
+      id: '/_authenticated/create'
+      path: '/create'
+      fullPath: '/create'
+      preLoaderRoute: typeof AuthenticatedCreateRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/adventurers': {
+      id: '/_authenticated/adventurers'
+      path: '/adventurers'
+      fullPath: '/adventurers'
+      preLoaderRoute: typeof AuthenticatedAdventurersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/story/$id': {
+      id: '/_authenticated/story/$id'
       path: '/story/$id'
       fullPath: '/story/$id'
-      preLoaderRoute: typeof StoryIdRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedStoryIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/adventurers/new': {
-      id: '/adventurers/new'
+    '/_authenticated/adventurers/new': {
+      id: '/_authenticated/adventurers/new'
       path: '/new'
       fullPath: '/adventurers/new'
-      preLoaderRoute: typeof AdventurersNewRouteImport
-      parentRoute: typeof AdventurersRoute
+      preLoaderRoute: typeof AuthenticatedAdventurersNewRouteImport
+      parentRoute: typeof AuthenticatedAdventurersRoute
     }
   }
 }
 
-interface AdventurersRouteChildren {
-  AdventurersNewRoute: typeof AdventurersNewRoute
+interface AuthenticatedAdventurersRouteChildren {
+  AuthenticatedAdventurersNewRoute: typeof AuthenticatedAdventurersNewRoute
 }
 
-const AdventurersRouteChildren: AdventurersRouteChildren = {
-  AdventurersNewRoute: AdventurersNewRoute,
+const AuthenticatedAdventurersRouteChildren: AuthenticatedAdventurersRouteChildren =
+  {
+    AuthenticatedAdventurersNewRoute: AuthenticatedAdventurersNewRoute,
+  }
+
+const AuthenticatedAdventurersRouteWithChildren =
+  AuthenticatedAdventurersRoute._addFileChildren(
+    AuthenticatedAdventurersRouteChildren,
+  )
+
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdventurersRoute: typeof AuthenticatedAdventurersRouteWithChildren
+  AuthenticatedCreateRoute: typeof AuthenticatedCreateRoute
+  AuthenticatedLibraryRoute: typeof AuthenticatedLibraryRoute
+  AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+  AuthenticatedPassportRoute: typeof AuthenticatedPassportRoute
+  AuthenticatedRewardsRoute: typeof AuthenticatedRewardsRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedSubscriptionRoute: typeof AuthenticatedSubscriptionRoute
+  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedStoryIdRoute: typeof AuthenticatedStoryIdRoute
 }
 
-const AdventurersRouteWithChildren = AdventurersRoute._addFileChildren(
-  AdventurersRouteChildren,
-)
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdventurersRoute: AuthenticatedAdventurersRouteWithChildren,
+  AuthenticatedCreateRoute: AuthenticatedCreateRoute,
+  AuthenticatedLibraryRoute: AuthenticatedLibraryRoute,
+  AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+  AuthenticatedPassportRoute: AuthenticatedPassportRoute,
+  AuthenticatedRewardsRoute: AuthenticatedRewardsRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedSubscriptionRoute: AuthenticatedSubscriptionRoute,
+  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedStoryIdRoute: AuthenticatedStoryIdRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  AdventurersRoute: AdventurersRouteWithChildren,
-  CreateRoute: CreateRoute,
-  LibraryRoute: LibraryRoute,
-  PassportRoute: PassportRoute,
-  RewardsRoute: RewardsRoute,
-  SettingsRoute: SettingsRoute,
-  SubscriptionRoute: SubscriptionRoute,
-  StoryIdRoute: StoryIdRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

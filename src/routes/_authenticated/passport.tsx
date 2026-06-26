@@ -3,7 +3,7 @@ import { AppShell } from "@/components/app-shell";
 import { PASSPORT_STAMPS, ACHIEVEMENTS, REWARDS, CHILDREN } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/passport")({
+export const Route = createFileRoute("/_authenticated/passport")({
   head: () => ({
     meta: [
       { title: "Adventure Passport — Adventure Club" },

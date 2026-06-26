@@ -5,7 +5,7 @@ import { StoryCover } from "@/components/cover";
 import { getStory, getChild } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/story/$id")({
+export const Route = createFileRoute("/_authenticated/story/$id")({
   loader: ({ params }) => {
     const story = getStory(params.id);
     if (!story) throw notFound();
