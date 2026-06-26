@@ -20,14 +20,16 @@ export type Database = {
           created_at: string
           date_of_birth: string | null
           eye_color: string | null
-          favorite_animal: string | null
-          favorite_color: string | null
-          favorite_food: string | null
+          favorite_animal: string[]
+          favorite_color: string[]
+          favorite_food: string[]
+          favorite_hobbies: string[]
           favorite_holiday: string | null
-          favorite_place: string | null
+          favorite_place: string[]
           favorite_season: string | null
-          favorite_story: string | null
-          favorite_toy: string | null
+          favorite_story: string[]
+          favorite_story_themes: string[]
+          favorite_toy: string[]
           first_name: string
           freckles: boolean | null
           glasses: boolean | null
@@ -50,14 +52,16 @@ export type Database = {
           created_at?: string
           date_of_birth?: string | null
           eye_color?: string | null
-          favorite_animal?: string | null
-          favorite_color?: string | null
-          favorite_food?: string | null
+          favorite_animal?: string[]
+          favorite_color?: string[]
+          favorite_food?: string[]
+          favorite_hobbies?: string[]
           favorite_holiday?: string | null
-          favorite_place?: string | null
+          favorite_place?: string[]
           favorite_season?: string | null
-          favorite_story?: string | null
-          favorite_toy?: string | null
+          favorite_story?: string[]
+          favorite_story_themes?: string[]
+          favorite_toy?: string[]
           first_name: string
           freckles?: boolean | null
           glasses?: boolean | null
@@ -80,14 +84,16 @@ export type Database = {
           created_at?: string
           date_of_birth?: string | null
           eye_color?: string | null
-          favorite_animal?: string | null
-          favorite_color?: string | null
-          favorite_food?: string | null
+          favorite_animal?: string[]
+          favorite_color?: string[]
+          favorite_food?: string[]
+          favorite_hobbies?: string[]
           favorite_holiday?: string | null
-          favorite_place?: string | null
+          favorite_place?: string[]
           favorite_season?: string | null
-          favorite_story?: string | null
-          favorite_toy?: string | null
+          favorite_story?: string[]
+          favorite_story_themes?: string[]
+          favorite_toy?: string[]
           first_name?: string
           freckles?: boolean | null
           glasses?: boolean | null
