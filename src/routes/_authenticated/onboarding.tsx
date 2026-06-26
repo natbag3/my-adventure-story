@@ -17,7 +17,7 @@ type FormState = {
   date_of_birth: string;
   reference_photo: File | null;
   reference_photo_preview: string | null;
-  avatar_emoji: string;
+  
   hair_color: string;
   hair_style: string;
   eye_color: string;
@@ -86,7 +86,7 @@ const OUTFIT_COLORS = [
   { id: "Gold", hex: "#fbbf24" },
 ];
 const SHOES = ["Sneakers", "Boots", "Sandals", "Wellies", "Slippers", "Magical"];
-const AVATARS = ["🦁", "🦊", "🐻", "🦄", "🐲", "🐙", "🐯", "🦉", "🐸", "🦋"];
+
 
 const TRAITS = [
   "Brave", "Kind", "Funny", "Creative", "Curious",
@@ -157,7 +157,7 @@ function OnboardingPage() {
     date_of_birth: "",
     reference_photo: null,
     reference_photo_preview: null,
-    avatar_emoji: "🦁",
+    
     hair_color: "",
     hair_style: "",
     eye_color: "",
@@ -248,7 +248,7 @@ function OnboardingPage() {
           gender: form.gender,
           date_of_birth: form.date_of_birth || null,
           reference_photo_url: photoUrl,
-          avatar_emoji: form.avatar_emoji,
+          
           hair_color: form.hair_color || null,
           hair_style: form.hair_style || null,
           eye_color: form.eye_color || null,
@@ -438,7 +438,7 @@ function ScreenBasics({
             <img src={form.reference_photo_preview} alt="" className="size-full object-cover" />
           ) : (
             <div className="text-center">
-              <div className="text-4xl">{form.avatar_emoji}</div>
+              <div className="text-3xl">📷</div>
               <div className="mt-1 text-[10px] font-mono uppercase tracking-widest text-foreground/45">
                 Add photo
               </div>
@@ -515,50 +515,32 @@ function ScreenAppearance({
 }) {
   return (
     <ScreenCard title="Appearance" subtitle="Bring your adventurer to life.">
-      <div className="grid gap-6 md:grid-cols-[1fr,180px]">
-        <div className="space-y-6">
-          <ColorPicker label="Hair colour" value={form.hair_color} options={HAIR_COLORS}
-            onChange={(v) => update("hair_color", v)} />
-          <ChipPicker label="Hair style" value={form.hair_style} options={HAIR_STYLES.map((s) => ({ id: s.id, label: `${s.emoji} ${s.id}` }))}
-            onChange={(v) => update("hair_style", v)} />
-          <ColorPicker label="Eye colour" value={form.eye_color} options={EYE_COLORS}
-            onChange={(v) => update("eye_color", v)} />
-          <ColorPicker label="Skin tone" value={form.skin_tone} options={SKIN_TONES}
-            onChange={(v) => update("skin_tone", v)} />
+      <div className="space-y-6">
+        <ColorPicker label="Hair colour" value={form.hair_color} options={HAIR_COLORS}
+          onChange={(v) => update("hair_color", v)} />
+        <ChipPicker label="Hair style" value={form.hair_style} options={HAIR_STYLES.map((s) => ({ id: s.id, label: `${s.emoji} ${s.id}` }))}
+          onChange={(v) => update("hair_style", v)} />
+        <ColorPicker label="Eye colour" value={form.eye_color} options={EYE_COLORS}
+          onChange={(v) => update("eye_color", v)} />
+        <ColorPicker label="Skin tone" value={form.skin_tone} options={SKIN_TONES}
+          onChange={(v) => update("skin_tone", v)} />
 
-          <div className="grid grid-cols-2 gap-3">
-            <ToggleCard active={form.freckles} onClick={() => update("freckles", !form.freckles)}>
-              <span className="text-2xl">🟤</span>
-              <span>Freckles</span>
-            </ToggleCard>
-            <ToggleCard active={form.glasses} onClick={() => update("glasses", !form.glasses)}>
-              <span className="text-2xl">👓</span>
-              <span>Glasses</span>
-            </ToggleCard>
-          </div>
-
-          <ColorPicker label="Favourite outfit colour" value={form.outfit_color} options={OUTFIT_COLORS}
-            onChange={(v) => update("outfit_color", v)} />
-          <ChipPicker label="Favourite shoes" value={form.shoes}
-            options={SHOES.map((s) => ({ id: s, label: s }))}
-            onChange={(v) => update("shoes", v)} />
+        <div className="grid grid-cols-2 gap-3">
+          <ToggleCard active={form.freckles} onClick={() => update("freckles", !form.freckles)}>
+            <span className="text-2xl">🟤</span>
+            <span>Freckles</span>
+          </ToggleCard>
+          <ToggleCard active={form.glasses} onClick={() => update("glasses", !form.glasses)}>
+            <span className="text-2xl">👓</span>
+            <span>Glasses</span>
+          </ToggleCard>
         </div>
 
-        {/* Live preview */}
-        <div className="sticky top-6 self-start">
-          <div className="rounded-3xl border border-hairline bg-surface-elevated p-5 text-center card-glow">
-            <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-foreground/45">
-              Preview
-            </p>
-            <CartoonFacePreview form={form} />
-            <p className="mt-3 font-display text-lg text-foreground">{form.hair_color || "—"}</p>
-            <p className="text-xs text-foreground/55">{form.hair_style || "Choose a style"}</p>
-            <div className="mt-3 flex justify-center gap-2 text-xs text-foreground/55">
-              {form.freckles && <span>· freckles</span>}
-              {form.glasses && <span>· glasses</span>}
-            </div>
-          </div>
-        </div>
+        <ColorPicker label="Favourite outfit colour" value={form.outfit_color} options={OUTFIT_COLORS}
+          onChange={(v) => update("outfit_color", v)} />
+        <ChipPicker label="Favourite shoes" value={form.shoes}
+          options={SHOES.map((s) => ({ id: s, label: s }))}
+          onChange={(v) => update("shoes", v)} />
       </div>
 
       <NextButton onClick={onNext}>Continue</NextButton>
