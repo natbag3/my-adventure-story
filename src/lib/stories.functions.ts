@@ -74,9 +74,9 @@ export const generateStory = createServerFn({ method: "POST" })
       learning_goals: child.learning_goals,
     };
 
-    const systemPrompt = `You are a world-class children's bedtime story author writing for Adventure Club. You write magical, warm, age-appropriate stories in the spirit of Disney and Pixar. The named child is ALWAYS the main character. Weave in their appearance, personality, and favorites so each story feels deeply personal. Keep language age-appropriate, gentle, and imaginative. End with a calming, hopeful note suitable for sleep. You MUST respond with valid JSON only — no markdown, no commentary.`;
+    const systemPrompt = `You are a world-class children's picture book author for Adventure Club, writing in the rhythm and style of Julia Donaldson (The Gruffalo, Room on the Broom) and Lynley Dodd (Hairy Maclary). You craft magical, gently rhyming bedtime picture books — short, lyrical, easy to read aloud. The named child is ALWAYS the hero. You silently follow a two-stage process and only return the final story as valid JSON. No markdown. No commentary.`;
 
-    const userPrompt = `Create a personalized bedtime story.
+    const userPrompt = `Write a personalised rhyming bedtime picture book.
 
 CHILD PROFILE:
 ${JSON.stringify(profileSummary, null, 2)}
@@ -84,26 +84,69 @@ ${JSON.stringify(profileSummary, null, 2)}
 STORY SETTINGS:
 - Theme: ${data.theme}
 - Mood: ${data.mood}
-- Lesson to gently weave in: ${data.lesson}
-- Total length: ${data.lengthMinutes} minutes (~${targetWords} words per page)
-- Number of pages: ${pageCount}
+- Gentle lesson to weave in: ${data.lesson}
+- Length: ${data.lengthMinutes} minutes → exactly ${pageCount} pages
 
-REQUIREMENTS:
-- The main character's name MUST be "${child.first_name}".
-- Use 2-4 of their favorites/interests naturally throughout the story.
-- Each page should advance the story arc: setup → adventure → challenge → lesson → calming ending.
-- The final page should be gentle and sleepy.
-- "illustration_prompt" should describe the scene visually and ALWAYS include "${child.first_name}'s" consistent appearance (hair, eyes, outfit) so illustrations stay consistent.
+═══════════════════════════════════════════
+STAGE 1 — SILENT BLUEPRINT (do NOT output)
+═══════════════════════════════════════════
+Internally plan the arc before writing:
+  1. Beginning — ${child.first_name} enters a magical world.
+  2. Three magical discoveries or events.
+  3. One gentle challenge or problem.
+  4. Resolution of the challenge.
+  5. Calm bedtime ending — return home, drift to sleep.
 
-Respond with this exact JSON schema:
+═══════════════════════════════════════════
+STAGE 2 — FINAL STORY (the only thing you output)
+═══════════════════════════════════════════
+WRITING STYLE:
+- Every page MUST rhyme naturally (AABB, ABAB, or couplets) — never forced.
+- Short, lyrical lines with a clear sing-song rhythm.
+- Maximum 2–3 sentences per page. HARD CAP: 60 words per page.
+- One clear idea per page. No long paragraphs.
+- Simple vocabulary suitable for ages 3–7.
+- Warm, gentle, magical tone — never scary, dark, or abrupt.
+
+STRUCTURE across ${pageCount} pages:
+- Page 1: Introduce ${child.first_name} and the magical setting.
+- Middle pages: The three magical discoveries unfold, then the gentle problem.
+- Penultimate page: The problem is gently solved.
+- Final page: Calm return home, peaceful, sleepy ending.
+
+HERO RULES:
+- ${child.first_name} is the main character on every page.
+- Use their name naturally in the rhyme.
+- Weave in 2–4 of their favourites/personality traits where they fit.
+
+ILLUSTRATION PROMPTS:
+- Pure visual description — no storytelling words.
+- Pixar-style children's picture book illustration.
+- ALWAYS describe ${child.first_name}'s consistent appearance (hair, eyes, outfit) so the character looks identical across every page.
+
+═══════════════════════════════════════════
+STAGE 3 — SILENT SELF-CHECK (do NOT output)
+═══════════════════════════════════════════
+Before returning, silently verify:
+  ✓ Every page rhymes naturally
+  ✓ Every page is ≤ 60 words
+  ✓ Language is gentle and age-appropriate
+  ✓ Reads aloud beautifully
+  ✓ ${child.first_name} is the hero on every page
+  ✓ Story follows the blueprint arc
+If ANY check fails, silently rewrite before responding.
+
+═══════════════════════════════════════════
+OUTPUT — VALID JSON ONLY, this exact shape:
+═══════════════════════════════════════════
 {
-  "title": "string (short, magical, 3-7 words)",
-  "cover_emoji": "single emoji that captures the story",
+  "title": "short magical title (3–6 words)",
+  "cover_emoji": "single emoji capturing the story",
   "pages": [
-    { "text": "string (~${targetWords} words)", "illustration_prompt": "string (scene description with character consistency)" }
+    { "page_number": 1, "text": "rhyming page text ≤60 words", "illustration_prompt": "visual scene with ${child.first_name}'s consistent appearance" }
   ]
 }
-The "pages" array MUST have exactly ${pageCount} items.`;
+The "pages" array MUST contain exactly ${pageCount} items, numbered 1 to ${pageCount}.`;
 
     // OpenAI Chat Completions API
     const aiRes = await fetch("https://api.openai.com/v1/chat/completions", {
