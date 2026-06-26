@@ -41,8 +41,8 @@ function StoryReader() {
   const { story } = Route.useLoaderData();
   const child = getChild(story.childId);
   const [page, setPage] = useState(0);
-  const [favorite, setFavorite] = useState(story.favorite);
-  const [reading, setReading] = useState(false);
+  const [favorite, setFavorite] = useState<boolean>(story.favorite);
+  const [reading, setReading] = useState<boolean>(false);
 
   const isCover = page === 0;
   const currentPage = story.pages[page - 1];
