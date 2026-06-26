@@ -1,14 +1,22 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppShell } from "@/components/app-shell";
-import {
-  CHILDREN,
-  ADVENTURES,
-  MOODS,
-  LESSONS,
-  LENGTHS,
-} from "@/lib/mock-data";
+import { ADVENTURES, MOODS, LESSONS, LENGTHS } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth-context";
+
+type ChildRow = { id: string; first_name: string; avatar_emoji: string | null; date_of_birth: string | null };
+function calcAge(dob: string | null) {
+  if (!dob) return null;
+  const d = new Date(dob);
+  if (isNaN(d.getTime())) return null;
+  const now = new Date();
+  let a = now.getFullYear() - d.getFullYear();
+  const m = now.getMonth() - d.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < d.getDate())) a--;
+  return a;
+}
 
 export const Route = createFileRoute("/_authenticated/create")({
   head: () => ({
@@ -26,13 +34,33 @@ const STEPS = ["Adventurer", "World", "Mood", "Lesson", "Length", "Generate"] as
 
 function CreateWizard() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [children, setChildren] = useState<ChildRow[]>([]);
   const [step, setStep] = useState(0);
-  const [child, setChild] = useState(CHILDREN[0].id);
+  const [child, setChild] = useState<string | null>(null);
   const [adventure, setAdventure] = useState<string | null>(null);
   const [mood, setMood] = useState<string | null>("bedtime");
   const [lesson, setLesson] = useState<string | null>(null);
   const [length, setLength] = useState<3 | 5 | 10>(5);
   const [generating, setGenerating] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("children")
+      .select("id, first_name, avatar_emoji, date_of_birth")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: true })
+      .then(({ data }) => {
+        const list = (data ?? []) as ChildRow[];
+        setChildren(list);
+        if (list.length === 1) setChild(list[0].id);
+        // Skip "choose child" step if only one
+        if (list.length === 1) setStep((s) => (s === 0 ? 1 : s));
+      });
+  }, [user]);
+
+  const selectedChild = children.find((c) => c.id === child);
 
   const canNext =
     (step === 0 && !!child) ||
