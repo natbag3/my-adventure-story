@@ -571,6 +571,122 @@ function skinHex(id: string) {
   return t ? t.hex : "var(--surface)";
 }
 
+function hexFrom(list: { id: string; hex: string }[], id: string, fallback: string) {
+  return list.find((x) => x.id === id)?.hex ?? fallback;
+}
+
+function CartoonFacePreview({ form }: { form: FormState }) {
+  const skin = form.skin_tone ? hexFrom(SKIN_TONES, form.skin_tone, "#f5d2a8") : "#f5d2a8";
+  const hair = form.hair_color ? hexFrom(HAIR_COLORS, form.hair_color, "#78350f") : "#78350f";
+  const eye = form.eye_color ? hexFrom(EYE_COLORS, form.eye_color, "#7c2d12") : "#7c2d12";
+  const outfit = form.outfit_color ? hexFrom(OUTFIT_COLORS, form.outfit_color, "#c4b5fd") : "#c4b5fd";
+  const style = form.hair_style;
+
+  // Hair shape variations
+  let hairShape: React.ReactNode = null;
+  if (style === "Long") {
+    hairShape = (
+      <>
+        <path d={`M30 75 Q30 30 100 28 Q170 30 170 75 L170 145 Q170 155 160 155 L150 155 L150 80 Q100 70 50 80 L50 155 L40 155 Q30 155 30 145 Z`} fill={hair} />
+        <ellipse cx="100" cy="42" rx="72" ry="32" fill={hair} />
+      </>
+    );
+  } else if (style === "Wavy") {
+    hairShape = (
+      <path d={`M30 80 Q35 35 70 32 Q85 20 100 30 Q115 20 130 32 Q165 35 170 80 Q160 70 150 78 Q140 60 125 72 Q110 55 100 70 Q90 55 75 72 Q60 60 50 78 Q40 70 30 80 Z`} fill={hair} />
+    );
+  } else if (style === "Curly") {
+    hairShape = (
+      <g fill={hair}>
+        <ellipse cx="100" cy="40" rx="70" ry="28" />
+        {[35, 55, 75, 95, 115, 135, 155, 175].map((cx) => (
+          <circle key={`t-${cx}`} cx={cx} cy={28} r={14} />
+        ))}
+        {[30, 55, 145, 170].map((cx) => (
+          <circle key={`s-${cx}`} cx={cx} cy={60} r={14} />
+        ))}
+        {[28, 172].map((cx) => (
+          <circle key={`b-${cx}`} cx={cx} cy={85} r={12} />
+        ))}
+      </g>
+    );
+  } else if (style === "Braided") {
+    hairShape = (
+      <>
+        <ellipse cx="100" cy="45" rx="70" ry="30" fill={hair} />
+        <path d="M30 70 Q20 110 28 150 L42 150 Q40 110 45 75 Z" fill={hair} />
+        <path d="M170 70 Q180 110 172 150 L158 150 Q160 110 155 75 Z" fill={hair} />
+        {[80, 105, 130].map((cy) => (
+          <g key={cy}>
+            <circle cx="32" cy={cy} r="6" fill={hair} stroke="rgba(0,0,0,0.15)" />
+            <circle cx="168" cy={cy} r="6" fill={hair} stroke="rgba(0,0,0,0.15)" />
+          </g>
+        ))}
+      </>
+    );
+  } else if (style === "Buzzed") {
+    hairShape = <path d="M35 70 Q35 38 100 35 Q165 38 165 70 L165 78 Q100 70 35 78 Z" fill={hair} opacity={0.9} />;
+  } else if (style === "Short") {
+    hairShape = <path d="M32 78 Q32 32 100 30 Q168 32 168 78 Q150 55 100 55 Q50 55 32 78 Z" fill={hair} />;
+  } else {
+    hairShape = <path d="M32 78 Q32 32 100 30 Q168 32 168 78 Q150 55 100 55 Q50 55 32 78 Z" fill={hair} opacity={0.5} />;
+  }
+
+  return (
+    <svg viewBox="0 0 200 220" className="mx-auto block h-44 w-44" aria-label="Adventurer preview">
+      {/* body */}
+      <path d={`M50 215 Q50 165 100 160 Q150 165 150 215 Z`} fill={outfit} />
+      <rect x="50" y="200" width="100" height="20" fill={outfit} />
+      {/* neck */}
+      <rect x="88" y="148" width="24" height="18" fill={skin} />
+      {/* face */}
+      <ellipse cx="100" cy="100" rx="58" ry="62" fill={skin} />
+      {/* ears */}
+      <ellipse cx="42" cy="105" rx="9" ry="13" fill={skin} />
+      <ellipse cx="158" cy="105" rx="9" ry="13" fill={skin} />
+      {/* hair */}
+      {hairShape}
+      {/* eyes */}
+      <g>
+        <ellipse cx="80" cy="105" rx="9" ry="11" fill="#ffffff" />
+        <ellipse cx="120" cy="105" rx="9" ry="11" fill="#ffffff" />
+        <circle cx="80" cy="107" r="5.5" fill={eye} />
+        <circle cx="120" cy="107" r="5.5" fill={eye} />
+        <circle cx="81.5" cy="105" r="1.6" fill="#ffffff" />
+        <circle cx="121.5" cy="105" r="1.6" fill="#ffffff" />
+      </g>
+      {/* eyebrows */}
+      <path d="M70 92 Q80 87 90 92" stroke={hair} strokeWidth="2.5" fill="none" strokeLinecap="round" />
+      <path d="M110 92 Q120 87 130 92" stroke={hair} strokeWidth="2.5" fill="none" strokeLinecap="round" />
+      {/* nose */}
+      <path d="M100 115 Q97 125 100 130" stroke="rgba(0,0,0,0.25)" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+      {/* mouth */}
+      <path d="M88 140 Q100 150 112 140" stroke="#b91c1c" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+      {/* freckles */}
+      {form.freckles && (
+        <g fill="#7c4a2a" opacity={0.75}>
+          {[
+            [72, 122], [78, 127], [70, 130],
+            [122, 127], [128, 122], [130, 130],
+          ].map(([cx, cy], i) => (
+            <circle key={i} cx={cx} cy={cy} r={1.6} />
+          ))}
+        </g>
+      )}
+      {/* glasses */}
+      {form.glasses && (
+        <g stroke="#1f2937" strokeWidth="2.2" fill="none">
+          <circle cx="80" cy="106" r="14" />
+          <circle cx="120" cy="106" r="14" />
+          <path d="M94 106 L106 106" />
+          <path d="M66 106 L52 102" />
+          <path d="M134 106 L148 102" />
+        </g>
+      )}
+    </svg>
+  );
+}
+
 function ScreenPersonality({
   form, setForm, toggleTrait, onNext,
 }: {
