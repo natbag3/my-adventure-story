@@ -134,6 +134,19 @@ function CreateWizard() {
     }
   }
 
+  if (generating) {
+    return (
+      <AppShell>
+        <StoryPreparation
+          total={prepTotal}
+          done={prepDone}
+          stage={prepStage}
+          childName={selectedChild?.first_name ?? "your adventurer"}
+        />
+      </AppShell>
+    );
+  }
+
   return (
     <AppShell>
       <header className="mb-8 animate-slide-up">
