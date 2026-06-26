@@ -131,9 +131,9 @@ function AdventurersPage() {
                   <h3 className="font-display text-2xl text-foreground">{c.first_name}</h3>
                   {c.nickname && <p className="text-xs text-foreground/55">aka {c.nickname}</p>}
                   <p className="mt-2 text-sm text-foreground/55">
-                    {c.favorite_animal && `Loves ${c.favorite_animal.toLowerCase()}`}
-                    {c.favorite_food && `, ${c.favorite_food.toLowerCase()}`}
-                    {c.favorite_color && ` & ${c.favorite_color.toLowerCase()} skies.`}
+                    {c.favorite_animals?.length > 0 && `Loves ${c.favorite_animals.slice(0, 2).join(" & ").toLowerCase()}`}
+                    {c.favorite_foods?.length > 0 && `, ${c.favorite_foods[0].toLowerCase()}`}
+                    {c.favorite_colors?.length > 0 && ` & ${c.favorite_colors[0].toLowerCase()} skies.`}
                   </p>
 
                   <div className="mt-4 flex flex-wrap gap-2">
