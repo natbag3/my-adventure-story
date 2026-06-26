@@ -40,6 +40,14 @@ export const Route = createFileRoute("/_authenticated/create")({
 
 const STEPS = ["Stars", "World", "Mood", "Lesson", "Length", "Generate"] as const;
 
+type PetRow = {
+  id: string;
+  name: string;
+  type: "cat" | "dog";
+  fur_color: string | null;
+  eye_color: string | null;
+};
+
 function CreateWizard() {
   const navigate = useNavigate();
   const { children, activeChild } = useActiveChild();
@@ -48,6 +56,8 @@ function CreateWizard() {
   const [primaryId, setPrimaryId] = useState<string | null>(null);
   const [mode, setMode] = useState<"solo" | "multi">("solo");
   const [coStarIds, setCoStarIds] = useState<string[]>([]);
+  const [petIds, setPetIds] = useState<string[]>([]);
+  const [pets, setPets] = useState<PetRow[]>([]);
   const [adventure, setAdventure] = useState<string | null>(null);
   const [mood, setMood] = useState<string | null>("bedtime");
   const [lesson, setLesson] = useState<string | null>(null);
@@ -59,6 +69,22 @@ function CreateWizard() {
   const [error, setError] = useState<string | null>(null);
   const generateFn = useServerFn(generateStory);
   const generateImageFn = useServerFn(generateStoryPageImage);
+
+  // Fetch the user's pets once.
+  useEffect(() => {
+    let cancelled = false;
+    supabase
+      .from("pets")
+      .select("id, name, type, fur_color, eye_color")
+      .order("created_at", { ascending: true })
+      .then(({ data }) => {
+        if (cancelled) return;
+        setPets((data ?? []) as PetRow[]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Default the primary star to the currently active adventurer.
   useEffect(() => {
@@ -105,6 +131,7 @@ function CreateWizard() {
           mood: moodLabel,
           lesson: lessonLabel,
           lengthMinutes: length,
+          petIds,
         },
       });
 
@@ -290,6 +317,65 @@ function CreateWizard() {
                 Tap a card to add a co-star. Double-tap to make them the main hero.
               </p>
             )}
+
+            <div className="mt-10">
+              <p className="mb-1 font-mono text-[10px] uppercase tracking-widest text-foreground/45">
+                Add a pet sidekick
+              </p>
+              <p className="mb-3 text-xs text-foreground/50">
+                Pets can join as sidekicks but never as the main hero.
+              </p>
+              {pets.length === 0 ? (
+                <Link
+                  to="/adventurers/new-pet"
+                  className="inline-flex items-center gap-2 rounded-full border border-dashed border-hairline px-4 py-2 text-sm text-foreground/65 hover:text-foreground"
+                >
+                  🐾 Add your first pet
+                </Link>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {pets.map((p) => {
+                    const selected = petIds.includes(p.id);
+                    return (
+                      <button
+                        key={p.id}
+                        onClick={() =>
+                          setPetIds((cur) =>
+                            cur.includes(p.id) ? cur.filter((x) => x !== p.id) : [...cur, p.id],
+                          )
+                        }
+                        className={cn(
+                          "flex items-center gap-3 rounded-2xl border p-4 text-left transition-all",
+                          selected
+                            ? "border-mint/60 bg-mint/10"
+                            : "border-hairline bg-surface-elevated hover:border-foreground/30",
+                        )}
+                      >
+                        <span className="grid size-12 place-items-center rounded-full bg-paper text-2xl shadow-sm">
+                          {p.type === "cat" ? "🐱" : "🐶"}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-display text-base text-foreground truncate">{p.name}</p>
+                          <p className="text-[11px] text-foreground/55 flex items-center gap-1.5">
+                            {p.fur_color && (
+                              <>
+                                <span className="size-2.5 rounded-full bg-foreground/20" />
+                                {p.fur_color}
+                              </>
+                            )}
+                          </p>
+                        </div>
+                        {selected && (
+                          <span className="rounded-full bg-mint/20 px-2 py-0.5 text-[10px] font-mono uppercase tracking-widest text-mint">
+                            Sidekick
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </StepWrap>
         )}
 

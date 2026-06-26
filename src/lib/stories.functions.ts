@@ -5,6 +5,7 @@ import { z } from "zod";
 const GenerateInput = z.object({
   childId: z.string().uuid(),
   coStarIds: z.array(z.string().uuid()).optional().default([]),
+  petIds: z.array(z.string().uuid()).optional().default([]),
   theme: z.string().min(1),
   mood: z.string().min(1),
   lesson: z.string().min(1),
@@ -90,9 +91,20 @@ export const generateStory = createServerFn({ method: "POST" })
 
     const pageCount = data.lengthMinutes === 3 ? 8 : data.lengthMinutes === 5 ? 12 : 18;
 
+    let pets: Array<{ name: string; type: string; fur_color: string | null; eye_color: string | null }> = [];
+    if (data.petIds.length > 0) {
+      const { data: petRows } = await supabase
+        .from("pets")
+        .select("name, type, fur_color, eye_color")
+        .in("id", data.petIds)
+        .eq("user_id", userId);
+      pets = petRows ?? [];
+    }
+
     const profile = {
       primary_hero: summariseChild(primary),
       co_stars: coStars.map(summariseChild),
+      pet_sidekicks: pets,
     };
 
     const systemPrompt = `You are a world-class children's picture book author for Adventure Club, writing in the rhythm and style of Julia Donaldson (The Gruffalo, Room on the Broom) and Lynley Dodd (Hairy Maclary). You craft magical, gently rhyming bedtime picture books — short, lyrical, easy to read aloud. The named child(ren) are ALWAYS the heroes. You silently follow a two-stage process and only return the final story as valid JSON. No markdown. No commentary.`;
@@ -102,11 +114,19 @@ export const generateStory = createServerFn({ method: "POST" })
         ? `\nMULTI-HERO STORY: ${heroLabel} go on this adventure TOGETHER. Each child appears on most pages, with their own moments to shine. Use each child's gender pronouns correctly (girl → she/her, boy → he/him). Keep every child's appearance and personality consistent across pages.\n`
         : "";
 
+    const petNote =
+      pets.length > 0
+        ? `\nPET SIDEKICK(S): ${pets
+            .map((p) => `${p.name} the ${p.fur_color ?? ""} ${p.type}${p.eye_color ? ` with ${p.eye_color} eyes` : ""}`.replace(/\s+/g, " ").trim())
+            .join(", ")} join${pets.length === 1 ? "s" : ""} the adventure as a loyal sidekick. Include the pet by name on most pages. Keep the pet's fur colour and eye colour consistent in every illustration. The pet is a sidekick — never the main hero.\n`
+        : "";
+
+
     const userPrompt = `Write a personalised rhyming bedtime picture book.
 
 HERO PROFILE(S):
 ${JSON.stringify(profile, null, 2)}
-${multiNote}
+${multiNote}${petNote}
 STORY SETTINGS:
 - Theme: ${data.theme}
 - Mood: ${data.mood}
