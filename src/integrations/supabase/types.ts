@@ -110,6 +110,36 @@ export type Database = {
         }
         Relationships: []
       }
+      pets: {
+        Row: {
+          created_at: string
+          eye_color: string | null
+          fur_color: string | null
+          id: string
+          name: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          eye_color?: string | null
+          fur_color?: string | null
+          id?: string
+          name: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          eye_color?: string | null
+          fur_color?: string | null
+          id?: string
+          name?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           active_child_id: string | null
