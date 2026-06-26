@@ -77,7 +77,6 @@ export const generateChildPortrait = createServerFn({ method: "POST" })
         model: "dall-e-3",
         prompt,
         size: "1024x1024",
-        response_format: "b64_json",
         n: 1,
       }),
     });
@@ -88,10 +87,17 @@ export const generateChildPortrait = createServerFn({ method: "POST" })
     }
 
     const aiJson = await aiRes.json();
-    const b64: string | undefined = aiJson?.data?.[0]?.b64_json;
-    if (!b64) throw new Error("Portrait generation returned no image.");
-
-    const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+    const first = aiJson?.data?.[0] ?? {};
+    let bytes: Uint8Array;
+    if (first.b64_json) {
+      bytes = Uint8Array.from(atob(first.b64_json), (c) => c.charCodeAt(0));
+    } else if (first.url) {
+      const imgRes = await fetch(first.url);
+      if (!imgRes.ok) throw new Error(`Could not download portrait: ${imgRes.status}`);
+      bytes = new Uint8Array(await imgRes.arrayBuffer());
+    } else {
+      throw new Error("Portrait generation returned no image.");
+    }
     const path = `${userId}/portraits/${data.childId}.png`;
 
     const { error: upErr } = await supabase.storage
