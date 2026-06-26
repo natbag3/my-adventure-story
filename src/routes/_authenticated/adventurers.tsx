@@ -57,27 +57,45 @@ function AdventurersPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [children, setChildren] = useState<ChildRow[]>([]);
+  const [pets, setPets] = useState<PetRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
     setLoading(true);
-    supabase
-      .from("children")
-      .select("id, first_name, nickname, avatar_emoji, portrait_url, date_of_birth, personality_traits, favorite_animals, favorite_foods, favorite_colors, hair_color, eye_color")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: true })
-      .then(({ data, error }) => {
-        if (cancelled) return;
-        if (error) toast.error(error.message);
-        setChildren((data ?? []) as ChildRow[]);
-        setLoading(false);
-      });
+    Promise.all([
+      supabase
+        .from("children")
+        .select("id, first_name, nickname, avatar_emoji, portrait_url, date_of_birth, personality_traits, favorite_animals, favorite_foods, favorite_colors, hair_color, eye_color")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: true }),
+      supabase
+        .from("pets")
+        .select("id, name, type, fur_color, eye_color")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: true }),
+    ]).then(([cRes, pRes]) => {
+      if (cancelled) return;
+      if (cRes.error) toast.error(cRes.error.message);
+      if (pRes.error) toast.error(pRes.error.message);
+      setChildren((cRes.data ?? []) as ChildRow[]);
+      setPets((pRes.data ?? []) as PetRow[]);
+      setLoading(false);
+    });
     return () => {
       cancelled = true;
     };
   }, [user]);
+
+  async function deletePet(id: string, name: string) {
+    if (!confirm(`Remove ${name}? This can't be undone.`)) return;
+    const { error } = await supabase.from("pets").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    setPets((ps) => ps.filter((p) => p.id !== id));
+    toast.success(`${name} removed`);
+  }
+
 
   async function deleteChild(id: string, name: string) {
     if (!confirm(`Remove ${name}'s profile? This can't be undone.`)) return;
