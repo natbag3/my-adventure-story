@@ -12,13 +12,6 @@ export const Route = createFileRoute("/_authenticated/settings")({
   component: SettingsPage,
 });
 
-function genderEmoji(g: string | null | undefined) {
-  const v = (g ?? "").toLowerCase();
-  if (v === "boy") return "👦";
-  if (v === "girl") return "👧";
-  return "🧒";
-}
-
 const VOICES = [
   { id: "cgSgspJ2msm6clMCkdW9", flag: "🇺🇸", label: "Jessica", sub: "US · Female" },
   { id: "pNInz6obpgDQGcFmaJgB", flag: "🇺🇸", label: "Adam", sub: "US · Male" },
@@ -221,7 +214,7 @@ function SettingsPage() {
                     </span>
                     <div className="flex-1 min-w-0">
                       <p className="font-display text-base text-foreground truncate">
-                        {genderEmoji(c.gender)} {c.first_name}
+                        {c.first_name}
                         {active && (
                           <span className="ml-2 align-middle text-[10px] uppercase tracking-widest text-star">
                             ● Active

@@ -139,13 +139,6 @@ function getSeasonalOptions(dobIso: string | null | undefined, now: Date = new D
 }
 
 
-function genderEmoji(g: string | null | undefined) {
-  const v = (g ?? "").toLowerCase();
-  if (v === "boy") return "👦";
-  if (v === "girl") return "👧";
-  return "🧒";
-}
-
 export const Route = createFileRoute("/_authenticated/create")({
   head: () => ({
     meta: [
@@ -453,7 +446,7 @@ function CreateWizard() {
                       <CharacterAvatar portraitPath={c.portrait_url} alt={c.first_name} className="size-full" />
                     </span>
                     <span className="font-display text-lg text-foreground">
-                      {genderEmoji(c.gender)} {c.first_name}
+                      {c.first_name}
                     </span>
                     {age != null && <span className="text-xs text-foreground/55">Age {age}</span>}
                     {isPrimary && (

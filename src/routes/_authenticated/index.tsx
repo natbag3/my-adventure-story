@@ -34,13 +34,6 @@ export const Route = createFileRoute("/_authenticated/")({
   component: HomePage,
 });
 
-function genderEmoji(g: string | null | undefined) {
-  const v = (g ?? "").toLowerCase();
-  if (v === "boy") return "👦";
-  if (v === "girl") return "👧";
-  return "🧒";
-}
-
 function HomePage() {
   const { user } = useAuth();
   const { activeChild, children } = useActiveChild();
@@ -270,7 +263,7 @@ function ChildPills() {
               />
             </span>
             <span>
-              {genderEmoji(c.gender)} {c.first_name}
+              {c.first_name}
             </span>
           </button>
         );

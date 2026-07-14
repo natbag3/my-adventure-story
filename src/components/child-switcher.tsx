@@ -4,13 +4,6 @@ import { useActiveChild } from "@/lib/active-child-context";
 import { CharacterAvatar } from "@/components/character-avatar";
 import { cn } from "@/lib/utils";
 
-function genderEmoji(g: string | null | undefined) {
-  const v = (g ?? "").toLowerCase();
-  if (v === "boy") return "👦";
-  if (v === "girl") return "👧";
-  return "🧒";
-}
-
 export function ChildSwitcher({ className }: { className?: string }) {
   const { children, activeChild, setActiveChildId } = useActiveChild();
   const [open, setOpen] = useState(false);
@@ -71,7 +64,7 @@ export function ChildSwitcher({ className }: { className?: string }) {
                 </span>
                 <span className="flex-1">
                   <span className="block text-sm font-medium text-foreground">
-                    {genderEmoji(c.gender)} {c.first_name}
+                    {c.first_name}
                   </span>
                   {c.nickname && (
                     <span className="block text-[11px] text-foreground/50">
