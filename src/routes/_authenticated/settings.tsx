@@ -153,6 +153,44 @@ function SettingsPage() {
           </div>
         </Card>
 
+        {/* Narration voice (premium only) */}
+        {isPremium && (
+          <Card
+            title="🔊 Narration Voice"
+            subtitle="Choose the voice used to read stories aloud."
+          >
+            <div className="grid grid-cols-2 gap-3">
+              {VOICES.map((v) => {
+                const selected = preferredVoice === v.id;
+                return (
+                  <button
+                    key={v.id}
+                    onClick={() => pickVoice(v.id)}
+                    disabled={savingVoice !== null}
+                    className={
+                      "flex items-center gap-3 rounded-2xl border p-4 text-left transition-colors " +
+                      (selected
+                        ? "border-star/60 bg-star/10"
+                        : "border-hairline bg-surface-elevated hover:border-lavender/40")
+                    }
+                  >
+                    <span className="text-2xl">{v.flag}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-display text-base text-foreground">{v.label}</p>
+                      <p className="text-xs text-foreground/50">{v.sub}</p>
+                    </div>
+                    {selected && (
+                      <span className="text-[10px] font-mono uppercase tracking-widest text-star">
+                        ● Active
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </Card>
+        )}
+
         {/* Children */}
         <Card
           title="🧒 Children"
