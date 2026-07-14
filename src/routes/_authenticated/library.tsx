@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { useActiveChild } from "@/lib/active-child-context";
 import { StreakBadge } from "@/components/streak-badge";
+import { StoryBookModal } from "@/components/story-book-modal";
 
 type StoryRow = {
   id: string;
@@ -52,6 +53,7 @@ function LibraryPage() {
   const [scope, setScope] = useState<"active" | "all">("active");
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [bookOpen, setBookOpen] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -143,7 +145,26 @@ function LibraryPage() {
         >
           ★ Favorites
         </button>
+        {activeChild &&
+          stories.filter((s) => s.child_id === activeChild.id).length >= 5 && (
+            <button
+              onClick={() => setBookOpen(true)}
+              className="rounded-full border border-lavender/40 bg-lavender/10 px-4 py-3 text-sm font-medium text-lavender hover:bg-lavender/20 transition-colors"
+            >
+              📚 Create Story Book
+            </button>
+          )}
       </div>
+
+      {activeChild && (
+        <StoryBookModal
+          open={bookOpen}
+          onOpenChange={setBookOpen}
+          childId={activeChild.id}
+          childName={activeChild.first_name}
+          stories={stories.filter((s) => s.child_id === activeChild.id)}
+        />
+      )}
 
       {visibleSeries.length > 0 && (
         <section className="mb-10 animate-slide-up">
