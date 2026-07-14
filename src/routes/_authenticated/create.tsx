@@ -136,6 +136,8 @@ function getSeasonalOptions(dobIso: string | null | undefined, now: Date = new D
       unlockLabel: birthdayUnlock,
     },
   ];
+}
+
 
 function genderEmoji(g: string | null | undefined) {
   const v = (g ?? "").toLowerCase();
