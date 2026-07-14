@@ -270,7 +270,7 @@ function ChildPills() {
               />
             </span>
             <span>
-              {genderEmoji(c.gender)} {c.first_name}
+              {c.first_name}
             </span>
           </button>
         );

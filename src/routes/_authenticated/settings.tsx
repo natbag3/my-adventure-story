@@ -221,7 +221,7 @@ function SettingsPage() {
                     </span>
                     <div className="flex-1 min-w-0">
                       <p className="font-display text-base text-foreground truncate">
-                        {genderEmoji(c.gender)} {c.first_name}
+                        {c.first_name}
                         {active && (
                           <span className="ml-2 align-middle text-[10px] uppercase tracking-widest text-star">
                             ● Active
