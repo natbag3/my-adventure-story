@@ -21,6 +21,16 @@ type StoryRow = {
   favorite: boolean;
   created_at: string;
   child_id: string;
+  series_id: string | null;
+  series_part: number | null;
+};
+
+type SeriesRow = {
+  id: string;
+  title: string;
+  total_parts: number;
+  current_part: number;
+  child_id: string;
 };
 
 export const Route = createFileRoute("/_authenticated/library")({
