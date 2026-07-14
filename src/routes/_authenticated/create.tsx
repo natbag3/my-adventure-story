@@ -387,7 +387,10 @@ function CreateWizard() {
               {ADVENTURES.map((a) => (
                 <button
                   key={a.id}
-                  onClick={() => setAdventure(a.id)}
+                  onClick={() => {
+                    setAdventure(a.id);
+                    setStep(2);
+                  }}
                   className={cn(
                     "flex flex-col items-center gap-2 rounded-2xl border p-4 transition-all hover:-translate-y-0.5",
                     adventure === a.id
@@ -409,7 +412,10 @@ function CreateWizard() {
               {MOODS.map((m) => (
                 <button
                   key={m.id}
-                  onClick={() => setMood(m.id)}
+                  onClick={() => {
+                    setMood(m.id);
+                    setStep(3);
+                  }}
                   className={cn(
                     "flex items-center gap-3 rounded-2xl border p-5 text-left transition-all",
                     mood === m.id
@@ -431,7 +437,10 @@ function CreateWizard() {
               {LESSONS.map((l) => (
                 <button
                   key={l.id}
-                  onClick={() => setLesson(l.id)}
+                  onClick={() => {
+                    setLesson(l.id);
+                    setStep(4);
+                  }}
                   className={cn(
                     "flex flex-col items-center gap-2 rounded-2xl border p-4 transition-all hover:-translate-y-0.5",
                     lesson === l.id
