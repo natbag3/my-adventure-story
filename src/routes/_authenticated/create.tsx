@@ -412,7 +412,10 @@ function CreateWizard() {
               {MOODS.map((m) => (
                 <button
                   key={m.id}
-                  onClick={() => setMood(m.id)}
+                  onClick={() => {
+                    setMood(m.id);
+                    setStep(3);
+                  }}
                   className={cn(
                     "flex items-center gap-3 rounded-2xl border p-5 text-left transition-all",
                     mood === m.id
