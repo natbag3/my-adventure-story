@@ -39,6 +39,7 @@ function StoryReader() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
   const generateImageFn = useServerFn(generateStoryPageImage);
+  const { refresh: refreshChildren } = useActiveChild();
   const [story, setStory] = useState<StoryRow | null>(null);
   const [childName, setChildName] = useState<string>("");
   const [loading, setLoading] = useState(true);
