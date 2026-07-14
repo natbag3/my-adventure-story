@@ -265,8 +265,19 @@ function StoryReader() {
 
 
 
+  const progress = Math.min(1, Math.max(0, page / (totalPages + 1)));
+
   return (
     <AppShell>
+      <div
+        aria-hidden
+        className="fixed left-0 right-0 top-16 z-30 h-[3px] bg-background/60"
+      >
+        <div
+          className="h-full bg-primary transition-[width] duration-500 ease-out"
+          style={{ width: `${progress * 100}%` }}
+        />
+      </div>
       <div className="mb-6 flex items-center justify-between animate-fade-in">
         <Link to="/library" className="text-xs text-foreground/55 hover:text-foreground">← Library</Link>
         <div className="flex items-center gap-2">
