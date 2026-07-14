@@ -24,6 +24,7 @@ import { Route as AuthenticatedAdventurersRouteImport } from './routes/_authenti
 import { Route as AuthenticatedStoryIdRouteImport } from './routes/_authenticated/story.$id'
 import { Route as AuthenticatedPetsNewRouteImport } from './routes/_authenticated/pets.new'
 import { Route as AuthenticatedAdventurersNewRouteImport } from './routes/_authenticated/adventurers.new'
+import { Route as ApiPublicHooksWeeklyDigestRouteImport } from './routes/api/public/hooks/weekly-digest'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -102,6 +103,12 @@ const AuthenticatedAdventurersNewRoute =
     path: '/new',
     getParentRoute: () => AuthenticatedAdventurersRoute,
   } as any)
+const ApiPublicHooksWeeklyDigestRoute =
+  ApiPublicHooksWeeklyDigestRouteImport.update({
+    id: '/api/public/hooks/weekly-digest',
+    path: '/api/public/hooks/weekly-digest',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
@@ -118,6 +125,7 @@ export interface FileRoutesByFullPath {
   '/adventurers/new': typeof AuthenticatedAdventurersNewRoute
   '/pets/new': typeof AuthenticatedPetsNewRoute
   '/story/$id': typeof AuthenticatedStoryIdRoute
+  '/api/public/hooks/weekly-digest': typeof ApiPublicHooksWeeklyDigestRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
@@ -134,6 +142,7 @@ export interface FileRoutesByTo {
   '/adventurers/new': typeof AuthenticatedAdventurersNewRoute
   '/pets/new': typeof AuthenticatedPetsNewRoute
   '/story/$id': typeof AuthenticatedStoryIdRoute
+  '/api/public/hooks/weekly-digest': typeof ApiPublicHooksWeeklyDigestRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -152,6 +161,7 @@ export interface FileRoutesById {
   '/_authenticated/adventurers/new': typeof AuthenticatedAdventurersNewRoute
   '/_authenticated/pets/new': typeof AuthenticatedPetsNewRoute
   '/_authenticated/story/$id': typeof AuthenticatedStoryIdRoute
+  '/api/public/hooks/weekly-digest': typeof ApiPublicHooksWeeklyDigestRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -170,6 +180,7 @@ export interface FileRouteTypes {
     | '/adventurers/new'
     | '/pets/new'
     | '/story/$id'
+    | '/api/public/hooks/weekly-digest'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
@@ -186,6 +197,7 @@ export interface FileRouteTypes {
     | '/adventurers/new'
     | '/pets/new'
     | '/story/$id'
+    | '/api/public/hooks/weekly-digest'
   id:
     | '__root__'
     | '/_authenticated'
@@ -203,12 +215,14 @@ export interface FileRouteTypes {
     | '/_authenticated/adventurers/new'
     | '/_authenticated/pets/new'
     | '/_authenticated/story/$id'
+    | '/api/public/hooks/weekly-digest'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   ShareTokenRoute: typeof ShareTokenRoute
+  ApiPublicHooksWeeklyDigestRoute: typeof ApiPublicHooksWeeklyDigestRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -318,6 +332,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdventurersNewRouteImport
       parentRoute: typeof AuthenticatedAdventurersRoute
     }
+    '/api/public/hooks/weekly-digest': {
+      id: '/api/public/hooks/weekly-digest'
+      path: '/api/public/hooks/weekly-digest'
+      fullPath: '/api/public/hooks/weekly-digest'
+      preLoaderRoute: typeof ApiPublicHooksWeeklyDigestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -370,6 +391,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   ShareTokenRoute: ShareTokenRoute,
+  ApiPublicHooksWeeklyDigestRoute: ApiPublicHooksWeeklyDigestRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
