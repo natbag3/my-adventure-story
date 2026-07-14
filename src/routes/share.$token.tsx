@@ -2,7 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useState } from "react";
 import { StoryCover } from "@/components/cover";
 import { cn } from "@/lib/utils";
-import { getSharedStory } from "@/lib/shared-story.functions";
+import { getSharedStory, type SharedStory } from "@/lib/shared-story.functions";
 
 export const Route = createFileRoute("/share/$token")({
   head: ({ loaderData }) => {
