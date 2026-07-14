@@ -82,6 +82,11 @@ function HomePage() {
           <span className="inline-block animate-float">🌙</span>
         </h1>
         <p className="mb-6 text-foreground/65 text-lg">Ready for tonight's adventure?</p>
+        {activeChild && activeChild.streak_count > 0 && (
+          <div className="mb-6">
+            <StreakBadge count={activeChild.streak_count} />
+          </div>
+        )}
 
         <div className="mb-7 flex flex-wrap items-center gap-3">
           <ChildSwitcher />
