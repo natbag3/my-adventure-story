@@ -43,7 +43,9 @@ function StoryReader() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
   const generateImageFn = useServerFn(generateStoryPageImage);
+  const generateAudioFn = useServerFn(generateStoryPageAudio);
   const { refresh: refreshChildren } = useActiveChild();
+  const { user } = useAuth();
   const [story, setStory] = useState<StoryRow | null>(null);
   const [childName, setChildName] = useState<string>("");
   const [loading, setLoading] = useState(true);
@@ -52,6 +54,24 @@ function StoryReader() {
   const [notFound, setNotFound] = useState(false);
   const [page, setPage] = useState(0);
   const [favorite, setFavorite] = useState(false);
+  const [isPremium, setIsPremium] = useState(false);
+  const [playingIdx, setPlayingIdx] = useState<number | null>(null);
+  const [loadingAudioIdx, setLoadingAudioIdx] = useState<number | null>(null);
+  const audioCacheRef = useRef<Map<number, string>>(new Map());
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("profiles")
+      .select("is_premium")
+      .eq("id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        setIsPremium(!!(data as { is_premium?: boolean } | null)?.is_premium);
+      });
+  }, [user]);
+
 
   useEffect(() => {
     let cancelled = false;
