@@ -415,3 +415,48 @@ function IconBtn({
     </button>
   );
 }
+
+function NarrationButton({
+  isPremium,
+  isPlaying,
+  isLoading,
+  onClick,
+}: {
+  isPremium: boolean;
+  isPlaying: boolean;
+  isLoading: boolean;
+  onClick: () => void;
+}) {
+  if (!isPremium) {
+    return (
+      <button
+        type="button"
+        title="Upgrade to hear your story narrated ✨"
+        aria-label="Upgrade to hear your story narrated"
+        onClick={() => toast("Upgrade to hear your story narrated ✨")}
+        className="inline-flex items-center gap-2 rounded-full border border-ink/15 bg-ink/5 px-4 py-2 text-sm font-medium text-ink/40 cursor-not-allowed"
+      >
+        <span className="text-lg">🔊</span>
+        <span>Narrate</span>
+      </button>
+    );
+  }
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={isLoading}
+      aria-label={isPlaying ? "Pause narration" : "Play narration"}
+      className={cn(
+        "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-colors",
+        isPlaying
+          ? "border-star/60 bg-star/15 text-star"
+          : "border-ink/15 bg-paper text-ink hover:bg-ink/5",
+        isLoading && "opacity-70",
+      )}
+    >
+      <span className="text-lg">{isLoading ? "⏳" : isPlaying ? "⏸️" : "🔊"}</span>
+      <span>{isLoading ? "Loading…" : isPlaying ? "Pause" : "Listen"}</span>
+    </button>
+  );
+}
