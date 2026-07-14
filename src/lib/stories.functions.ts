@@ -147,7 +147,7 @@ ${worldNotes ? worldNotes + "\n" : ""}${pastSummaries.length > 0 ? `Recent adven
 
 HERO PROFILE(S):
 ${JSON.stringify(profile, null, 2)}
-${multiNote}${petNote}
+${multiNote}${petNote}${universeSection}
 STORY SETTINGS:
 - Theme: ${data.theme}
 - Mood: ${data.mood}
