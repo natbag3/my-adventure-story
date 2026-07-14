@@ -108,12 +108,10 @@ export const generateStoryPageImage = createServerFn({ method: "POST" })
       .upload(path, bytes, { contentType: "image/png", upsert: true });
     if (upErr) throw new Error(`Could not store illustration: ${upErr.message}`);
 
-    const nextPages = pages.map((p, i) => (i === data.pageIndex ? { ...p, image_url: path } : p));
-    const { error: updErr } = await supabase
-      .from("stories")
-      .update({ pages: nextPages as unknown as never })
-      .eq("id", data.storyId)
-      .eq("user_id", userId);
+    const { error: updErr } = await supabase.rpc(
+      "set_story_page_image_url" as never,
+      { p_story_id: data.storyId, p_page_index: data.pageIndex, p_image_url: path } as never,
+    );
     if (updErr) throw new Error(`Could not save illustration reference: ${updErr.message}`);
 
     return { imagePath: path };
