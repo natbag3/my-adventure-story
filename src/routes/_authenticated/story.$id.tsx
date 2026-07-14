@@ -24,6 +24,7 @@ type StoryRow = {
   pages: StoryPage[];
   favorite: boolean;
   child_id: string;
+  share_token: string;
 };
 
 export const Route = createFileRoute("/_authenticated/story/$id")({
