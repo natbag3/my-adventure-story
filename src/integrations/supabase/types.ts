@@ -34,6 +34,7 @@ export type Database = {
           hair_color: string | null
           hair_style: string | null
           id: string
+          last_story_read_date: string | null
           learning_goals: string[]
           nickname: string | null
           outfit_color: string | null
@@ -43,6 +44,7 @@ export type Database = {
           reference_photo_url: string | null
           shoes: string | null
           skin_tone: string | null
+          streak_count: number
           updated_at: string
           user_id: string
           world_notes: string | null
@@ -66,6 +68,7 @@ export type Database = {
           hair_color?: string | null
           hair_style?: string | null
           id?: string
+          last_story_read_date?: string | null
           learning_goals?: string[]
           nickname?: string | null
           outfit_color?: string | null
@@ -75,6 +78,7 @@ export type Database = {
           reference_photo_url?: string | null
           shoes?: string | null
           skin_tone?: string | null
+          streak_count?: number
           updated_at?: string
           user_id: string
           world_notes?: string | null
@@ -98,6 +102,7 @@ export type Database = {
           hair_color?: string | null
           hair_style?: string | null
           id?: string
+          last_story_read_date?: string | null
           learning_goals?: string[]
           nickname?: string | null
           outfit_color?: string | null
@@ -107,6 +112,7 @@ export type Database = {
           reference_photo_url?: string | null
           shoes?: string | null
           skin_tone?: string | null
+          streak_count?: number
           updated_at?: string
           user_id?: string
           world_notes?: string | null
@@ -251,6 +257,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      bump_reading_streak: {
+        Args: { p_child_id: string }
+        Returns: {
+          last_story_read_date: string
+          streak_count: number
+        }[]
+      }
       set_story_page_image_url: {
         Args: { p_image_url: string; p_page_index: number; p_story_id: string }
         Returns: undefined
