@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/auth-context";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_authenticated/adventurers/new-pet")({
+export const Route = createFileRoute("/_authenticated/pets/new")({
   head: () => ({
     meta: [
       { title: "Add a Pet Sidekick — Adventure Club" },
