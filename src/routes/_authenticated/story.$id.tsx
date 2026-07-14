@@ -157,12 +157,8 @@ function StoryReader() {
   const storyPageIdx = page - 1; // 0-based index into pages[]
   const currentPage = !isCover && !isEnd ? story.pages[storyPageIdx] : null;
 
-  useEffect(() => {
-    if (isEnd && story) {
-      void bumpReadingStreak(story.child_id).then(() => refreshChildren());
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEnd, story?.id]);
+
+
 
   return (
     <AppShell>
