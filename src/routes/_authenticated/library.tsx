@@ -53,6 +53,7 @@ function LibraryPage() {
   const [scope, setScope] = useState<"active" | "all">("active");
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [bookOpen, setBookOpen] = useState(false);
 
   useEffect(() => {
     if (!user) return;
