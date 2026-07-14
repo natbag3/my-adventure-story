@@ -99,7 +99,7 @@ export const generateStoryPageAudio = createServerFn({ method: "POST" })
       );
       const { error: updErr } = await supabase
         .from("stories")
-        .update({ pages: updatedPages })
+        .update({ pages: updatedPages as unknown as never })
         .eq("id", data.storyId)
         .eq("user_id", userId);
       if (updErr) throw new Error(`Could not save narration reference: ${updErr.message}`);
