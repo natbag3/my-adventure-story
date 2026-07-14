@@ -245,7 +245,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      set_story_page_image_url: {
+        Args: { p_image_url: string; p_page_index: number; p_story_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
