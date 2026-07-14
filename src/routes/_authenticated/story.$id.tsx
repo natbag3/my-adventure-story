@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/app-shell";
 import { StoryCover } from "@/components/cover";
@@ -7,11 +7,13 @@ import { StoryImage } from "@/components/story-image";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { generateStoryPageImage } from "@/lib/story-images.functions";
+import { generateStoryPageAudio } from "@/lib/story-audio.functions";
 import { bumpReadingStreak } from "@/lib/streak";
 import { useActiveChild } from "@/lib/active-child-context";
+import { useAuth } from "@/lib/auth-context";
 import { toast } from "sonner";
 
-type StoryPage = { text: string; illustration_prompt?: string; image_url?: string | null };
+type StoryPage = { text: string; illustration_prompt?: string; image_url?: string | null; audio_url?: string | null };
 type StoryRow = {
   id: string;
   title: string;
@@ -41,7 +43,9 @@ function StoryReader() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
   const generateImageFn = useServerFn(generateStoryPageImage);
+  const generateAudioFn = useServerFn(generateStoryPageAudio);
   const { refresh: refreshChildren } = useActiveChild();
+  const { user } = useAuth();
   const [story, setStory] = useState<StoryRow | null>(null);
   const [childName, setChildName] = useState<string>("");
   const [loading, setLoading] = useState(true);
@@ -50,6 +54,24 @@ function StoryReader() {
   const [notFound, setNotFound] = useState(false);
   const [page, setPage] = useState(0);
   const [favorite, setFavorite] = useState(false);
+  const [isPremium, setIsPremium] = useState(false);
+  const [playingIdx, setPlayingIdx] = useState<number | null>(null);
+  const [loadingAudioIdx, setLoadingAudioIdx] = useState<number | null>(null);
+  const audioCacheRef = useRef<Map<number, string>>(new Map());
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("profiles")
+      .select("is_premium")
+      .eq("id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        setIsPremium(!!(data as { is_premium?: boolean } | null)?.is_premium);
+      });
+  }, [user]);
+
 
   useEffect(() => {
     let cancelled = false;
@@ -138,6 +160,76 @@ function StoryReader() {
       toast.error("Couldn't copy link", { description: url });
     }
   }
+
+
+  async function ensureAudioUrl(pageIdx: number): Promise<string> {
+    const cached = audioCacheRef.current.get(pageIdx);
+    if (cached) return cached;
+    const res = await generateAudioFn({ data: { storyId: id, pageIndex: pageIdx } });
+    audioCacheRef.current.set(pageIdx, res.audioUrl);
+    return res.audioUrl;
+  }
+
+  function stopPlayback() {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = "";
+      audioRef.current = null;
+    }
+    setPlayingIdx(null);
+  }
+
+  async function togglePlay(pageIdx: number) {
+    if (playingIdx === pageIdx) {
+      stopPlayback();
+      return;
+    }
+    stopPlayback();
+    setLoadingAudioIdx(pageIdx);
+    try {
+      const url = await ensureAudioUrl(pageIdx);
+      const audio = new Audio(url);
+      audioRef.current = audio;
+      audio.onended = () => {
+        if (audioRef.current === audio) {
+          audioRef.current = null;
+          setPlayingIdx(null);
+        }
+      };
+      audio.onerror = () => {
+        if (audioRef.current === audio) {
+          audioRef.current = null;
+          setPlayingIdx(null);
+        }
+        toast.error("Couldn't play narration");
+      };
+      await audio.play();
+      setPlayingIdx(pageIdx);
+      // Prefetch next page's audio in the background
+      if (story) {
+        const nextIdx = pageIdx + 1;
+        if (nextIdx < story.pages.length && !audioCacheRef.current.has(nextIdx)) {
+          void ensureAudioUrl(nextIdx).catch(() => {});
+        }
+      }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Narration failed");
+    } finally {
+      setLoadingAudioIdx(null);
+    }
+  }
+
+  useEffect(() => {
+    return () => stopPlayback();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Stop audio when navigating pages
+  useEffect(() => {
+    stopPlayback();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page]);
+
 
   if (loading) {
     return (
@@ -249,6 +341,14 @@ function StoryReader() {
                 />
               </div>
               <div className="px-8 py-10">
+                <div className="mb-4 flex justify-end">
+                  <NarrationButton
+                    isPremium={isPremium}
+                    isPlaying={playingIdx === storyPageIdx}
+                    isLoading={loadingAudioIdx === storyPageIdx}
+                    onClick={() => togglePlay(storyPageIdx)}
+                  />
+                </div>
                 <p className="font-display text-2xl md:text-3xl leading-relaxed text-ink text-balance">
                   {currentPage?.text}
                 </p>
@@ -312,6 +412,51 @@ function IconBtn({
       )}
     >
       {children}
+    </button>
+  );
+}
+
+function NarrationButton({
+  isPremium,
+  isPlaying,
+  isLoading,
+  onClick,
+}: {
+  isPremium: boolean;
+  isPlaying: boolean;
+  isLoading: boolean;
+  onClick: () => void;
+}) {
+  if (!isPremium) {
+    return (
+      <button
+        type="button"
+        title="Upgrade to hear your story narrated ✨"
+        aria-label="Upgrade to hear your story narrated"
+        onClick={() => toast("Upgrade to hear your story narrated ✨")}
+        className="inline-flex items-center gap-2 rounded-full border border-ink/15 bg-ink/5 px-4 py-2 text-sm font-medium text-ink/40 cursor-not-allowed"
+      >
+        <span className="text-lg">🔊</span>
+        <span>Narrate</span>
+      </button>
+    );
+  }
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={isLoading}
+      aria-label={isPlaying ? "Pause narration" : "Play narration"}
+      className={cn(
+        "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-colors",
+        isPlaying
+          ? "border-star/60 bg-star/15 text-star"
+          : "border-ink/15 bg-paper text-ink hover:bg-ink/5",
+        isLoading && "opacity-70",
+      )}
+    >
+      <span className="text-lg">{isLoading ? "⏳" : isPlaying ? "⏸️" : "🔊"}</span>
+      <span>{isLoading ? "Loading…" : isPlaying ? "Pause" : "Listen"}</span>
     </button>
   );
 }
