@@ -223,6 +223,34 @@ function CreateWizard() {
     if (children.length === 1 && step === 0) setStep(1);
   }, [children.length, step]);
 
+  // Load active (unfinished) series for the currently selected child
+  useEffect(() => {
+    if (!primaryId) {
+      setActiveSeries([]);
+      return;
+    }
+    let cancelled = false;
+    supabase
+      .from("story_series")
+      .select("id, title, total_parts, current_part, child_id")
+      .eq("child_id", primaryId)
+      .order("created_at", { ascending: false })
+      .then(({ data }) => {
+        if (cancelled) return;
+        const rows = (data ?? []) as Array<{
+          id: string;
+          title: string;
+          total_parts: number;
+          current_part: number;
+          child_id: string;
+        }>;
+        setActiveSeries(rows.filter((s) => s.current_part <= s.total_parts));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [primaryId]);
+
   const selectedChild = children.find((c) => c.id === primaryId);
   const seasonalOptions = getSeasonalOptions(selectedChild?.date_of_birth);
 
