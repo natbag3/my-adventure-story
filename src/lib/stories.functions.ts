@@ -346,6 +346,8 @@ The "pages" array MUST contain exactly ${pageCount} items, numbered 1 to ${pageC
         cover_emoji: parsed.cover_emoji || "✨",
         cover_gradient: coverGradient,
         pages: parsed.pages,
+        series_id: series?.id ?? null,
+        series_part: seriesPart,
       })
       .select("id")
       .single();
