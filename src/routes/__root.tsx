@@ -79,22 +79,26 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Adventure Club — AI bedtime stories starring your child" },
+      { title: "Adventure Club — bedtime stories starring your child" },
       {
         name: "description",
         content:
-          "Magical, AI-generated bedtime stories where your child is always the hero. Build their Adventure Passport one story at a time.",
+          "Magical bedtime stories where your child is always the hero. Build their Adventure Passport one story at a time.",
       },
       { name: "author", content: "Adventure Club" },
       { name: "theme-color", content: "#1a1c3a" },
-      { property: "og:title", content: "Adventure Club — Bedtime stories starring your child" },
+      { property: "og:title", content: "Adventure Club — bedtime stories starring your child" },
       {
         property: "og:description",
         content:
-          "Premium AI-illustrated bedtime stories for kids. Pick the world, the lesson, and the length — tuck in with a one-of-a-kind adventure tonight.",
+          "Magical bedtime stories where your child is always the hero. Build their Adventure Passport one story at a time.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Adventure Club — bedtime stories starring your child" },
+      { name: "twitter:description", content: "Magical bedtime stories where your child is always the hero. Build their Adventure Passport one story at a time." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/68b021ec-fcff-410d-885c-e7f7ddb7609a/id-preview-bc19107d--7650450c-a145-4f83-80ba-0fd7144a0e8e.lovable.app-1784015454150.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/68b021ec-fcff-410d-885c-e7f7ddb7609a/id-preview-bc19107d--7650450c-a145-4f83-80ba-0fd7144a0e8e.lovable.app-1784015454150.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
