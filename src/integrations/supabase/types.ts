@@ -198,6 +198,8 @@ export type Database = {
           mood: string
           pages: Json
           progress: number
+          series_id: string | null
+          series_part: number | null
           share_token: string
           story_summary: string | null
           theme: string
@@ -218,6 +220,8 @@ export type Database = {
           mood: string
           pages?: Json
           progress?: number
+          series_id?: string | null
+          series_part?: number | null
           share_token?: string
           story_summary?: string | null
           theme: string
@@ -238,6 +242,8 @@ export type Database = {
           mood?: string
           pages?: Json
           progress?: number
+          series_id?: string | null
+          series_part?: number | null
           share_token?: string
           story_summary?: string | null
           theme?: string
@@ -248,6 +254,57 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "stories_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stories_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "story_series"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      story_series: {
+        Row: {
+          child_id: string
+          created_at: string
+          current_part: number
+          id: string
+          title: string
+          total_parts: number
+          updated_at: string
+          user_id: string
+          world_description: string
+        }
+        Insert: {
+          child_id: string
+          created_at?: string
+          current_part?: number
+          id?: string
+          title: string
+          total_parts?: number
+          updated_at?: string
+          user_id: string
+          world_description?: string
+        }
+        Update: {
+          child_id?: string
+          created_at?: string
+          current_part?: number
+          id?: string
+          title?: string
+          total_parts?: number
+          updated_at?: string
+          user_id?: string
+          world_description?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_series_child_id_fkey"
             columns: ["child_id"]
             isOneToOne: false
             referencedRelation: "children"
