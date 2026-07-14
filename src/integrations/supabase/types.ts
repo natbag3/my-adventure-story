@@ -47,6 +47,7 @@ export type Database = {
           streak_count: number
           updated_at: string
           user_id: string
+          visited_worlds: string[]
           world_notes: string | null
         }
         Insert: {
@@ -81,6 +82,7 @@ export type Database = {
           streak_count?: number
           updated_at?: string
           user_id: string
+          visited_worlds?: string[]
           world_notes?: string | null
         }
         Update: {
@@ -115,6 +117,7 @@ export type Database = {
           streak_count?: number
           updated_at?: string
           user_id?: string
+          visited_worlds?: string[]
           world_notes?: string | null
         }
         Relationships: []

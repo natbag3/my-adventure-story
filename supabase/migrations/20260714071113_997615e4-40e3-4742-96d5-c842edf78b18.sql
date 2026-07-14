@@ -1,0 +1,1 @@
+ALTER TABLE public.children ADD COLUMN IF NOT EXISTS visited_worlds text[] NOT NULL DEFAULT '{}'::text[];

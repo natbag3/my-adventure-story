@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { zoneForTheme } from "@/lib/worlds";
 
 const GenerateInput = z.object({
   childId: z.string().uuid(),
@@ -352,6 +353,23 @@ The "pages" array MUST contain exactly ${pageCount} items, numbered 1 to ${pageC
       .select("id")
       .single();
     if (insErr || !inserted) throw new Error("Could not save the story. Please try again.");
+
+    // Mark the corresponding world zone visited on the child (best-effort).
+    try {
+      const zone = zoneForTheme(data.theme);
+      if (zone) {
+        const current = (primary as { visited_worlds?: string[] | null }).visited_worlds ?? [];
+        if (!current.includes(zone.id)) {
+          await supabase
+            .from("children")
+            .update({ visited_worlds: [...current, zone.id] })
+            .eq("id", data.childId)
+            .eq("user_id", userId);
+        }
+      }
+    } catch {
+      // non-fatal
+    }
 
     // Advance the series counter (best-effort)
     if (series && seriesPart) {
