@@ -159,7 +159,75 @@ function StoryReader() {
     } catch {
       toast.error("Couldn't copy link", { description: url });
     }
+
+  async function ensureAudioUrl(pageIdx: number): Promise<string> {
+    const cached = audioCacheRef.current.get(pageIdx);
+    if (cached) return cached;
+    const res = await generateAudioFn({ data: { storyId: id, pageIndex: pageIdx } });
+    audioCacheRef.current.set(pageIdx, res.audioUrl);
+    return res.audioUrl;
   }
+
+  function stopPlayback() {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = "";
+      audioRef.current = null;
+    }
+    setPlayingIdx(null);
+  }
+
+  async function togglePlay(pageIdx: number) {
+    if (playingIdx === pageIdx) {
+      stopPlayback();
+      return;
+    }
+    stopPlayback();
+    setLoadingAudioIdx(pageIdx);
+    try {
+      const url = await ensureAudioUrl(pageIdx);
+      const audio = new Audio(url);
+      audioRef.current = audio;
+      audio.onended = () => {
+        if (audioRef.current === audio) {
+          audioRef.current = null;
+          setPlayingIdx(null);
+        }
+      };
+      audio.onerror = () => {
+        if (audioRef.current === audio) {
+          audioRef.current = null;
+          setPlayingIdx(null);
+        }
+        toast.error("Couldn't play narration");
+      };
+      await audio.play();
+      setPlayingIdx(pageIdx);
+      // Prefetch next page's audio in the background
+      if (story) {
+        const nextIdx = pageIdx + 1;
+        if (nextIdx < story.pages.length && !audioCacheRef.current.has(nextIdx)) {
+          void ensureAudioUrl(nextIdx).catch(() => {});
+        }
+      }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Narration failed");
+    } finally {
+      setLoadingAudioIdx(null);
+    }
+  }
+
+  useEffect(() => {
+    return () => stopPlayback();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Stop audio when navigating pages
+  useEffect(() => {
+    stopPlayback();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page]);
+
 
   if (loading) {
     return (
