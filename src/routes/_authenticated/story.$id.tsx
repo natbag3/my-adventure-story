@@ -341,6 +341,14 @@ function StoryReader() {
                 />
               </div>
               <div className="px-8 py-10">
+                <div className="mb-4 flex justify-end">
+                  <NarrationButton
+                    isPremium={isPremium}
+                    isPlaying={playingIdx === storyPageIdx}
+                    isLoading={loadingAudioIdx === storyPageIdx}
+                    onClick={() => togglePlay(storyPageIdx)}
+                  />
+                </div>
                 <p className="font-display text-2xl md:text-3xl leading-relaxed text-ink text-balance">
                   {currentPage?.text}
                 </p>
