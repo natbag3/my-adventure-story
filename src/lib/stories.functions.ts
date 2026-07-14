@@ -354,6 +354,23 @@ The "pages" array MUST contain exactly ${pageCount} items, numbered 1 to ${pageC
       .single();
     if (insErr || !inserted) throw new Error("Could not save the story. Please try again.");
 
+    // Mark the corresponding world zone visited on the child (best-effort).
+    try {
+      const zone = zoneForTheme(data.theme);
+      if (zone) {
+        const current = (primary as { visited_worlds?: string[] | null }).visited_worlds ?? [];
+        if (!current.includes(zone.id)) {
+          await supabase
+            .from("children")
+            .update({ visited_worlds: [...current, zone.id] })
+            .eq("id", data.childId)
+            .eq("user_id", userId);
+        }
+      }
+    } catch {
+      // non-fatal
+    }
+
     // Advance the series counter (best-effort)
     if (series && seriesPart) {
       const nextPart = Math.min(seriesPart + 1, series.total_parts);
