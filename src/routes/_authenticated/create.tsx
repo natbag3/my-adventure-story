@@ -21,6 +21,124 @@ function calcAge(dob: string | null) {
   return a;
 }
 
+// Anonymous Gregorian algorithm for Easter Sunday
+function easterSunday(year: number): Date {
+  const a = year % 19;
+  const b = Math.floor(year / 100);
+  const c = year % 100;
+  const d = Math.floor(b / 4);
+  const e = b % 4;
+  const f = Math.floor((b + 8) / 25);
+  const g = Math.floor((b - f + 1) / 3);
+  const h = (19 * a + b - d - g + 15) % 30;
+  const i = Math.floor(c / 4);
+  const k = c % 4;
+  const l = (32 + 2 * e + 2 * i - h - k) % 7;
+  const m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const month = Math.floor((h + l - 7 * m + 114) / 31);
+  const day = ((h + l - 7 * m + 114) % 31) + 1;
+  return new Date(year, month - 1, day);
+}
+
+function daysBetween(a: Date, b: Date) {
+  const ms = 24 * 60 * 60 * 1000;
+  const da = new Date(a.getFullYear(), a.getMonth(), a.getDate()).getTime();
+  const db = new Date(b.getFullYear(), b.getMonth(), b.getDate()).getTime();
+  return Math.round((da - db) / ms);
+}
+
+type SeasonalOption = {
+  id: string;
+  emoji: string;
+  label: string;
+  theme: string; // sent to the story generator
+  active: boolean;
+  unlockLabel: string;
+};
+
+function getSeasonalOptions(dobIso: string | null | undefined, now: Date = new Date()): SeasonalOption[] {
+  const year = now.getFullYear();
+  const month = now.getMonth(); // 0-based
+  const day = now.getDate();
+
+  // Halloween — all of October
+  const halloweenActive = month === 9;
+  const halloweenUnlock = halloweenActive
+    ? "Active all October"
+    : `Unlocks Oct 1${month > 9 ? `, ${year + 1}` : ""}`;
+
+  // Christmas — Dec 1–26
+  const christmasActive = month === 11 && day >= 1 && day <= 26;
+  const christmasUnlock = christmasActive
+    ? "Active through Dec 26"
+    : `Unlocks Dec 1${month === 11 && day > 26 ? `, ${year + 1}` : ""}`;
+
+  // Easter — week of Easter Sunday (Sunday..Saturday around it, ±3 days)
+  const easter = easterSunday(year);
+  const easterDelta = daysBetween(now, easter);
+  const easterActive = Math.abs(easterDelta) <= 3;
+  const nextEaster = easterDelta < -3 ? easterSunday(year + 1) : easter;
+  const easterUnlock = easterActive
+    ? "Easter week!"
+    : `Unlocks ${nextEaster.toLocaleDateString(undefined, { month: "short", day: "numeric" })}`;
+
+  // Birthday — within 7 days of the child's DOB (this year)
+  let birthdayActive = false;
+  let birthdayUnlock = "Add a birthday to unlock";
+  if (dobIso) {
+    const dob = new Date(dobIso);
+    if (!isNaN(dob.getTime())) {
+      const thisYear = new Date(year, dob.getMonth(), dob.getDate());
+      let delta = daysBetween(thisYear, now);
+      let nextBirthday = thisYear;
+      if (delta < -7) {
+        nextBirthday = new Date(year + 1, dob.getMonth(), dob.getDate());
+        delta = daysBetween(nextBirthday, now);
+      }
+      birthdayActive = Math.abs(daysBetween(now, nextBirthday)) <= 7;
+      birthdayUnlock = birthdayActive
+        ? "Birthday week!"
+        : `Unlocks ${nextBirthday.toLocaleDateString(undefined, { month: "short", day: "numeric" })}`;
+    }
+  }
+
+  return [
+    {
+      id: "seasonal-halloween",
+      emoji: "🎃",
+      label: "Halloween",
+      theme: "A friendly, not-too-spooky Halloween adventure",
+      active: halloweenActive,
+      unlockLabel: halloweenUnlock,
+    },
+    {
+      id: "seasonal-christmas",
+      emoji: "🎄",
+      label: "Christmas",
+      theme: "A cozy Christmas Eve adventure with snow and wonder",
+      active: christmasActive,
+      unlockLabel: christmasUnlock,
+    },
+    {
+      id: "seasonal-easter",
+      emoji: "🐣",
+      label: "Easter",
+      theme: "A springtime Easter adventure with hidden treasures",
+      active: easterActive,
+      unlockLabel: easterUnlock,
+    },
+    {
+      id: "seasonal-birthday",
+      emoji: "🎂",
+      label: "Birthday",
+      theme: "A birthday adventure full of surprises made just for them",
+      active: birthdayActive,
+      unlockLabel: birthdayUnlock,
+    },
+  ];
+}
+
+
 function genderEmoji(g: string | null | undefined) {
   const v = (g ?? "").toLowerCase();
   if (v === "boy") return "👦";
@@ -97,6 +215,7 @@ function CreateWizard() {
   }, [children.length, step]);
 
   const selectedChild = children.find((c) => c.id === primaryId);
+  const seasonalOptions = getSeasonalOptions(selectedChild?.date_of_birth);
 
   const canNext =
     (step === 0 && !!primaryId) ||
@@ -383,6 +502,51 @@ function CreateWizard() {
 
         {step === 1 && (
           <StepWrap title="Where shall we go?">
+            <div className="mb-8">
+              <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-star/80">
+                ✨ Special
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {seasonalOptions.map((s) => {
+                  const selected = adventure === s.theme;
+                  return (
+                    <button
+                      key={s.id}
+                      disabled={!s.active}
+                      onClick={() => {
+                        if (!s.active) return;
+                        setAdventure(s.theme);
+                        setStep(2);
+                      }}
+                      className={cn(
+                        "relative flex flex-col items-center gap-2 rounded-2xl border p-4 text-center transition-all",
+                        !s.active
+                          ? "border-hairline bg-surface-elevated/40 opacity-50 cursor-not-allowed"
+                          : selected
+                          ? "border-star bg-star/15 shadow-[0_0_0_2px_oklch(0.85_0.16_88/0.4),0_10px_30px_-10px_oklch(0.85_0.16_88/0.6)]"
+                          : "border-star/60 bg-gradient-to-br from-star/10 to-peach/5 shadow-[0_0_0_1px_oklch(0.85_0.16_88/0.5),0_10px_30px_-15px_oklch(0.85_0.16_88/0.5)] hover:-translate-y-0.5",
+                      )}
+                    >
+                      <span className={cn("text-3xl", !s.active && "grayscale")}>{s.emoji}</span>
+                      <span className="text-sm font-medium text-foreground">{s.label}</span>
+                      {s.active ? (
+                        <span className="font-mono text-[9px] uppercase tracking-widest text-star">
+                          {s.unlockLabel}
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1 font-mono text-[9px] uppercase tracking-widest text-foreground/50">
+                          🔒 {s.unlockLabel}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-foreground/45">
+              All adventures
+            </p>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
               {ADVENTURES.map((a) => (
                 <button
