@@ -159,6 +159,8 @@ function StoryReader() {
     } catch {
       toast.error("Couldn't copy link", { description: url });
     }
+  }
+
 
   async function ensureAudioUrl(pageIdx: number): Promise<string> {
     const cached = audioCacheRef.current.get(pageIdx);
