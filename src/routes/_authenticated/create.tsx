@@ -215,6 +215,7 @@ function CreateWizard() {
   }, [children.length, step]);
 
   const selectedChild = children.find((c) => c.id === primaryId);
+  const seasonalOptions = getSeasonalOptions(selectedChild?.date_of_birth);
 
   const canNext =
     (step === 0 && !!primaryId) ||
