@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { getSharedStory, type SharedStory } from "@/lib/shared-story.functions";
 
 export const Route = createFileRoute("/share/$token")({
-  head: ({ loaderData }) => {
+  head: ({ loaderData }: { loaderData?: SharedStory }) => {
     const title = loaderData?.title
       ? `${loaderData.title} — Adventure Club`
       : "A shared adventure — Adventure Club";
