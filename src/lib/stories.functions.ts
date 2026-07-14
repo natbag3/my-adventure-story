@@ -353,6 +353,16 @@ The "pages" array MUST contain exactly ${pageCount} items, numbered 1 to ${pageC
       .single();
     if (insErr || !inserted) throw new Error("Could not save the story. Please try again.");
 
+    // Advance the series counter (best-effort)
+    if (series && seriesPart) {
+      const nextPart = Math.min(seriesPart + 1, series.total_parts);
+      await supabase
+        .from("story_series")
+        .update({ current_part: nextPart })
+        .eq("id", series.id)
+        .eq("user_id", userId);
+    }
+
     // Second AI call: generate story_summary + world_notes_update (best-effort, non-fatal)
     try {
       const storyText = parsed.pages.map((p) => p.text).join("\n\n");
