@@ -269,13 +269,14 @@ export const generateStoryBookPdf = createServerFn({ method: "POST" })
       const bodyTopY = PAGE_H - MARGIN - 40;
       const bodyBottomY = MARGIN + 40;
       let cursor = bodyTopY;
-      let bodyPage: typeof page | null = null;
+      type PdfPage = ReturnType<typeof pdfDoc.addPage>;
+      let bodyPage: PdfPage | null = null;
       let pageNum = 0;
 
-      const startBodyPage = () => {
-        bodyPage = pdfDoc.addPage([PAGE_W, PAGE_H]);
+      const startBodyPage = (): PdfPage => {
+        const p = pdfDoc.addPage([PAGE_W, PAGE_H]);
         pageNum += 1;
-        bodyPage.drawText(title, {
+        p.drawText(title, {
           x: MARGIN,
           y: PAGE_H - MARGIN + 8,
           size: 9,
@@ -283,48 +284,41 @@ export const generateStoryBookPdf = createServerFn({ method: "POST" })
           color: muted,
         });
         cursor = bodyTopY;
+        bodyPage = p;
+        return p;
       };
 
-      if (bodyLines.length > 0) startBodyPage();
-      for (const line of bodyLines) {
-        if (cursor < bodyBottomY) {
-          // Footer + new page
-          if (bodyPage) {
-            const pn = `${pageNum}`;
-            const pnw = regular.widthOfTextAtSize(pn, 9);
-            bodyPage.drawText(pn, {
-              x: (PAGE_W - pnw) / 2,
-              y: MARGIN - 20,
-              size: 9,
-              font: regular,
-              color: muted,
-            });
-          }
-          startBodyPage();
-        }
-        if (bodyPage) {
-          bodyPage.drawText(line, {
-            x: MARGIN,
-            y: cursor,
-            size: 12,
-            font: regular,
-            color: ink,
-            maxWidth: CONTENT_W,
-          });
-        }
-        cursor -= lineHeight;
-      }
-      if (bodyPage) {
+      const drawFooter = (p: PdfPage) => {
         const pn = `${pageNum}`;
         const pnw = regular.widthOfTextAtSize(pn, 9);
-        (bodyPage as typeof page).drawText(pn, {
+        p.drawText(pn, {
           x: (PAGE_W - pnw) / 2,
           y: MARGIN - 20,
           size: 9,
           font: regular,
           color: muted,
         });
+      };
+
+      let current: PdfPage | null =
+        bodyLines.length > 0 ? startBodyPage() : null;
+      for (const line of bodyLines) {
+        if (!current || cursor < bodyBottomY) {
+          if (current) drawFooter(current);
+          current = startBodyPage();
+        }
+        current.drawText(line, {
+          x: MARGIN,
+          y: cursor,
+          size: 12,
+          font: regular,
+          color: ink,
+          maxWidth: CONTENT_W,
+        });
+        cursor -= lineHeight;
       }
+      if (current) drawFooter(current);
+      void bodyPage;
     }
 
     // ---------- Back page ----------
