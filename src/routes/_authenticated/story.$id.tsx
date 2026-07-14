@@ -57,7 +57,7 @@ function StoryReader() {
       setLoading(true);
       const { data, error } = await supabase
         .from("stories")
-        .select("id, title, theme, mood, lesson, length_minutes, cover_emoji, cover_gradient, pages, favorite, child_id")
+        .select("id, title, theme, mood, lesson, length_minutes, cover_emoji, cover_gradient, pages, favorite, child_id, share_token")
         .eq("id", id)
         .maybeSingle();
       if (cancelled) return;
@@ -96,7 +96,7 @@ function StoryReader() {
         // Refetch the row so updated image_url values are reflected.
         const { data: refreshed } = await supabase
           .from("stories")
-          .select("id, title, theme, mood, lesson, length_minutes, cover_emoji, cover_gradient, pages, favorite, child_id")
+          .select("id, title, theme, mood, lesson, length_minutes, cover_emoji, cover_gradient, pages, favorite, child_id, share_token")
           .eq("id", id)
           .maybeSingle();
         if (!cancelled) {
