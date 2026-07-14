@@ -108,6 +108,26 @@ export const generateStory = createServerFn({ method: "POST" })
       pet_sidekicks: pets,
     };
 
+    // Fetch story universe: past summaries + world notes
+    const { data: recentStories } = await supabase
+      .from("stories")
+      .select("story_summary, created_at")
+      .eq("child_id", data.childId)
+      .eq("user_id", userId)
+      .not("story_summary", "is", null)
+      .order("created_at", { ascending: false })
+      .limit(5);
+    const pastSummaries = (recentStories ?? [])
+      .map((s) => (s as { story_summary: string | null }).story_summary)
+      .filter((s): s is string => !!s);
+    const worldNotes = (primary as { world_notes?: string | null }).world_notes ?? null;
+
+    const universeSection =
+      pastSummaries.length > 0 || worldNotes
+        ? `\nSTORY UNIVERSE & MEMORIES (use subtly — story must work standalone):
+${worldNotes ? worldNotes + "\n" : ""}${pastSummaries.length > 0 ? `Recent adventures ${primary.first_name} remembers:\n${pastSummaries.map((s, i) => `${i + 1}. ${s}`).join("\n")}\n` : ""}Weave in 1–2 gentle callbacks to past events where natural — "remember when…", a familiar character reappearing, or returning to a known place. Never retell past stories, just hint at shared history.\n`
+        : "";
+
     const systemPrompt = `You are a world-class children's picture book author for Adventure Club, writing in the rhythm and style of Julia Donaldson (The Gruffalo, Room on the Broom) and Lynley Dodd (Hairy Maclary). You craft magical, gently rhyming bedtime picture books — short, lyrical, easy to read aloud. The named child(ren) are ALWAYS the heroes. You silently follow a two-stage process and only return the final story as valid JSON. No markdown. No commentary.`;
 
     const multiNote =
