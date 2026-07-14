@@ -48,8 +48,8 @@ export const generateStoryPageImage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => Input.parse(i))
   .handler(async ({ data, context }) => {
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) throw new Error("OpenAI API key is not configured.");
+    const apiKey = process.env.FAL_KEY;
+    if (!apiKey) throw new Error("FAL API key is not configured.");
     const { supabase, userId } = context;
 
     const { data: story, error } = await supabase
@@ -81,27 +81,22 @@ export const generateStoryPageImage = createServerFn({ method: "POST" })
       heroDescriptions ? `Heroes featured: ${heroDescriptions}. Keep every character design consistent across pages.` : ""
     } Warm magical lighting, soft painterly Pixar/Disney style, gentle bedtime atmosphere, premium children's book art, no text, no logos, no watermarks.`;
 
-    const aiRes = await fetch("https://api.openai.com/v1/images/generations", {
+    const aiRes = await fetch("https://fal.run/fal-ai/flux/dev", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({ model: "gpt-image-1-mini", prompt, size: "1024x1024", n: 1 }),
+      headers: { "Content-Type": "application/json", Authorization: `Key ${apiKey}` },
+      body: JSON.stringify({ prompt, image_size: "landscape_4_3", num_images: 1 }),
     });
     if (!aiRes.ok) {
       const txt = await aiRes.text();
       throw new Error(`Illustration generation failed: ${aiRes.status} ${txt.slice(0, 200)}`);
     }
     const aiJson = await aiRes.json();
-    const first = aiJson?.data?.[0] ?? {};
-    let bytes: Uint8Array;
-    if (first.b64_json) {
-      bytes = Uint8Array.from(atob(first.b64_json), (c) => c.charCodeAt(0));
-    } else if (first.url) {
-      const imgRes = await fetch(first.url);
-      if (!imgRes.ok) throw new Error(`Could not download illustration: ${imgRes.status}`);
-      bytes = new Uint8Array(await imgRes.arrayBuffer());
-    } else {
-      throw new Error("Illustration generation returned no image.");
-    }
+    const imageUrl: string | undefined = aiJson?.images?.[0]?.url;
+    if (!imageUrl) throw new Error("Illustration generation returned no image.");
+    const imgRes = await fetch(imageUrl);
+    if (!imgRes.ok) throw new Error(`Could not download illustration: ${imgRes.status}`);
+    const bytes = new Uint8Array(await imgRes.arrayBuffer());
+
     const path = `${userId}/stories/${data.storyId}/${data.pageIndex}.png`;
     const { error: upErr } = await supabase.storage
       .from("adventurer-photos")
