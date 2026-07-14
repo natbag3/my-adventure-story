@@ -185,6 +185,15 @@ function CreateWizard() {
   const [prepDone, setPrepDone] = useState(0);
   const [prepStage, setPrepStage] = useState<"writing" | "painting" | "binding">("writing");
   const [error, setError] = useState<string | null>(null);
+  // Series state
+  const [seriesMode, setSeriesMode] = useState<"oneoff" | "continue" | "new">("oneoff");
+  const [seriesId, setSeriesId] = useState<string | null>(null);
+  const [newSeriesTitle, setNewSeriesTitle] = useState("");
+  const [newSeriesWorld, setNewSeriesWorld] = useState("");
+  const [newSeriesTotalParts, setNewSeriesTotalParts] = useState(5);
+  const [activeSeries, setActiveSeries] = useState<
+    Array<{ id: string; title: string; total_parts: number; current_part: number; child_id: string }>
+  >([]);
   const generateFn = useServerFn(generateStory);
   const generateImageFn = useServerFn(generateStoryPageImage);
 
@@ -213,6 +222,34 @@ function CreateWizard() {
   useEffect(() => {
     if (children.length === 1 && step === 0) setStep(1);
   }, [children.length, step]);
+
+  // Load active (unfinished) series for the currently selected child
+  useEffect(() => {
+    if (!primaryId) {
+      setActiveSeries([]);
+      return;
+    }
+    let cancelled = false;
+    supabase
+      .from("story_series")
+      .select("id, title, total_parts, current_part, child_id")
+      .eq("child_id", primaryId)
+      .order("created_at", { ascending: false })
+      .then(({ data }) => {
+        if (cancelled) return;
+        const rows = (data ?? []) as Array<{
+          id: string;
+          title: string;
+          total_parts: number;
+          current_part: number;
+          child_id: string;
+        }>;
+        setActiveSeries(rows.filter((s) => s.current_part <= s.total_parts));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [primaryId]);
 
   const selectedChild = children.find((c) => c.id === primaryId);
   const seasonalOptions = getSeasonalOptions(selectedChild?.date_of_birth);
@@ -251,6 +288,15 @@ function CreateWizard() {
           lesson: lessonLabel,
           lengthMinutes: length,
           petIds,
+          seriesId: seriesMode === "continue" ? seriesId : null,
+          newSeries:
+            seriesMode === "new" && newSeriesTitle.trim() && newSeriesWorld.trim()
+              ? {
+                  title: newSeriesTitle.trim(),
+                  worldDescription: newSeriesWorld.trim(),
+                  totalParts: newSeriesTotalParts,
+                }
+              : null,
         },
       });
 
@@ -502,6 +548,101 @@ function CreateWizard() {
 
         {step === 1 && (
           <StepWrap title="Where shall we go?">
+            {/* Series toggle */}
+            <div className="mb-8 rounded-2xl border border-hairline bg-surface-elevated/50 p-4">
+              <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-foreground/45">
+                Story series
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {([
+                  { id: "oneoff", label: "One-off story" },
+                  { id: "continue", label: "Continue a series", disabled: activeSeries.length === 0 },
+                  { id: "new", label: "Start a new series" },
+                ] as const).map((opt) => (
+                  <button
+                    key={opt.id}
+                    disabled={"disabled" in opt ? opt.disabled : false}
+                    onClick={() => {
+                      setSeriesMode(opt.id);
+                      if (opt.id !== "continue") setSeriesId(null);
+                    }}
+                    className={cn(
+                      "rounded-full border px-4 py-2 text-sm font-medium transition-all",
+                      seriesMode === opt.id
+                        ? "border-lavender/60 bg-lavender/15 text-foreground"
+                        : "border-hairline bg-surface text-foreground/70 hover:border-foreground/30",
+                      "disabled" in opt && opt.disabled && "opacity-40 cursor-not-allowed",
+                    )}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+
+              {seriesMode === "continue" && activeSeries.length > 0 && (
+                <div className="mt-4 grid gap-2">
+                  {activeSeries.map((s) => (
+                    <button
+                      key={s.id}
+                      onClick={() => setSeriesId(s.id)}
+                      className={cn(
+                        "flex items-center justify-between rounded-xl border p-3 text-left transition-all",
+                        seriesId === s.id
+                          ? "border-lavender/70 bg-lavender/10"
+                          : "border-hairline bg-surface hover:border-foreground/30",
+                      )}
+                    >
+                      <span className="font-display text-base text-foreground">📖 {s.title}</span>
+                      <span className="font-mono text-[10px] uppercase tracking-widest text-foreground/55">
+                        Next: Part {Math.min(s.current_part, s.total_parts)} of {s.total_parts}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {seriesMode === "new" && (
+                <div className="mt-4 space-y-3">
+                  <input
+                    value={newSeriesTitle}
+                    onChange={(e) => setNewSeriesTitle(e.target.value)}
+                    maxLength={80}
+                    placeholder="Series title (e.g. The Dragon Chronicles)"
+                    className="w-full rounded-xl border border-hairline bg-surface px-4 py-3 text-sm text-foreground placeholder:text-foreground/40 outline-none focus:border-lavender/60"
+                  />
+                  <textarea
+                    value={newSeriesWorld}
+                    onChange={(e) => setNewSeriesWorld(e.target.value)}
+                    maxLength={500}
+                    rows={3}
+                    placeholder="Describe the world: kingdom, characters, magic, tone… (this stays consistent across parts)"
+                    className="w-full rounded-xl border border-hairline bg-surface px-4 py-3 text-sm text-foreground placeholder:text-foreground/40 outline-none focus:border-lavender/60"
+                  />
+                  <div className="flex items-center gap-3">
+                    <label className="font-mono text-[10px] uppercase tracking-widest text-foreground/55">
+                      Total parts
+                    </label>
+                    <div className="flex gap-1">
+                      {[3, 5, 7, 10].map((n) => (
+                        <button
+                          key={n}
+                          onClick={() => setNewSeriesTotalParts(n)}
+                          className={cn(
+                            "rounded-full border px-3 py-1 text-xs font-medium",
+                            newSeriesTotalParts === n
+                              ? "border-lavender/60 bg-lavender/15 text-foreground"
+                              : "border-hairline bg-surface text-foreground/60",
+                          )}
+                        >
+                          {n}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
             <div className="mb-8">
               <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-star/80">
                 ✨ Special

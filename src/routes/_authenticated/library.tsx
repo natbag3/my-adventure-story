@@ -21,6 +21,16 @@ type StoryRow = {
   favorite: boolean;
   created_at: string;
   child_id: string;
+  series_id: string | null;
+  series_part: number | null;
+};
+
+type SeriesRow = {
+  id: string;
+  title: string;
+  total_parts: number;
+  current_part: number;
+  child_id: string;
 };
 
 export const Route = createFileRoute("/_authenticated/library")({
@@ -37,6 +47,7 @@ function LibraryPage() {
   const { user } = useAuth();
   const { activeChild, children } = useActiveChild();
   const [stories, setStories] = useState<StoryRow[]>([]);
+  const [seriesList, setSeriesList] = useState<SeriesRow[]>([]);
   const [query, setQuery] = useState("");
   const [scope, setScope] = useState<"active" | "all">("active");
   const [favoritesOnly, setFavoritesOnly] = useState(false);
@@ -45,15 +56,24 @@ function LibraryPage() {
   useEffect(() => {
     if (!user) return;
     setLoading(true);
-    supabase
-      .from("stories")
-      .select("id, title, theme, mood, lesson, length_minutes, cover_emoji, cover_gradient, favorite, created_at, child_id")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .then(({ data }) => {
-        setStories((data ?? []) as StoryRow[]);
-        setLoading(false);
-      });
+    Promise.all([
+      supabase
+        .from("stories")
+        .select(
+          "id, title, theme, mood, lesson, length_minutes, cover_emoji, cover_gradient, favorite, created_at, child_id, series_id, series_part",
+        )
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("story_series")
+        .select("id, title, total_parts, current_part, child_id")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false }),
+    ]).then(([storiesRes, seriesRes]) => {
+      setStories((storiesRes.data ?? []) as StoryRow[]);
+      setSeriesList((seriesRes.data ?? []) as SeriesRow[]);
+      setLoading(false);
+    });
   }, [user]);
 
   const filtered = stories.filter((s) => {
@@ -62,6 +82,10 @@ function LibraryPage() {
     if (query && !s.title.toLowerCase().includes(query.toLowerCase()) && !s.theme.toLowerCase().includes(query.toLowerCase())) return false;
     return true;
   });
+
+  const visibleSeries = seriesList.filter(
+    (s) => scope === "all" || !activeChild || s.child_id === activeChild.id,
+  );
 
   return (
     <AppShell>
@@ -120,6 +144,97 @@ function LibraryPage() {
           ★ Favorites
         </button>
       </div>
+
+      {visibleSeries.length > 0 && (
+        <section className="mb-10 animate-slide-up">
+          <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.25em] text-lavender/80">
+            📖 Story series
+          </p>
+          <div className="space-y-6">
+            {visibleSeries.map((series) => {
+              const parts = stories
+                .filter((s) => s.series_id === series.id)
+                .sort((a, b) => (a.series_part ?? 0) - (b.series_part ?? 0));
+              const childObj = children.find((c) => c.id === series.child_id);
+              const nextPart = Math.min(series.current_part, series.total_parts);
+              const complete = parts.length >= series.total_parts;
+              return (
+                <div
+                  key={series.id}
+                  className="rounded-[28px] border border-hairline bg-surface/60 p-5"
+                >
+                  <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+                    <div>
+                      <h3 className="font-display text-xl text-foreground">
+                        {series.title}
+                      </h3>
+                      <p className="text-xs text-foreground/50">
+                        {childObj?.first_name} · {parts.length} of {series.total_parts} parts{complete ? " · Complete 🎉" : ""}
+                      </p>
+                    </div>
+                    {!complete && (
+                      <Link
+                        to="/create"
+                        className="rounded-full bg-primary/90 px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary"
+                      >
+                        Continue → Part {nextPart}
+                      </Link>
+                    )}
+                  </div>
+                  <div className="flex gap-3 overflow-x-auto pb-2">
+                    {Array.from({ length: series.total_parts }).map((_, idx) => {
+                      const partNum = idx + 1;
+                      const story = parts.find((p) => p.series_part === partNum);
+                      const locked = !story;
+                      const inner = (
+                        <div
+                          className={cn(
+                            "relative w-40 shrink-0 rounded-2xl border p-2 transition-all",
+                            locked
+                              ? "border-dashed border-hairline bg-surface/40 opacity-60"
+                              : "border-hairline bg-surface hover:-translate-y-0.5",
+                          )}
+                        >
+                          {story ? (
+                            <StoryCover
+                              emoji={story.cover_emoji}
+                              gradient={story.cover_gradient}
+                              className="aspect-[4/3] mb-2"
+                              size="lg"
+                            />
+                          ) : (
+                            <div className="aspect-[4/3] mb-2 grid place-items-center rounded-xl bg-surface-elevated text-3xl opacity-50">
+                              🔒
+                            </div>
+                          )}
+                          <p className="px-1 font-mono text-[10px] uppercase tracking-widest text-foreground/50">
+                            Part {partNum}
+                          </p>
+                          <p className="px-1 font-display text-sm text-foreground line-clamp-1">
+                            {story?.title ?? "Not yet written"}
+                          </p>
+                        </div>
+                      );
+                      return story ? (
+                        <Link
+                          key={partNum}
+                          to="/story/$id"
+                          params={{ id: story.id }}
+                          className="block"
+                        >
+                          {inner}
+                        </Link>
+                      ) : (
+                        <div key={partNum}>{inner}</div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {filtered.map((s, i) => {
