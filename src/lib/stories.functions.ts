@@ -252,7 +252,11 @@ STRUCTURE across ${pageCount} pages:
 - Page 1: Introduce ${heroLabel} and the magical setting.
 - Middle pages: The three magical discoveries unfold, then the gentle problem.
 - Penultimate page: The problem is gently solved.
-- Final page: Calm return home, peaceful, sleepy ending.
+- Final page: ${
+      series && !isFinalPart
+        ? `A gentle bedtime-safe cliffhanger — hint at something new to discover next time. Curiosity, not fear. Do NOT fully resolve.`
+        : `Calm return home, peaceful, sleepy ending.`
+    }
 
 HERO RULES:
 - ${heroLabel} ${heroNames.length > 1 ? "are" : "is"} the main character${heroNames.length > 1 ? "s" : ""} on every page.
