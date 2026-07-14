@@ -288,6 +288,15 @@ function CreateWizard() {
           lesson: lessonLabel,
           lengthMinutes: length,
           petIds,
+          seriesId: seriesMode === "continue" ? seriesId : null,
+          newSeries:
+            seriesMode === "new" && newSeriesTitle.trim() && newSeriesWorld.trim()
+              ? {
+                  title: newSeriesTitle.trim(),
+                  worldDescription: newSeriesWorld.trim(),
+                  totalParts: newSeriesTotalParts,
+                }
+              : null,
         },
       });
 
