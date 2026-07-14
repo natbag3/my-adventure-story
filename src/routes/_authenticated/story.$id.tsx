@@ -330,17 +330,17 @@ function StoryReader() {
               </div>
             </div>
           ) : (
-            <div className="p-2">
-              <div className="aspect-[4/3] relative overflow-hidden rounded-3xl">
+            <div className="flex flex-col h-[calc(100vh-11rem)] min-h-[520px] p-2">
+              <div className="relative overflow-hidden rounded-3xl basis-[55%] shrink-0">
                 <StoryImage
                   storyId={story.id}
                   pageIndex={storyPageIdx}
                   initialPath={currentPage?.image_url ?? null}
                   alt={currentPage?.illustration_prompt ?? `Page ${page}`}
-                  className="absolute inset-0 size-full"
+                  className="absolute inset-0 size-full object-cover"
                 />
               </div>
-              <div className="px-8 py-10">
+              <div className="flex-1 min-h-0 overflow-y-auto px-6 md:px-8 py-6 md:py-8">
                 <div className="mb-4 flex justify-end">
                   <NarrationButton
                     isPremium={isPremium}
@@ -349,7 +349,7 @@ function StoryReader() {
                     onClick={() => togglePlay(storyPageIdx)}
                   />
                 </div>
-                <p className="font-display text-2xl md:text-3xl leading-relaxed text-ink text-balance">
+                <p className="font-display text-xl md:text-2xl leading-relaxed text-ink text-balance">
                   {currentPage?.text}
                 </p>
               </div>
