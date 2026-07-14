@@ -198,6 +198,7 @@ export type Database = {
           mood: string
           pages: Json
           progress: number
+          share_token: string
           story_summary: string | null
           theme: string
           title: string
@@ -217,6 +218,7 @@ export type Database = {
           mood: string
           pages?: Json
           progress?: number
+          share_token?: string
           story_summary?: string | null
           theme: string
           title: string
@@ -236,6 +238,7 @@ export type Database = {
           mood?: string
           pages?: Json
           progress?: number
+          share_token?: string
           story_summary?: string | null
           theme?: string
           title?: string

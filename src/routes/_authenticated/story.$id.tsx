@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { generateStoryPageImage } from "@/lib/story-images.functions";
 import { bumpReadingStreak } from "@/lib/streak";
 import { useActiveChild } from "@/lib/active-child-context";
+import { toast } from "sonner";
 
 type StoryPage = { text: string; illustration_prompt?: string; image_url?: string | null };
 type StoryRow = {
@@ -23,6 +24,7 @@ type StoryRow = {
   pages: StoryPage[];
   favorite: boolean;
   child_id: string;
+  share_token: string;
 };
 
 export const Route = createFileRoute("/_authenticated/story/$id")({
@@ -55,7 +57,7 @@ function StoryReader() {
       setLoading(true);
       const { data, error } = await supabase
         .from("stories")
-        .select("id, title, theme, mood, lesson, length_minutes, cover_emoji, cover_gradient, pages, favorite, child_id")
+        .select("id, title, theme, mood, lesson, length_minutes, cover_emoji, cover_gradient, pages, favorite, child_id, share_token")
         .eq("id", id)
         .maybeSingle();
       if (cancelled) return;
@@ -94,7 +96,7 @@ function StoryReader() {
         // Refetch the row so updated image_url values are reflected.
         const { data: refreshed } = await supabase
           .from("stories")
-          .select("id, title, theme, mood, lesson, length_minutes, cover_emoji, cover_gradient, pages, favorite, child_id")
+          .select("id, title, theme, mood, lesson, length_minutes, cover_emoji, cover_gradient, pages, favorite, child_id, share_token")
           .eq("id", id)
           .maybeSingle();
         if (!cancelled) {
@@ -124,6 +126,17 @@ function StoryReader() {
     const next = !favorite;
     setFavorite(next);
     await supabase.from("stories").update({ favorite: next }).eq("id", story.id);
+  }
+
+  async function shareStory() {
+    if (!story) return;
+    const url = `${window.location.origin}/share/${story.share_token}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("Link copied!", { description: "Share it with anyone." });
+    } catch {
+      toast.error("Couldn't copy link", { description: url });
+    }
   }
 
   if (loading) {
@@ -165,6 +178,7 @@ function StoryReader() {
       <div className="mb-6 flex items-center justify-between animate-fade-in">
         <Link to="/library" className="text-xs text-foreground/55 hover:text-foreground">← Library</Link>
         <div className="flex items-center gap-2">
+          <IconBtn label="Share" onClick={shareStory}>🔗</IconBtn>
           <IconBtn label="Favorite" onClick={toggleFavorite} active={favorite}>★</IconBtn>
         </div>
       </div>
