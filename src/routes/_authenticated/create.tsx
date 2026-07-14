@@ -437,7 +437,10 @@ function CreateWizard() {
               {LESSONS.map((l) => (
                 <button
                   key={l.id}
-                  onClick={() => setLesson(l.id)}
+                  onClick={() => {
+                    setLesson(l.id);
+                    setStep(4);
+                  }}
                   className={cn(
                     "flex flex-col items-center gap-2 rounded-2xl border p-4 transition-all hover:-translate-y-0.5",
                     lesson === l.id
