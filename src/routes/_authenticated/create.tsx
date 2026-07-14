@@ -139,13 +139,6 @@ function getSeasonalOptions(dobIso: string | null | undefined, now: Date = new D
 }
 
 
-function genderEmoji(g: string | null | undefined) {
-  const v = (g ?? "").toLowerCase();
-  if (v === "boy") return "👦";
-  if (v === "girl") return "👧";
-  return "🧒";
-}
-
 export const Route = createFileRoute("/_authenticated/create")({
   head: () => ({
     meta: [

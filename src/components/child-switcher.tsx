@@ -4,13 +4,6 @@ import { useActiveChild } from "@/lib/active-child-context";
 import { CharacterAvatar } from "@/components/character-avatar";
 import { cn } from "@/lib/utils";
 
-function genderEmoji(g: string | null | undefined) {
-  const v = (g ?? "").toLowerCase();
-  if (v === "boy") return "👦";
-  if (v === "girl") return "👧";
-  return "🧒";
-}
-
 export function ChildSwitcher({ className }: { className?: string }) {
   const { children, activeChild, setActiveChildId } = useActiveChild();
   const [open, setOpen] = useState(false);

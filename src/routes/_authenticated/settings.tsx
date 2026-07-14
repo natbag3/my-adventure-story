@@ -12,13 +12,6 @@ export const Route = createFileRoute("/_authenticated/settings")({
   component: SettingsPage,
 });
 
-function genderEmoji(g: string | null | undefined) {
-  const v = (g ?? "").toLowerCase();
-  if (v === "boy") return "👦";
-  if (v === "girl") return "👧";
-  return "🧒";
-}
-
 const VOICES = [
   { id: "cgSgspJ2msm6clMCkdW9", flag: "🇺🇸", label: "Jessica", sub: "US · Female" },
   { id: "pNInz6obpgDQGcFmaJgB", flag: "🇺🇸", label: "Adam", sub: "US · Male" },
