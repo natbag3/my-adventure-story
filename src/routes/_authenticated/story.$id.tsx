@@ -67,6 +67,8 @@ function StoryReader() {
       const row = data as unknown as StoryRow;
       setStory(row);
       setFavorite(row.favorite);
+      // Bump reading streak when a story is opened
+      void bumpReadingStreak(row.child_id).then(() => refreshChildren());
       const { data: child } = await supabase
         .from("children")
         .select("first_name")
