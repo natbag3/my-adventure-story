@@ -10,6 +10,15 @@ const GenerateInput = z.object({
   mood: z.string().min(1),
   lesson: z.string().min(1),
   lengthMinutes: z.union([z.literal(3), z.literal(5), z.literal(10)]),
+  seriesId: z.string().uuid().optional().nullable(),
+  newSeries: z
+    .object({
+      title: z.string().min(1).max(80),
+      worldDescription: z.string().min(1).max(500),
+      totalParts: z.number().int().min(2).max(20).optional().default(5),
+    })
+    .optional()
+    .nullable(),
 });
 
 const COVER_GRADIENTS: Record<string, string> = {
