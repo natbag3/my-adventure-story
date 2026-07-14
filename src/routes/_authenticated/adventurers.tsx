@@ -139,7 +139,7 @@ function AdventurersPage() {
             <span>+</span> Add Adventurer
           </Link>
           <Link
-            to="/adventurers/new-pet"
+            to="/pets/new"
             className="inline-flex items-center gap-2 rounded-full border border-hairline bg-surface px-5 py-3 text-sm font-semibold text-foreground hover:scale-[1.02] transition-transform"
           >
             <span>🐾</span> Add a pet
@@ -233,7 +233,7 @@ function AdventurersPage() {
               <h2 className="font-display text-3xl text-foreground">Pets</h2>
             </div>
             <Link
-              to="/adventurers/new-pet"
+              to="/pets/new"
               className="text-xs font-medium text-foreground/70 hover:text-foreground"
             >
               + Add another
