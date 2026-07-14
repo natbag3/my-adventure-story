@@ -89,7 +89,7 @@ export const generateStory = createServerFn({ method: "POST" })
         ? `${heroNames[0]} and ${heroNames[1]}`
         : `${heroNames.slice(0, -1).join(", ")}, and ${heroNames[heroNames.length - 1]}`;
 
-    const pageCount = data.lengthMinutes === 3 ? 8 : data.lengthMinutes === 5 ? 12 : 18;
+    const pageCount = data.lengthMinutes === 3 ? 4 : data.lengthMinutes === 5 ? 6 : 8;
 
     let pets: Array<{ name: string; type: string; fur_color: string | null; eye_color: string | null }> = [];
     if (data.petIds.length > 0) {
