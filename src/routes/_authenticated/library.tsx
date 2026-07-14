@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { useActiveChild } from "@/lib/active-child-context";
+import { StreakBadge } from "@/components/streak-badge";
 
 type StoryRow = {
   id: string;
