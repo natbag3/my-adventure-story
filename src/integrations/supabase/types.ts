@@ -45,6 +45,7 @@ export type Database = {
           skin_tone: string | null
           updated_at: string
           user_id: string
+          world_notes: string | null
         }
         Insert: {
           avatar_emoji?: string | null
@@ -76,6 +77,7 @@ export type Database = {
           skin_tone?: string | null
           updated_at?: string
           user_id: string
+          world_notes?: string | null
         }
         Update: {
           avatar_emoji?: string | null
@@ -107,6 +109,7 @@ export type Database = {
           skin_tone?: string | null
           updated_at?: string
           user_id?: string
+          world_notes?: string | null
         }
         Relationships: []
       }
@@ -189,6 +192,7 @@ export type Database = {
           mood: string
           pages: Json
           progress: number
+          story_summary: string | null
           theme: string
           title: string
           updated_at: string
@@ -207,6 +211,7 @@ export type Database = {
           mood: string
           pages?: Json
           progress?: number
+          story_summary?: string | null
           theme: string
           title: string
           updated_at?: string
@@ -225,6 +230,7 @@ export type Database = {
           mood?: string
           pages?: Json
           progress?: number
+          story_summary?: string | null
           theme?: string
           title?: string
           updated_at?: string
