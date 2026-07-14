@@ -282,5 +282,70 @@ The "pages" array MUST contain exactly ${pageCount} items, numbered 1 to ${pageC
       .single();
     if (insErr || !inserted) throw new Error("Could not save the story. Please try again.");
 
+    // Second AI call: generate story_summary + world_notes_update (best-effort, non-fatal)
+    try {
+      const storyText = parsed.pages.map((p) => p.text).join("\n\n");
+      const recapRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash-lite",
+          messages: [
+            {
+              role: "system",
+              content:
+                "You summarise children's stories for continuity across a child's story universe. Return VALID JSON only, no markdown.",
+            },
+            {
+              role: "user",
+              content: `Story title: ${parsed.title}
+Child: ${primary.first_name}
+Current world notes: ${worldNotes ?? "(none yet)"}
+
+Story text:
+${storyText}
+
+Return a JSON object with exactly these two fields:
+{
+  "story_summary": "2-3 sentences capturing key events, any new characters or places introduced, and what ${primary.first_name} discovered or learned.",
+  "world_notes_update": "1-2 sentences describing any NEW permanent additions to ${primary.first_name}'s universe from this story (e.g. a magical forest they discovered, a dragon friend they made, a recurring character). Empty string if nothing new/permanent was introduced."
+}`,
+            },
+          ],
+          response_format: { type: "json_object" },
+        }),
+      });
+      if (recapRes.ok) {
+        const recapJson = await recapRes.json();
+        const recapContent: string = recapJson?.choices?.[0]?.message?.content ?? "";
+        const recap = JSON.parse(recapContent) as {
+          story_summary?: string;
+          world_notes_update?: string;
+        };
+        if (recap.story_summary) {
+          await supabase
+            .from("stories")
+            .update({ story_summary: recap.story_summary })
+            .eq("id", inserted.id)
+            .eq("user_id", userId);
+        }
+        if (recap.world_notes_update && recap.world_notes_update.trim()) {
+          const nextNotes = worldNotes
+            ? `${worldNotes}\n${recap.world_notes_update.trim()}`
+            : recap.world_notes_update.trim();
+          await supabase
+            .from("children")
+            .update({ world_notes: nextNotes })
+            .eq("id", data.childId)
+            .eq("user_id", userId);
+        }
+      }
+    } catch {
+      // Non-fatal: story is saved even if recap fails
+    }
+
     return { storyId: inserted.id as string };
   });
