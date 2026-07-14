@@ -159,6 +159,8 @@ export type Database = {
           display_name: string | null
           first_name: string | null
           id: string
+          is_premium: boolean
+          preferred_voice: string
           updated_at: string
         }
         Insert: {
@@ -167,6 +169,8 @@ export type Database = {
           display_name?: string | null
           first_name?: string | null
           id: string
+          is_premium?: boolean
+          preferred_voice?: string
           updated_at?: string
         }
         Update: {
@@ -175,6 +179,8 @@ export type Database = {
           display_name?: string | null
           first_name?: string | null
           id?: string
+          is_premium?: boolean
+          preferred_voice?: string
           updated_at?: string
         }
         Relationships: [
