@@ -67,8 +67,11 @@ function LibraryPage() {
     <AppShell>
       <header className="mb-8 animate-slide-up">
         <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.25em] text-star/80">Your collection</p>
-        <h1 className="font-display text-4xl md:text-5xl font-medium text-foreground">
-          {activeChild ? `${activeChild.first_name}'s Story Library` : "Story Library"}
+        <h1 className="font-display text-4xl md:text-5xl font-medium text-foreground flex flex-wrap items-center gap-3">
+          <span>{activeChild ? `${activeChild.first_name}'s Story Library` : "Story Library"}</span>
+          {activeChild && activeChild.streak_count > 0 && (
+            <StreakBadge count={activeChild.streak_count} />
+          )}
         </h1>
         <p className="mt-2 text-foreground/55">
           {loading ? "Loading…" : `${filtered.length} adventures saved · revisit any tale, anytime.`}
