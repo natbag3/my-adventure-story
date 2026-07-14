@@ -387,7 +387,10 @@ function CreateWizard() {
               {ADVENTURES.map((a) => (
                 <button
                   key={a.id}
-                  onClick={() => setAdventure(a.id)}
+                  onClick={() => {
+                    setAdventure(a.id);
+                    setStep(2);
+                  }}
                   className={cn(
                     "flex flex-col items-center gap-2 rounded-2xl border p-4 transition-all hover:-translate-y-0.5",
                     adventure === a.id
