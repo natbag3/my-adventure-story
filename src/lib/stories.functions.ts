@@ -212,7 +212,7 @@ ${
 
 HERO PROFILE(S):
 ${JSON.stringify(profile, null, 2)}
-${multiNote}${petNote}${universeSection}
+${multiNote}${petNote}${universeSection}${seriesSection}
 STORY SETTINGS:
 - Theme: ${data.theme}
 - Mood: ${data.mood}
