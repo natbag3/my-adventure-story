@@ -7,6 +7,8 @@ import { StoryImage } from "@/components/story-image";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { generateStoryPageImage } from "@/lib/story-images.functions";
+import { bumpReadingStreak } from "@/lib/streak";
+import { useActiveChild } from "@/lib/active-child-context";
 
 type StoryPage = { text: string; illustration_prompt?: string; image_url?: string | null };
 type StoryRow = {
@@ -37,6 +39,7 @@ function StoryReader() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
   const generateImageFn = useServerFn(generateStoryPageImage);
+  const { refresh: refreshChildren } = useActiveChild();
   const [story, setStory] = useState<StoryRow | null>(null);
   const [childName, setChildName] = useState<string>("");
   const [loading, setLoading] = useState(true);
@@ -64,6 +67,8 @@ function StoryReader() {
       const row = data as unknown as StoryRow;
       setStory(row);
       setFavorite(row.favorite);
+      // Bump reading streak when a story is opened
+      void bumpReadingStreak(row.child_id).then(() => refreshChildren());
       const { data: child } = await supabase
         .from("children")
         .select("first_name")
@@ -151,6 +156,9 @@ function StoryReader() {
   const isEnd = page === totalPages + 1;
   const storyPageIdx = page - 1; // 0-based index into pages[]
   const currentPage = !isCover && !isEnd ? story.pages[storyPageIdx] : null;
+
+
+
 
   return (
     <AppShell>

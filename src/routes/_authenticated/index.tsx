@@ -7,6 +7,7 @@ import { StoryCover } from "@/components/cover";
 import { useActiveChild } from "@/lib/active-child-context";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
+import { StreakBadge } from "@/components/streak-badge";
 
 type StoryRow = {
   id: string;
@@ -81,6 +82,11 @@ function HomePage() {
           <span className="inline-block animate-float">🌙</span>
         </h1>
         <p className="mb-6 text-foreground/65 text-lg">Ready for tonight's adventure?</p>
+        {activeChild && activeChild.streak_count > 0 && (
+          <div className="mb-6">
+            <StreakBadge count={activeChild.streak_count} />
+          </div>
+        )}
 
         <div className="mb-7 flex flex-wrap items-center gap-3">
           <ChildSwitcher />
