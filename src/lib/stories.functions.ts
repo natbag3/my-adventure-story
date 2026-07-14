@@ -204,15 +204,14 @@ OUTPUT — VALID JSON ONLY, this exact shape:
 }
 The "pages" array MUST contain exactly ${pageCount} items, numbered 1 to ${pageCount}.`;
 
-    const aiRes = await fetch("https://api.openai.com/v1/chat/completions", {
+    const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
-        temperature: 0.9,
+        model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
@@ -224,8 +223,8 @@ The "pages" array MUST contain exactly ${pageCount} items, numbered 1 to ${pageC
     if (!aiRes.ok) {
       const txt = await aiRes.text();
       if (aiRes.status === 429) throw new Error("Too many adventures right now. Please try again in a moment.");
-      if (aiRes.status === 401) throw new Error("OpenAI API key is invalid. Please check your configuration.");
-      if (aiRes.status === 402 || aiRes.status === 403) throw new Error("OpenAI quota exhausted. Please check your billing.");
+      if (aiRes.status === 402) throw new Error("AI credits exhausted. Please add credits to continue.");
+
       throw new Error(`AI request failed: ${aiRes.status} ${txt.slice(0, 200)}`);
     }
 
