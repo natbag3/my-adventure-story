@@ -13,7 +13,7 @@ type StoryRow = {
   child_id: string;
   title: string;
   theme: string | null;
-  is_favorite: boolean | null;
+  favorite: boolean | null;
   created_at: string;
 };
 
@@ -52,7 +52,7 @@ export const Route = createFileRoute("/api/public/hooks/weekly-digest")({
         // 1. All stories from the past week (grouped later by user)
         const { data: stories, error: storiesErr } = await supabaseAdmin
           .from("stories")
-          .select("id, child_id, user_id, title, theme, is_favorite, created_at")
+          .select("id, child_id, user_id, title, theme, favorite, created_at")
           .gte("created_at", sinceIso);
         if (storiesErr) {
           return Response.json(
@@ -138,7 +138,7 @@ export const Route = createFileRoute("/api/public/hooks/weekly-digest")({
 
           // Favourites this week (up to 3)
           const favourites = userStories
-            .filter((s) => s.is_favorite)
+            .filter((s) => s.favorite)
             .slice(0, 3)
             .map((s) => s.title);
 
