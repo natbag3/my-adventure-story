@@ -19,28 +19,46 @@ function genderEmoji(g: string | null | undefined) {
   return "🧒";
 }
 
+const VOICES = [
+  { id: "cgSgspJ2msm6clMCkdW9", flag: "🇺🇸", label: "Jessica", sub: "US · Female" },
+  { id: "pNInz6obpgDQGcFmaJgB", flag: "🇺🇸", label: "Adam", sub: "US · Male" },
+  { id: "XB0fDUnXU5powFXDhCwa", flag: "🇬🇧", label: "Charlotte", sub: "UK · Female" },
+  { id: "onwK4e9ZLuTAKqWW03F9", flag: "🇬🇧", label: "Daniel", sub: "UK · Male" },
+] as const;
+
 function SettingsPage() {
   const { user, signOut } = useAuth();
   const { children, activeChild, setActiveChildId, refresh } = useActiveChild();
   const navigate = useNavigate();
   const [parentName, setParentName] = useState<string>("");
   const [savingName, setSavingName] = useState(false);
+  const [isPremium, setIsPremium] = useState(false);
+  const [preferredVoice, setPreferredVoice] = useState<string>(VOICES[0].id);
+  const [savingVoice, setSavingVoice] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
     supabase
       .from("profiles")
-      .select("first_name, display_name")
+      .select("first_name, display_name, is_premium, preferred_voice")
       .eq("id", user.id)
       .maybeSingle()
       .then(({ data }) => {
+        const d = data as {
+          first_name?: string | null;
+          display_name?: string | null;
+          is_premium?: boolean | null;
+          preferred_voice?: string | null;
+        } | null;
         setParentName(
-          data?.first_name ||
-            data?.display_name ||
+          d?.first_name ||
+            d?.display_name ||
             (user.user_metadata?.display_name as string) ||
             user.email?.split("@")[0] ||
             "",
         );
+        setIsPremium(!!d?.is_premium);
+        if (d?.preferred_voice) setPreferredVoice(d.preferred_voice);
       });
   }, [user]);
 
@@ -55,6 +73,25 @@ function SettingsPage() {
     if (error) toast.error(error.message);
     else toast.success("Saved");
   }
+
+  async function pickVoice(voiceId: string) {
+    if (!user) return;
+    setSavingVoice(voiceId);
+    const prev = preferredVoice;
+    setPreferredVoice(voiceId);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ preferred_voice: voiceId } as never)
+      .eq("id", user.id);
+    setSavingVoice(null);
+    if (error) {
+      setPreferredVoice(prev);
+      toast.error(error.message);
+    } else {
+      toast.success("Narration voice updated");
+    }
+  }
+
 
   async function deleteChild(id: string, name: string) {
     if (!confirm(`Remove ${name}'s profile? This can't be undone.`)) return;
