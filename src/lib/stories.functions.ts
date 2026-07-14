@@ -137,6 +137,62 @@ export const generateStory = createServerFn({ method: "POST" })
 ${worldNotes ? worldNotes + "\n" : ""}${pastSummaries.length > 0 ? `Recent adventures ${primary.first_name} remembers:\n${pastSummaries.map((s, i) => `${i + 1}. ${s}`).join("\n")}\n` : ""}Weave in 1–2 gentle callbacks to past events where natural — "remember when…", a familiar character reappearing, or returning to a known place. Never retell past stories, just hint at shared history.\n`
         : "";
 
+    // Resolve or create the series (if any), and figure out which part number this is
+    type SeriesRow = {
+      id: string;
+      title: string;
+      total_parts: number;
+      current_part: number;
+      world_description: string;
+    };
+    let series: SeriesRow | null = null;
+    let seriesPart: number | null = null;
+    let isFinalPart = false;
+
+    if (data.newSeries) {
+      const { data: created, error: seriesErr } = await supabase
+        .from("story_series")
+        .insert({
+          user_id: userId,
+          child_id: data.childId,
+          title: data.newSeries.title,
+          world_description: data.newSeries.worldDescription,
+          total_parts: data.newSeries.totalParts ?? 5,
+          current_part: 1,
+        })
+        .select("id, title, total_parts, current_part, world_description")
+        .single();
+      if (seriesErr || !created) throw new Error("Could not start the series.");
+      series = created as SeriesRow;
+      seriesPart = 1;
+      isFinalPart = series.total_parts === 1;
+    } else if (data.seriesId) {
+      const { data: existing } = await supabase
+        .from("story_series")
+        .select("id, title, total_parts, current_part, world_description")
+        .eq("id", data.seriesId)
+        .eq("user_id", userId)
+        .maybeSingle();
+      if (!existing) throw new Error("Series not found.");
+      series = existing as SeriesRow;
+      seriesPart = Math.min(series.current_part, series.total_parts);
+      isFinalPart = seriesPart >= series.total_parts;
+    }
+
+    const seriesSection = series
+      ? `\nSERIES CONTEXT — This is Part ${seriesPart} of ${series.total_parts} in the series "${series.title}".
+Established series world (keep consistent with previous parts):
+${series.world_description}
+
+${
+  isFinalPart
+    ? `THIS IS THE FINAL PART. Wrap the series with a warm, satisfying conclusion — resolve the ongoing thread and give a full sense of closure on the final page.`
+    : `THIS IS NOT THE FINAL PART. End the story on a gentle cliffhanger — the final page should NOT fully resolve. Instead close on a note of curiosity, wonder, or anticipation that hints at what comes next. Example tone: "But just as they were about to leave, they spotted something glowing behind the waterfall…" Keep it warm and bedtime-safe — curiosity, not fear.`
+}
+`
+      : "";
+
+
     const systemPrompt = `You are a world-class children's picture book author for Adventure Club, writing in the rhythm and style of Julia Donaldson (The Gruffalo, Room on the Broom) and Lynley Dodd (Hairy Maclary). You craft magical, gently rhyming bedtime picture books — short, lyrical, easy to read aloud. The named child(ren) are ALWAYS the heroes. You silently follow a two-stage process and only return the final story as valid JSON. No markdown. No commentary.`;
 
     const multiNote =
