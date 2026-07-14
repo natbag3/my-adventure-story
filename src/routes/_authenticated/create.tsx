@@ -502,6 +502,51 @@ function CreateWizard() {
 
         {step === 1 && (
           <StepWrap title="Where shall we go?">
+            <div className="mb-8">
+              <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-star/80">
+                ✨ Special
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {seasonalOptions.map((s) => {
+                  const selected = adventure === s.theme;
+                  return (
+                    <button
+                      key={s.id}
+                      disabled={!s.active}
+                      onClick={() => {
+                        if (!s.active) return;
+                        setAdventure(s.theme);
+                        setStep(2);
+                      }}
+                      className={cn(
+                        "relative flex flex-col items-center gap-2 rounded-2xl border p-4 text-center transition-all",
+                        !s.active
+                          ? "border-hairline bg-surface-elevated/40 opacity-50 cursor-not-allowed"
+                          : selected
+                          ? "border-star bg-star/15 shadow-[0_0_0_2px_oklch(0.85_0.16_88/0.4),0_10px_30px_-10px_oklch(0.85_0.16_88/0.6)]"
+                          : "border-star/60 bg-gradient-to-br from-star/10 to-peach/5 shadow-[0_0_0_1px_oklch(0.85_0.16_88/0.5),0_10px_30px_-15px_oklch(0.85_0.16_88/0.5)] hover:-translate-y-0.5",
+                      )}
+                    >
+                      <span className={cn("text-3xl", !s.active && "grayscale")}>{s.emoji}</span>
+                      <span className="text-sm font-medium text-foreground">{s.label}</span>
+                      {s.active ? (
+                        <span className="font-mono text-[9px] uppercase tracking-widest text-star">
+                          {s.unlockLabel}
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1 font-mono text-[9px] uppercase tracking-widest text-foreground/50">
+                          🔒 {s.unlockLabel}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-foreground/45">
+              All adventures
+            </p>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
               {ADVENTURES.map((a) => (
                 <button
