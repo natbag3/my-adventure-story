@@ -47,6 +47,7 @@ function LibraryPage() {
   const { user } = useAuth();
   const { activeChild, children } = useActiveChild();
   const [stories, setStories] = useState<StoryRow[]>([]);
+  const [seriesList, setSeriesList] = useState<SeriesRow[]>([]);
   const [query, setQuery] = useState("");
   const [scope, setScope] = useState<"active" | "all">("active");
   const [favoritesOnly, setFavoritesOnly] = useState(false);
@@ -55,15 +56,24 @@ function LibraryPage() {
   useEffect(() => {
     if (!user) return;
     setLoading(true);
-    supabase
-      .from("stories")
-      .select("id, title, theme, mood, lesson, length_minutes, cover_emoji, cover_gradient, favorite, created_at, child_id")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .then(({ data }) => {
-        setStories((data ?? []) as StoryRow[]);
-        setLoading(false);
-      });
+    Promise.all([
+      supabase
+        .from("stories")
+        .select(
+          "id, title, theme, mood, lesson, length_minutes, cover_emoji, cover_gradient, favorite, created_at, child_id, series_id, series_part",
+        )
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("story_series")
+        .select("id, title, total_parts, current_part, child_id")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false }),
+    ]).then(([storiesRes, seriesRes]) => {
+      setStories((storiesRes.data ?? []) as StoryRow[]);
+      setSeriesList((seriesRes.data ?? []) as SeriesRow[]);
+      setLoading(false);
+    });
   }, [user]);
 
   const filtered = stories.filter((s) => {
@@ -72,6 +82,10 @@ function LibraryPage() {
     if (query && !s.title.toLowerCase().includes(query.toLowerCase()) && !s.theme.toLowerCase().includes(query.toLowerCase())) return false;
     return true;
   });
+
+  const visibleSeries = seriesList.filter(
+    (s) => scope === "all" || !activeChild || s.child_id === activeChild.id,
+  );
 
   return (
     <AppShell>
