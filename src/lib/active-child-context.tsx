@@ -17,6 +17,8 @@ export type ActiveChild = {
   date_of_birth: string | null;
   avatar_emoji: string | null;
   portrait_url: string | null;
+  streak_count: number;
+  last_story_read_date: string | null;
 };
 
 type Ctx = {
