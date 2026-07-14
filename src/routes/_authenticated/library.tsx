@@ -145,7 +145,26 @@ function LibraryPage() {
         >
           ★ Favorites
         </button>
+        {activeChild &&
+          stories.filter((s) => s.child_id === activeChild.id).length >= 5 && (
+            <button
+              onClick={() => setBookOpen(true)}
+              className="rounded-full border border-lavender/40 bg-lavender/10 px-4 py-3 text-sm font-medium text-lavender hover:bg-lavender/20 transition-colors"
+            >
+              📚 Create Story Book
+            </button>
+          )}
       </div>
+
+      {activeChild && (
+        <StoryBookModal
+          open={bookOpen}
+          onOpenChange={setBookOpen}
+          childId={activeChild.id}
+          childName={activeChild.first_name}
+          stories={stories.filter((s) => s.child_id === activeChild.id)}
+        />
+      )}
 
       {visibleSeries.length > 0 && (
         <section className="mb-10 animate-slide-up">
