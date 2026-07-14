@@ -185,6 +185,15 @@ function CreateWizard() {
   const [prepDone, setPrepDone] = useState(0);
   const [prepStage, setPrepStage] = useState<"writing" | "painting" | "binding">("writing");
   const [error, setError] = useState<string | null>(null);
+  // Series state
+  const [seriesMode, setSeriesMode] = useState<"oneoff" | "continue" | "new">("oneoff");
+  const [seriesId, setSeriesId] = useState<string | null>(null);
+  const [newSeriesTitle, setNewSeriesTitle] = useState("");
+  const [newSeriesWorld, setNewSeriesWorld] = useState("");
+  const [newSeriesTotalParts, setNewSeriesTotalParts] = useState(5);
+  const [activeSeries, setActiveSeries] = useState<
+    Array<{ id: string; title: string; total_parts: number; current_part: number; child_id: string }>
+  >([]);
   const generateFn = useServerFn(generateStory);
   const generateImageFn = useServerFn(generateStoryPageImage);
 
