@@ -178,6 +178,7 @@ function StoryReader() {
       <div className="mb-6 flex items-center justify-between animate-fade-in">
         <Link to="/library" className="text-xs text-foreground/55 hover:text-foreground">← Library</Link>
         <div className="flex items-center gap-2">
+          <IconBtn label="Share" onClick={shareStory}>🔗</IconBtn>
           <IconBtn label="Favorite" onClick={toggleFavorite} active={favorite}>★</IconBtn>
         </div>
       </div>
