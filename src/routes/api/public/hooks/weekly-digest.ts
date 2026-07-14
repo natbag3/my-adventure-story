@@ -28,13 +28,13 @@ export const Route = createFileRoute("/api/public/hooks/weekly-digest")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const cronSecret = process.env.WEEKLY_DIGEST_CRON_SECRET;
         const resendKey = process.env.RESEND_API_KEY;
+        const expectedApiKey = process.env.SUPABASE_PUBLISHABLE_KEY;
 
-        // Simple bearer-secret auth so the endpoint isn't openly triggerable.
-        const auth = request.headers.get("authorization") ?? "";
-        const provided = auth.replace(/^Bearer\s+/i, "").trim();
-        if (!cronSecret || provided !== cronSecret) {
+        // Gate with the project anon/publishable key — matches the documented
+        // pg_cron `apikey` header pattern for internal scheduled calls.
+        const apiKey = request.headers.get("apikey") ?? "";
+        if (!expectedApiKey || apiKey !== expectedApiKey) {
           return new Response("Unauthorized", { status: 401 });
         }
         if (!resendKey) {
