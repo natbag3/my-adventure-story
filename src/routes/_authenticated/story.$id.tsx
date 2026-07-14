@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { generateStoryPageImage } from "@/lib/story-images.functions";
 import { bumpReadingStreak } from "@/lib/streak";
 import { useActiveChild } from "@/lib/active-child-context";
+import { toast } from "sonner";
 
 type StoryPage = { text: string; illustration_prompt?: string; image_url?: string | null };
 type StoryRow = {
