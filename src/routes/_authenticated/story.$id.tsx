@@ -128,6 +128,17 @@ function StoryReader() {
     await supabase.from("stories").update({ favorite: next }).eq("id", story.id);
   }
 
+  async function shareStory() {
+    if (!story) return;
+    const url = `${window.location.origin}/share/${story.share_token}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("Link copied!", { description: "Share it with anyone." });
+    } catch {
+      toast.error("Couldn't copy link", { description: url });
+    }
+  }
+
   if (loading) {
     return (
       <AppShell>
