@@ -114,7 +114,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <main className="relative z-10 mx-auto max-w-6xl px-5 py-10 md:py-14">{children}</main>
 
-      <nav className="fixed bottom-3 left-1/2 z-40 -translate-x-1/2">
+      <nav className="fixed bottom-3 left-1/2 z-40 -translate-x-1/2 md:hidden">
         <div className="flex items-center gap-1 rounded-full border border-hairline bg-background/85 px-2 py-1.5 backdrop-blur-xl shadow-lg">
           {NAV.map((item) => {
             const active =
