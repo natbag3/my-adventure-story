@@ -333,6 +333,10 @@ export type Database = {
           streak_count: number
         }[]
       }
+      set_story_page_audio_url: {
+        Args: { p_audio_url: string; p_page_index: number; p_story_id: string }
+        Returns: undefined
+      }
       set_story_page_image_url: {
         Args: { p_image_url: string; p_page_index: number; p_story_id: string }
         Returns: undefined
