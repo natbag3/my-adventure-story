@@ -189,6 +189,7 @@ function CreateWizard() {
   >([]);
   const generateFn = useServerFn(generateStory);
   const generateImageFn = useServerFn(generateStoryPageImage);
+  const generateCoverFn = useServerFn(generateStoryCoverImage);
 
   // Fetch the user's pets once.
   useEffect(() => {
