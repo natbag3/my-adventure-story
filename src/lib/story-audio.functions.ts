@@ -113,7 +113,7 @@ export const generateStoryPageAudio = createServerFn({ method: "POST" })
         }
         audioBytes = new Uint8Array(await ttsRes.arrayBuffer());
       }
-      const audioBytes = new Uint8Array(await ttsRes.arrayBuffer());
+      
 
       const { error: upErr } = await supabase.storage
         .from("story-audio")
