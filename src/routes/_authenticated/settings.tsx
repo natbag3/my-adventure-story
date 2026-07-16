@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { openFeedbackDialog } from "@/components/feedback-dialog";
+import { VoicePickerGrid, type NarrationVoiceKey } from "@/components/voice-picker";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({ meta: [{ title: "Profile — Adventure Club" }] }),
