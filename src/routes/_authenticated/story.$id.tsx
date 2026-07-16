@@ -58,6 +58,10 @@ function StoryReader() {
   const [page, setPage] = useState(0);
   const [favorite, setFavorite] = useState(false);
   const [isPremium, setIsPremium] = useState(false);
+  const [narrationVoice, setNarrationVoice] = useState<NarrationVoiceKey | null>(null);
+  const [voicePickerOpen, setVoicePickerOpen] = useState(false);
+  const [savingVoice, setSavingVoice] = useState(false);
+  const pendingPageRef = useRef<number | null>(null);
   const [playingIdx, setPlayingIdx] = useState<number | null>(null);
   const [loadingAudioIdx, setLoadingAudioIdx] = useState<number | null>(null);
   const audioCacheRef = useRef<Map<number, string>>(new Map());
@@ -67,11 +71,13 @@ function StoryReader() {
     if (!user) return;
     supabase
       .from("profiles")
-      .select("is_premium")
+      .select("is_premium, narration_voice")
       .eq("id", user.id)
       .maybeSingle()
       .then(({ data }) => {
-        setIsPremium(!!(data as { is_premium?: boolean } | null)?.is_premium);
+        const d = data as { is_premium?: boolean; narration_voice?: NarrationVoiceKey | null } | null;
+        setIsPremium(!!d?.is_premium);
+        setNarrationVoice(d?.narration_voice ?? null);
       });
   }, [user]);
 
