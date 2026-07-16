@@ -11,7 +11,6 @@ type ChildRow = {
   id: string;
   first_name: string;
   nickname: string | null;
-  avatar_emoji: string | null;
   portrait_url: string | null;
   date_of_birth: string | null;
   personality_traits: string[];
@@ -67,7 +66,7 @@ function AdventurersPage() {
     Promise.all([
       supabase
         .from("children")
-        .select("id, first_name, nickname, avatar_emoji, portrait_url, date_of_birth, personality_traits, favorite_animals, favorite_foods, favorite_colors, hair_color, eye_color")
+        .select("id, first_name, nickname, portrait_url, date_of_birth, personality_traits, favorite_animals, favorite_foods, favorite_colors, hair_color, eye_color")
         .eq("user_id", user.id)
         .order("created_at", { ascending: true }),
       supabase
