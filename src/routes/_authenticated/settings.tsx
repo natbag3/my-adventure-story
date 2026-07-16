@@ -24,12 +24,6 @@ export const Route = createFileRoute("/_authenticated/settings")({
   component: SettingsPage,
 });
 
-const VOICES = [
-  { id: "cgSgspJ2msm6clMCkdW9", flag: "🇺🇸", label: "Jessica", sub: "US · Female" },
-  { id: "pNInz6obpgDQGcFmaJgB", flag: "🇺🇸", label: "Adam", sub: "US · Male" },
-  { id: "XB0fDUnXU5powFXDhCwa", flag: "🇬🇧", label: "Charlotte", sub: "UK · Female" },
-  { id: "onwK4e9ZLuTAKqWW03F9", flag: "🇬🇧", label: "Daniel", sub: "UK · Male" },
-] as const;
 
 function SettingsPage() {
   const { user, signOut } = useAuth();
