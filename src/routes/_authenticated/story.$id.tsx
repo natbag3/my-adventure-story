@@ -394,7 +394,7 @@ function StoryReader() {
                     isPremium={isPremium}
                     isPlaying={playingIdx === storyPageIdx}
                     isLoading={loadingAudioIdx === storyPageIdx}
-                    onClick={() => togglePlay(storyPageIdx)}
+                    onClick={() => handleNarrateClick(storyPageIdx)}
                   />
                 </div>
                 <p className="font-display text-xl md:text-2xl leading-relaxed text-ink text-balance">
