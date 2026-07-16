@@ -14,6 +14,7 @@ export type SharedStory = {
   lesson: string;
   length_minutes: number;
   cover_emoji: string;
+  cover_url: string | null;
   cover_gradient: string;
   pages: SharedStoryPage[];
   child_first_name: string;
@@ -30,7 +31,7 @@ export const getSharedStory = createServerFn({ method: "GET" })
     const { data: story, error } = await supabaseAdmin
       .from("stories")
       .select(
-        "id, title, theme, mood, lesson, length_minutes, cover_emoji, cover_gradient, pages, child_id",
+        "id, title, theme, mood, lesson, length_minutes, cover_emoji, cover_gradient, cover_url, pages, child_id",
       )
       .eq("share_token", data.token)
       .maybeSingle();
@@ -57,6 +58,14 @@ export const getSharedStory = createServerFn({ method: "GET" })
       }),
     );
 
+    let coverUrl: string | null = null;
+    if (story.cover_url) {
+      const { data: signedCover } = await supabaseAdmin.storage
+        .from("adventurer-photos")
+        .createSignedUrl(story.cover_url, 60 * 60 * 24);
+      coverUrl = signedCover?.signedUrl ?? null;
+    }
+
     return {
       id: story.id,
       title: story.title,
@@ -66,6 +75,7 @@ export const getSharedStory = createServerFn({ method: "GET" })
       length_minutes: story.length_minutes,
       cover_emoji: story.cover_emoji,
       cover_gradient: story.cover_gradient,
+      cover_url: coverUrl,
       pages: signedPages,
       child_first_name: child?.first_name ?? "",
     };

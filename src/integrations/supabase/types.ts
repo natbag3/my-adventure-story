@@ -199,6 +199,7 @@ export type Database = {
           co_star_ids: string[]
           cover_emoji: string
           cover_gradient: string
+          cover_url: string | null
           created_at: string
           favorite: boolean
           id: string
@@ -221,6 +222,7 @@ export type Database = {
           co_star_ids?: string[]
           cover_emoji?: string
           cover_gradient?: string
+          cover_url?: string | null
           created_at?: string
           favorite?: boolean
           id?: string
@@ -243,6 +245,7 @@ export type Database = {
           co_star_ids?: string[]
           cover_emoji?: string
           cover_gradient?: string
+          cover_url?: string | null
           created_at?: string
           favorite?: boolean
           id?: string
@@ -332,6 +335,10 @@ export type Database = {
           last_story_read_date: string
           streak_count: number
         }[]
+      }
+      set_story_cover_url: {
+        Args: { p_cover_url: string; p_story_id: string }
+        Returns: undefined
       }
       set_story_page_audio_url: {
         Args: { p_audio_url: string; p_page_index: number; p_story_id: string }

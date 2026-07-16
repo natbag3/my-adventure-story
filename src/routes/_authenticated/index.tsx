@@ -14,6 +14,7 @@ type StoryRow = {
   title: string;
   theme: string;
   cover_emoji: string;
+  cover_url: string | null;
   cover_gradient: string;
   length_minutes: number;
   progress: number;
@@ -52,7 +53,7 @@ function HomePage() {
     }
     supabase
       .from("stories")
-      .select("id, title, theme, cover_emoji, cover_gradient, length_minutes, progress, child_id")
+      .select("id, title, theme, cover_emoji, cover_gradient, cover_url, length_minutes, progress, child_id")
       .eq("user_id", user.id)
       .eq("child_id", activeChild.id)
       .order("created_at", { ascending: false })
@@ -142,6 +143,7 @@ function HomePage() {
               <StoryCover
                 emoji={inProgress.cover_emoji}
                 gradient={inProgress.cover_gradient}
+                coverPath={inProgress.cover_url}
                 className="h-full w-full"
                 size="xl"
               />

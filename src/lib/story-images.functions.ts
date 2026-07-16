@@ -7,6 +7,10 @@ const Input = z.object({
   pageIndex: z.number().int().min(0),
 });
 
+const CoverInput = z.object({
+  storyId: z.string().uuid(),
+});
+
 type PageObj = {
   text?: string;
   illustration_prompt?: string;
@@ -110,4 +114,66 @@ export const generateStoryPageImage = createServerFn({ method: "POST" })
     if (updErr) throw new Error(`Could not save illustration reference: ${updErr.message}`);
 
     return { imagePath: path };
+  });
+
+export const generateStoryCoverImage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) => CoverInput.parse(i))
+  .handler(async ({ data, context }) => {
+    const apiKey = process.env.FAL_KEY;
+    if (!apiKey) throw new Error("FAL API key is not configured.");
+    const { supabase, userId } = context;
+
+    const { data: story, error } = await supabase
+      .from("stories")
+      .select("id, title, theme, mood, cover_url, child_id, co_star_ids")
+      .eq("id", data.storyId)
+      .eq("user_id", userId)
+      .single();
+    if (error || !story) throw new Error("Story not found.");
+    if (story.cover_url) return { coverPath: story.cover_url as string };
+
+    const heroIds = [story.child_id, ...((story.co_star_ids as string[] | null) ?? [])];
+    const { data: kids } = await supabase
+      .from("children")
+      .select("id, first_name, gender, hair_color, hair_style, eye_color, skin_tone, freckles, glasses, outfit_color")
+      .in("id", heroIds);
+    const orderedKids = heroIds
+      .map((id) => (kids ?? []).find((k) => k.id === id))
+      .filter(Boolean) as NonNullable<typeof kids>;
+    const heroDescriptions = orderedKids.map(describeChild).join("; ");
+
+    const prompt = `A storybook cover illustration titled "${story.title}". Scene: ${
+      heroDescriptions ? `${heroDescriptions} on an adventure in ${story.theme.toLowerCase()}.` : `A magical ${story.theme.toLowerCase()} adventure.`
+    } ${story.mood ? `${story.mood} atmosphere.` : ""} Warm painterly Pixar/Disney children's book cover style, hero centered and heroic, rich background world, cinematic lighting, portrait orientation, no text, no title, no logos, no watermarks.`;
+
+    const aiRes = await fetch("https://fal.run/fal-ai/flux/dev", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Key ${apiKey}` },
+      body: JSON.stringify({ prompt, image_size: "portrait_4_3", num_images: 1 }),
+    });
+    if (!aiRes.ok) {
+      const txt = await aiRes.text();
+      throw new Error(`Cover generation failed: ${aiRes.status} ${txt.slice(0, 200)}`);
+    }
+    const aiJson = await aiRes.json();
+    const imageUrl: string | undefined = aiJson?.images?.[0]?.url;
+    if (!imageUrl) throw new Error("Cover generation returned no image.");
+    const imgRes = await fetch(imageUrl);
+    if (!imgRes.ok) throw new Error(`Could not download cover: ${imgRes.status}`);
+    const bytes = new Uint8Array(await imgRes.arrayBuffer());
+
+    const path = `${userId}/stories/${data.storyId}/cover.png`;
+    const { error: upErr } = await supabase.storage
+      .from("adventurer-photos")
+      .upload(path, bytes, { contentType: "image/png", upsert: true });
+    if (upErr) throw new Error(`Could not store cover: ${upErr.message}`);
+
+    const { error: updErr } = await supabase.rpc(
+      "set_story_cover_url" as never,
+      { p_story_id: data.storyId, p_cover_url: path } as never,
+    );
+    if (updErr) throw new Error(`Could not save cover reference: ${updErr.message}`);
+
+    return { coverPath: path };
   });

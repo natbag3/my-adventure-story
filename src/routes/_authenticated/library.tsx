@@ -18,6 +18,7 @@ type StoryRow = {
   lesson: string;
   length_minutes: number;
   cover_emoji: string;
+  cover_url: string | null;
   cover_gradient: string;
   favorite: boolean;
   created_at: string;
@@ -62,7 +63,7 @@ function LibraryPage() {
       supabase
         .from("stories")
         .select(
-          "id, title, theme, mood, lesson, length_minutes, cover_emoji, cover_gradient, favorite, created_at, child_id, series_id, series_part",
+          "id, title, theme, mood, lesson, length_minutes, cover_emoji, cover_gradient, cover_url, favorite, created_at, child_id, series_id, series_part",
         )
         .eq("user_id", user.id)
         .order("created_at", { ascending: false }),
@@ -220,6 +221,7 @@ function LibraryPage() {
                             <StoryCover
                               emoji={story.cover_emoji}
                               gradient={story.cover_gradient}
+                              coverPath={story.cover_url}
                               className="aspect-[4/3] mb-2"
                               size="lg"
                             />
@@ -268,7 +270,7 @@ function LibraryPage() {
               style={{ animationDelay: `${i * 60}ms` }}
               className="group block animate-slide-up rounded-[28px] border border-hairline bg-surface/60 p-4 transition-all hover:-translate-y-1 hover:bg-surface"
             >
-              <StoryCover emoji={s.cover_emoji} gradient={s.cover_gradient} className="aspect-[4/3] mb-4" size="lg" />
+              <StoryCover emoji={s.cover_emoji} gradient={s.cover_gradient} coverPath={s.cover_url} className="aspect-[4/3] mb-4" size="lg" />
               <div className="px-1">
                 <div className="mb-1 flex items-center justify-between">
                   <span className="font-mono text-[10px] uppercase tracking-wider text-foreground/45">

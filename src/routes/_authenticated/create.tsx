@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useActiveChild } from "@/lib/active-child-context";
 import { generateStory } from "@/lib/stories.functions";
-import { generateStoryPageImage } from "@/lib/story-images.functions";
+import { generateStoryPageImage, generateStoryCoverImage } from "@/lib/story-images.functions";
 
 function calcAge(dob: string | null) {
   if (!dob) return null;
@@ -189,6 +189,7 @@ function CreateWizard() {
   >([]);
   const generateFn = useServerFn(generateStory);
   const generateImageFn = useServerFn(generateStoryPageImage);
+  const generateCoverFn = useServerFn(generateStoryCoverImage);
 
   // Fetch the user's pets once.
   useEffect(() => {
@@ -306,6 +307,12 @@ function CreateWizard() {
       setPrepTotal(pages.length);
       setPrepDone(pages.length - missing.length);
 
+      // Kick off the cover illustration in parallel with page illustrations.
+      const coverPromise = generateCoverFn({ data: { storyId: result.storyId } }).catch((e) => {
+        console.error("Cover failed", e);
+        return null;
+      });
+
       const results: Array<unknown | null> = [];
       for (const { i } of missing) {
         try {
@@ -328,6 +335,7 @@ function CreateWizard() {
       }
 
       setPrepStage("binding");
+      await coverPromise;
       await new Promise((r) => setTimeout(r, 600));
       navigate({ to: "/story/$id", params: { id: result.storyId } });
     } catch (e) {

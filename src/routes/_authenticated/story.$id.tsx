@@ -22,6 +22,7 @@ type StoryRow = {
   lesson: string;
   length_minutes: number;
   cover_emoji: string;
+  cover_url: string | null;
   cover_gradient: string;
   pages: StoryPage[];
   favorite: boolean;
@@ -79,7 +80,7 @@ function StoryReader() {
       setLoading(true);
       const { data, error } = await supabase
         .from("stories")
-        .select("id, title, theme, mood, lesson, length_minutes, cover_emoji, cover_gradient, pages, favorite, child_id, share_token")
+        .select("id, title, theme, mood, lesson, length_minutes, cover_emoji, cover_gradient, cover_url, pages, favorite, child_id, share_token")
         .eq("id", id)
         .maybeSingle();
       if (cancelled) return;
@@ -118,7 +119,7 @@ function StoryReader() {
         // Refetch the row so updated image_url values are reflected.
         const { data: refreshed } = await supabase
           .from("stories")
-          .select("id, title, theme, mood, lesson, length_minutes, cover_emoji, cover_gradient, pages, favorite, child_id, share_token")
+          .select("id, title, theme, mood, lesson, length_minutes, cover_emoji, cover_gradient, cover_url, pages, favorite, child_id, share_token")
           .eq("id", id)
           .maybeSingle();
         if (!cancelled) {
@@ -299,7 +300,7 @@ function StoryReader() {
         >
           {isCover ? (
             <div className="p-2">
-              <StoryCover emoji={story.cover_emoji} gradient={story.cover_gradient} className="aspect-[4/5]" size="xl" />
+              <StoryCover emoji={story.cover_emoji} gradient={story.cover_gradient} coverPath={story.cover_url} className="aspect-[4/5]" size="xl" />
               <div className="px-8 py-10 text-center">
                 <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-ink/50">
                   An adventure starring {childName}
