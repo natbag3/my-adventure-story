@@ -265,7 +265,7 @@ LANGUAGE SAFETY (STRICT — bedtime-safe only):
 - If ANY adult or complex word slips in during drafting, silently rewrite that line before output.
 
 STRUCTURE across ${pageCount} pages (map the 5-part arc to these pages):
-- Page 1${pageCount >= 6 ? "–2" : ""}: OPENING — introduce ${heroLabel} and the magical setting; hint at the adventure.
+- Page 1${pageCount >= 6 ? "–2" : ""}: OPENING — hook with action, atmosphere, mystery or a striking sensory detail; ${heroLabel}'s name appears within the first two lines; do NOT describe physical appearance.
 - Next 2–3 pages: THE PROBLEM/QUEST kicks in, then RISING ACTION with escalating obstacles.
 - Penultimate page (or the one before): CLIMAX — the biggest, most exciting moment.
 - Final page: ${
