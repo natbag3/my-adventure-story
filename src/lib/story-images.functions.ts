@@ -174,16 +174,17 @@ export const generateStoryCoverImage = createServerFn({ method: "POST" })
     const heroIds = [story.child_id, ...((story.co_star_ids as string[] | null) ?? [])];
     const { data: kids } = await supabase
       .from("children")
-      .select("id, first_name, gender, hair_color, hair_style, eye_color, skin_tone, freckles, glasses, outfit_color")
+      .select("id, first_name, date_of_birth, gender, hair_color, hair_style, eye_color, skin_tone, freckles, glasses, outfit_color")
       .in("id", heroIds);
     const orderedKids = heroIds
       .map((id) => (kids ?? []).find((k) => k.id === id))
       .filter(Boolean) as NonNullable<typeof kids>;
     const heroDescriptions = orderedKids.map(describeChild).join("; ");
+    const mainCharacter = orderedKids[0] ? characterReference(orderedKids[0]) : "";
 
-    const prompt = `A storybook cover illustration titled "${story.title}". Scene: ${
+    const prompt = `${mainCharacter} Maintain this exact character appearance consistently. A storybook cover illustration titled "${story.title}". Scene: ${
       heroDescriptions ? `${heroDescriptions} on an adventure in ${story.theme.toLowerCase()}.` : `A magical ${story.theme.toLowerCase()} adventure.`
-    } ${story.mood ? `${story.mood} atmosphere.` : ""} Warm painterly Pixar/Disney children's book cover style, hero centered and heroic, rich background world, cinematic lighting, portrait orientation, no text, no title, no logos, no watermarks.`;
+    } ${story.mood ? `${story.mood} atmosphere.` : ""} Warm painterly Pixar/Disney children's book cover style, hero centered and heroic, rich background world, cinematic lighting, portrait orientation, no text, no title, no logos, no watermarks. ${STYLE_ANCHOR}`;
 
     const aiRes = await fetch("https://fal.run/fal-ai/flux/dev", {
       method: "POST",
