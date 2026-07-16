@@ -15,20 +15,24 @@ type PageObj = {
   [k: string]: unknown;
 };
 
-const NARRATION_VOICE_MAP: Record<string, string> = {
-  us_female: "ws2FOzqnmYGWrHKuLOEA", // Charlotte
-  us_male: "G8PV54VHq7ixzyt4p91v", // Adam
-  uk_female: "5lZLOKBuHnNE1axAo7W9", // Natalie
-  uk_male: "QaNYLA77MCFZ5tpoVsQn", // Daniel
+type VoiceRoute =
+  | { provider: "elevenlabs"; voiceId: string }
+  | { provider: "openai"; voice: string; model: string };
+
+const NARRATION_ROUTES: Record<string, VoiceRoute> = {
+  uk_female: { provider: "elevenlabs", voiceId: "5lZLOKBuHnNE1axAo7W9" }, // Natalie
+  uk_male: { provider: "openai", voice: "fable", model: "tts-1-hd" }, // Daniel
+  us_male: { provider: "openai", voice: "alloy", model: "tts-1-hd" }, // Adam
+  us_female: { provider: "openai", voice: "sage", model: "tts-1-hd" }, // Charlotte
 };
-const DEFAULT_NARRATION_VOICE_ID = NARRATION_VOICE_MAP.uk_female;
+const DEFAULT_ROUTE: VoiceRoute = NARRATION_ROUTES.uk_female;
 
 export const generateStoryPageAudio = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => Input.parse(i))
   .handler(async ({ data, context }) => {
-    const apiKey = process.env.ELEVENLABS_API_KEY;
-    if (!apiKey) throw new Error("ElevenLabs API key is not configured.");
+    const elevenKey = process.env.ELEVENLABS_API_KEY;
+    const openaiKey = process.env.OPENAI_API_KEY;
     const { supabase, userId } = context;
 
     // Check premium + get voice preference
@@ -39,7 +43,7 @@ export const generateStoryPageAudio = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!profile?.is_premium) throw new Error("Audio narration is a premium feature.");
     const pref = (profile as { narration_voice?: string | null } | null)?.narration_voice;
-    const voiceId = (pref && NARRATION_VOICE_MAP[pref]) || DEFAULT_NARRATION_VOICE_ID;
+    const route: VoiceRoute = (pref && NARRATION_ROUTES[pref]) || DEFAULT_ROUTE;
 
     const { data: story, error } = await supabase
       .from("stories")
@@ -60,31 +64,56 @@ export const generateStoryPageAudio = createServerFn({ method: "POST" })
       const text = (page.text ?? "").trim();
       if (!text) throw new Error("Page has no text to narrate.");
 
-      const ttsRes = await fetch(
-        `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=mp3_44100_128`,
-        {
+      let audioBytes: Uint8Array;
+      if (route.provider === "elevenlabs") {
+        if (!elevenKey) throw new Error("ElevenLabs API key is not configured.");
+        const ttsRes = await fetch(
+          `https://api.elevenlabs.io/v1/text-to-speech/${route.voiceId}?output_format=mp3_44100_128`,
+          {
+            method: "POST",
+            headers: {
+              "xi-api-key": elevenKey,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              text,
+              model_id: "eleven_multilingual_v2",
+              voice_settings: {
+                stability: 0.5,
+                similarity_boost: 0.75,
+                style: 0.3,
+                use_speaker_boost: true,
+              },
+            }),
+          },
+        );
+        if (!ttsRes.ok) {
+          const errBody = await ttsRes.text();
+          throw new Error(`Narration failed: ${ttsRes.status} ${errBody.slice(0, 200)}`);
+        }
+        audioBytes = new Uint8Array(await ttsRes.arrayBuffer());
+      } else {
+        if (!openaiKey) throw new Error("OpenAI API key is not configured.");
+        const ttsRes = await fetch("https://api.openai.com/v1/audio/speech", {
           method: "POST",
           headers: {
-            "xi-api-key": apiKey,
+            Authorization: `Bearer ${openaiKey}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            text,
-            model_id: "eleven_multilingual_v2",
-            voice_settings: {
-              stability: 0.5,
-              similarity_boost: 0.75,
-              style: 0.3,
-              use_speaker_boost: true,
-            },
+            model: route.model,
+            voice: route.voice,
+            input: text,
+            response_format: "mp3",
           }),
-        },
-      );
-      if (!ttsRes.ok) {
-        const errBody = await ttsRes.text();
-        throw new Error(`Narration failed: ${ttsRes.status} ${errBody.slice(0, 200)}`);
+        });
+        if (!ttsRes.ok) {
+          const errBody = await ttsRes.text();
+          throw new Error(`Narration failed: ${ttsRes.status} ${errBody.slice(0, 200)}`);
+        }
+        audioBytes = new Uint8Array(await ttsRes.arrayBuffer());
       }
-      const audioBytes = new Uint8Array(await ttsRes.arrayBuffer());
+      
 
       const { error: upErr } = await supabase.storage
         .from("story-audio")
