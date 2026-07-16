@@ -38,6 +38,8 @@ function SettingsPage() {
   const [isPremium, setIsPremium] = useState(false);
   const [preferredVoice, setPreferredVoice] = useState<string>(VOICES[0].id);
   const [savingVoice, setSavingVoice] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!user) return;
