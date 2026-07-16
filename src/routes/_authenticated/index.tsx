@@ -143,6 +143,7 @@ function HomePage() {
               <StoryCover
                 emoji={inProgress.cover_emoji}
                 gradient={inProgress.cover_gradient}
+                coverPath={inProgress.cover_url}
                 className="h-full w-full"
                 size="xl"
               />
