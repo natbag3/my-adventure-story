@@ -14,6 +14,7 @@ export type SharedStory = {
   lesson: string;
   length_minutes: number;
   cover_emoji: string;
+  cover_url: string | null;
   cover_gradient: string;
   pages: SharedStoryPage[];
   child_first_name: string;

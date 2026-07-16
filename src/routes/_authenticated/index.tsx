@@ -14,6 +14,7 @@ type StoryRow = {
   title: string;
   theme: string;
   cover_emoji: string;
+  cover_url: string | null;
   cover_gradient: string;
   length_minutes: number;
   progress: number;

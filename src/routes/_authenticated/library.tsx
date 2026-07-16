@@ -18,6 +18,7 @@ type StoryRow = {
   lesson: string;
   length_minutes: number;
   cover_emoji: string;
+  cover_url: string | null;
   cover_gradient: string;
   favorite: boolean;
   created_at: string;
