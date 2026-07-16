@@ -15,13 +15,17 @@ type PageObj = {
   [k: string]: unknown;
 };
 
-const NARRATION_VOICE_MAP: Record<string, string> = {
-  us_female: "ws2FOzqnmYGWrHKuLOEA", // Charlotte
-  us_male: "G8PV54VHq7ixzyt4p91v", // Adam
-  uk_female: "5lZLOKBuHnNE1axAo7W9", // Natalie
-  uk_male: "QaNYLA77MCFZ5tpoVsQn", // Daniel
+type VoiceRoute =
+  | { provider: "elevenlabs"; voiceId: string }
+  | { provider: "openai"; voice: string; model: string };
+
+const NARRATION_ROUTES: Record<string, VoiceRoute> = {
+  uk_female: { provider: "elevenlabs", voiceId: "5lZLOKBuHnNE1axAo7W9" }, // Natalie
+  uk_male: { provider: "openai", voice: "fable", model: "tts-1-hd" }, // Daniel
+  us_male: { provider: "openai", voice: "alloy", model: "tts-1-hd" }, // Adam
+  us_female: { provider: "openai", voice: "sage", model: "tts-1-hd" }, // Charlotte
 };
-const DEFAULT_NARRATION_VOICE_ID = NARRATION_VOICE_MAP.uk_female;
+const DEFAULT_ROUTE: VoiceRoute = NARRATION_ROUTES.uk_female;
 
 export const generateStoryPageAudio = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
