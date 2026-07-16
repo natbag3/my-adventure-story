@@ -32,8 +32,8 @@ function SettingsPage() {
   const [parentName, setParentName] = useState<string>("");
   const [savingName, setSavingName] = useState(false);
   const [isPremium, setIsPremium] = useState(false);
-  const [preferredVoice, setPreferredVoice] = useState<string>(VOICES[0].id);
-  const [savingVoice, setSavingVoice] = useState<string | null>(null);
+  const [narrationVoice, setNarrationVoice] = useState<NarrationVoiceKey | null>(null);
+  const [savingVoice, setSavingVoice] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
   const [deleting, setDeleting] = useState(false);
 
@@ -41,7 +41,7 @@ function SettingsPage() {
     if (!user) return;
     supabase
       .from("profiles")
-      .select("first_name, display_name, is_premium, preferred_voice")
+      .select("first_name, display_name, is_premium, narration_voice")
       .eq("id", user.id)
       .maybeSingle()
       .then(({ data }) => {
@@ -49,7 +49,7 @@ function SettingsPage() {
           first_name?: string | null;
           display_name?: string | null;
           is_premium?: boolean | null;
-          preferred_voice?: string | null;
+          narration_voice?: NarrationVoiceKey | null;
         } | null;
         setParentName(
           d?.first_name ||
@@ -59,7 +59,7 @@ function SettingsPage() {
             "",
         );
         setIsPremium(!!d?.is_premium);
-        if (d?.preferred_voice) setPreferredVoice(d.preferred_voice);
+        if (d?.narration_voice) setNarrationVoice(d.narration_voice);
       });
   }, [user]);
 
@@ -75,23 +75,24 @@ function SettingsPage() {
     else toast.success("Saved");
   }
 
-  async function pickVoice(voiceId: string) {
+  async function pickVoice(key: NarrationVoiceKey) {
     if (!user) return;
-    setSavingVoice(voiceId);
-    const prev = preferredVoice;
-    setPreferredVoice(voiceId);
+    setSavingVoice(true);
+    const prev = narrationVoice;
+    setNarrationVoice(key);
     const { error } = await supabase
       .from("profiles")
-      .update({ preferred_voice: voiceId } as never)
+      .update({ narration_voice: key } as never)
       .eq("id", user.id);
-    setSavingVoice(null);
+    setSavingVoice(false);
     if (error) {
-      setPreferredVoice(prev);
+      setNarrationVoice(prev);
       toast.error(error.message);
     } else {
       toast.success("Narration voice updated");
     }
   }
+
 
 
   async function confirmDeleteChild() {
