@@ -9,7 +9,7 @@ export const NARRATION_VOICES: {
 }[] = [
   { key: "uk_female", flag: "🇬🇧", accent: "British", gender: "Female", label: "Natalie" },
   { key: "uk_male", flag: "🇬🇧", accent: "British", gender: "Male", label: "Daniel" },
-  { key: "us_female", flag: "🇺🇸", accent: "American", gender: "Female", label: "Jessica" },
+  { key: "us_female", flag: "🇺🇸", accent: "American", gender: "Female", label: "Charlotte" },
   { key: "us_male", flag: "🇺🇸", accent: "American", gender: "Male", label: "Adam" },
 ];
 
