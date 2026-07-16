@@ -98,10 +98,17 @@ function SettingsPage() {
   }
 
 
-  async function deleteChild(id: string, name: string) {
-    if (!confirm(`Remove ${name}'s profile? This can't be undone.`)) return;
+  async function confirmDeleteChild() {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    const { id, name } = deleteTarget;
     const { error } = await supabase.from("children").delete().eq("id", id);
-    if (error) return toast.error(error.message);
+    setDeleting(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setDeleteTarget(null);
     toast.success(`${name}'s profile removed`);
     await refresh();
   }
