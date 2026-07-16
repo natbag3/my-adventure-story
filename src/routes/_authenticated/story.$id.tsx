@@ -12,6 +12,8 @@ import { bumpReadingStreak } from "@/lib/streak";
 import { useActiveChild } from "@/lib/active-child-context";
 import { useAuth } from "@/lib/auth-context";
 import { toast } from "sonner";
+import { VoicePickerGrid, type NarrationVoiceKey } from "@/components/voice-picker";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 type StoryPage = { text: string; illustration_prompt?: string; image_url?: string | null; audio_url?: string | null };
 type StoryRow = {
