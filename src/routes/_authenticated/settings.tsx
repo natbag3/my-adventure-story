@@ -221,7 +221,7 @@ function SettingsPage() {
                           </span>
                         )}
                       </p>
-                      {c.nickname && (
+                      {c.nickname && c.nickname !== c.first_name && (
                         <p className="text-xs text-foreground/50">aka {c.nickname}</p>
                       )}
                     </div>
