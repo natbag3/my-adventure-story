@@ -188,6 +188,34 @@ function StoryReader() {
     setPlayingIdx(null);
   }
 
+  async function handleNarrateClick(pageIdx: number) {
+    if (isPremium && !narrationVoice && playingIdx !== pageIdx) {
+      pendingPageRef.current = pageIdx;
+      setVoicePickerOpen(true);
+      return;
+    }
+    void togglePlay(pageIdx);
+  }
+
+  async function pickNarrationVoice(key: NarrationVoiceKey) {
+    if (!user) return;
+    setSavingVoice(true);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ narration_voice: key } as never)
+      .eq("id", user.id);
+    setSavingVoice(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setNarrationVoice(key);
+    setVoicePickerOpen(false);
+    const pending = pendingPageRef.current;
+    pendingPageRef.current = null;
+    if (pending !== null) void togglePlay(pending);
+  }
+
   async function togglePlay(pageIdx: number) {
     if (playingIdx === pageIdx) {
       stopPlayback();
