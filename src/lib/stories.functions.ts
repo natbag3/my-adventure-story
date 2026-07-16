@@ -290,7 +290,13 @@ Before returning, silently verify:
   ✓ Reads aloud beautifully
   ✓ ${heroLabel} ${heroNames.length > 1 ? "are heroes" : "is the hero"} on every page
   ✓ Pronouns match each hero's gender
-  ✓ Story follows the blueprint arc
+  ✓ Story follows the 5-part arc: opening → problem/quest → rising action with 2–3 escalating obstacles → climax → resolution
+  ✓ Every page moves the plot forward — no filler pages
+  ✓ Characters introduced early reappear or matter later
+  ✓ At least one callback ties the ending back to something set up earlier
+  ✓ The climax is resolved using something established earlier, not a random new idea
+  ✓ The lesson is shown through the outcome, never stated bluntly
+  ✓ Rhyme pace matches emotion — punchy for action, flowing for calm moments
 If ANY check fails, silently rewrite before responding.
 
 ═══════════════════════════════════════════
