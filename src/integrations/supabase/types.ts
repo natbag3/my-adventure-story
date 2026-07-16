@@ -162,6 +162,13 @@ export type Database = {
           is_premium: boolean
           narration_voice: string | null
           preferred_voice: string
+          stories_generated_this_month: number
+          stories_generated_total: number
+          stories_month_reset_date: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          subscription_status: string | null
+          subscription_tier: string
           updated_at: string
         }
         Insert: {
@@ -173,6 +180,13 @@ export type Database = {
           is_premium?: boolean
           narration_voice?: string | null
           preferred_voice?: string
+          stories_generated_this_month?: number
+          stories_generated_total?: number
+          stories_month_reset_date?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_status?: string | null
+          subscription_tier?: string
           updated_at?: string
         }
         Update: {
@@ -184,6 +198,13 @@ export type Database = {
           is_premium?: boolean
           narration_voice?: string | null
           preferred_voice?: string
+          stories_generated_this_month?: number
+          stories_generated_total?: number
+          stories_month_reset_date?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_status?: string | null
+          subscription_tier?: string
           updated_at?: string
         }
         Relationships: [

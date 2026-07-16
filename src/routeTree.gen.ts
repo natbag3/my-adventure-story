@@ -25,6 +25,7 @@ import { Route as AuthenticatedAdventurersRouteImport } from './routes/_authenti
 import { Route as AuthenticatedStoryIdRouteImport } from './routes/_authenticated/story.$id'
 import { Route as AuthenticatedPetsNewRouteImport } from './routes/_authenticated/pets.new'
 import { Route as AuthenticatedAdventurersNewRouteImport } from './routes/_authenticated/adventurers.new'
+import { Route as ApiPublicWebhooksStripeRouteImport } from './routes/api/public/webhooks/stripe'
 import { Route as ApiPublicHooksWeeklyDigestRouteImport } from './routes/api/public/hooks/weekly-digest'
 
 const AuthRoute = AuthRouteImport.update({
@@ -109,6 +110,11 @@ const AuthenticatedAdventurersNewRoute =
     path: '/new',
     getParentRoute: () => AuthenticatedAdventurersRoute,
   } as any)
+const ApiPublicWebhooksStripeRoute = ApiPublicWebhooksStripeRouteImport.update({
+  id: '/api/public/webhooks/stripe',
+  path: '/api/public/webhooks/stripe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksWeeklyDigestRoute =
   ApiPublicHooksWeeklyDigestRouteImport.update({
     id: '/api/public/hooks/weekly-digest',
@@ -133,6 +139,7 @@ export interface FileRoutesByFullPath {
   '/pets/new': typeof AuthenticatedPetsNewRoute
   '/story/$id': typeof AuthenticatedStoryIdRoute
   '/api/public/hooks/weekly-digest': typeof ApiPublicHooksWeeklyDigestRoute
+  '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRouteWithChildren
@@ -151,6 +158,7 @@ export interface FileRoutesByTo {
   '/pets/new': typeof AuthenticatedPetsNewRoute
   '/story/$id': typeof AuthenticatedStoryIdRoute
   '/api/public/hooks/weekly-digest': typeof ApiPublicHooksWeeklyDigestRoute
+  '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -171,6 +179,7 @@ export interface FileRoutesById {
   '/_authenticated/pets/new': typeof AuthenticatedPetsNewRoute
   '/_authenticated/story/$id': typeof AuthenticatedStoryIdRoute
   '/api/public/hooks/weekly-digest': typeof ApiPublicHooksWeeklyDigestRoute
+  '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -191,6 +200,7 @@ export interface FileRouteTypes {
     | '/pets/new'
     | '/story/$id'
     | '/api/public/hooks/weekly-digest'
+    | '/api/public/webhooks/stripe'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
@@ -209,6 +219,7 @@ export interface FileRouteTypes {
     | '/pets/new'
     | '/story/$id'
     | '/api/public/hooks/weekly-digest'
+    | '/api/public/webhooks/stripe'
   id:
     | '__root__'
     | '/_authenticated'
@@ -228,6 +239,7 @@ export interface FileRouteTypes {
     | '/_authenticated/pets/new'
     | '/_authenticated/story/$id'
     | '/api/public/hooks/weekly-digest'
+    | '/api/public/webhooks/stripe'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -235,6 +247,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRouteWithChildren
   ShareTokenRoute: typeof ShareTokenRoute
   ApiPublicHooksWeeklyDigestRoute: typeof ApiPublicHooksWeeklyDigestRoute
+  ApiPublicWebhooksStripeRoute: typeof ApiPublicWebhooksStripeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -351,6 +364,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdventurersNewRouteImport
       parentRoute: typeof AuthenticatedAdventurersRoute
     }
+    '/api/public/webhooks/stripe': {
+      id: '/api/public/webhooks/stripe'
+      path: '/api/public/webhooks/stripe'
+      fullPath: '/api/public/webhooks/stripe'
+      preLoaderRoute: typeof ApiPublicWebhooksStripeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/weekly-digest': {
       id: '/api/public/hooks/weekly-digest'
       path: '/api/public/hooks/weekly-digest'
@@ -421,6 +441,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRouteWithChildren,
   ShareTokenRoute: ShareTokenRoute,
   ApiPublicHooksWeeklyDigestRoute: ApiPublicHooksWeeklyDigestRoute,
+  ApiPublicWebhooksStripeRoute: ApiPublicWebhooksStripeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

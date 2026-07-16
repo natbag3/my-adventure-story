@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/app-shell";
 import { CharacterAvatar } from "@/components/character-avatar";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,6 +19,9 @@ import {
 import { toast } from "sonner";
 import { openFeedbackDialog } from "@/components/feedback-dialog";
 import { VoicePickerGrid, type NarrationVoiceKey } from "@/components/voice-picker";
+import { PricingModal } from "@/components/pricing-modal";
+import { TIERS, tierHasNarration, type Tier } from "@/lib/subscription";
+import { getSubscriptionState, createPortalSession, type SubscriptionState } from "@/lib/subscription.functions";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({ meta: [{ title: "Profile — Adventure Club" }] }),
@@ -31,24 +35,28 @@ function SettingsPage() {
   const navigate = useNavigate();
   const [parentName, setParentName] = useState<string>("");
   const [savingName, setSavingName] = useState(false);
-  const [isPremium, setIsPremium] = useState(false);
   const [narrationVoice, setNarrationVoice] = useState<NarrationVoiceKey | null>(null);
   const [savingVoice, setSavingVoice] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [sub, setSub] = useState<SubscriptionState | null>(null);
+  const [pricingOpen, setPricingOpen] = useState(false);
+  const [openingPortal, setOpeningPortal] = useState(false);
+  const fetchSub = useServerFn(getSubscriptionState);
+  const openPortal = useServerFn(createPortalSession);
+  const hasNarration = sub ? tierHasNarration(sub.tier) : false;
 
   useEffect(() => {
     if (!user) return;
     supabase
       .from("profiles")
-      .select("first_name, display_name, is_premium, narration_voice")
+      .select("first_name, display_name, narration_voice")
       .eq("id", user.id)
       .maybeSingle()
       .then(({ data }) => {
         const d = data as {
           first_name?: string | null;
           display_name?: string | null;
-          is_premium?: boolean | null;
           narration_voice?: NarrationVoiceKey | null;
         } | null;
         setParentName(
@@ -58,10 +66,46 @@ function SettingsPage() {
             user.email?.split("@")[0] ||
             "",
         );
-        setIsPremium(!!d?.is_premium);
         if (d?.narration_voice) setNarrationVoice(d.narration_voice);
       });
-  }, [user]);
+    fetchSub().then(setSub).catch((e) => console.error("Failed to load subscription", e));
+  }, [user, fetchSub]);
+
+  // Refresh subscription state after returning from Stripe Checkout.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("subscription") === "success") {
+      toast.success("Welcome aboard! ✨ Your subscription is active.");
+      // Poll for webhook to catch up
+      let tries = 0;
+      const iv = window.setInterval(async () => {
+        tries++;
+        try {
+          const s = await fetchSub();
+          setSub(s);
+          if (s.tier !== "free" || tries > 10) window.clearInterval(iv);
+        } catch {
+          if (tries > 10) window.clearInterval(iv);
+        }
+      }, 1500);
+      // Clean the URL
+      const url = new URL(window.location.href);
+      url.searchParams.delete("subscription");
+      window.history.replaceState({}, "", url.toString());
+      return () => window.clearInterval(iv);
+    }
+  }, [fetchSub]);
+
+  async function handleManageSubscription() {
+    setOpeningPortal(true);
+    try {
+      const { url } = await openPortal({ data: { origin: window.location.origin } });
+      window.location.href = url;
+    } catch (e) {
+      setOpeningPortal(false);
+      toast.error(e instanceof Error ? e.message : "Could not open subscription portal");
+    }
+  }
 
   async function saveParentName() {
     if (!user) return;
@@ -148,12 +192,6 @@ function SettingsPage() {
           <Row label="Email" value={user?.email ?? "—"} />
           <div className="flex flex-wrap gap-3 pt-2">
             <button
-              onClick={() => navigate({ to: "/subscription" })}
-              className="rounded-full border border-hairline bg-surface-elevated px-4 py-2 text-sm font-medium text-foreground"
-            >
-              Subscription
-            </button>
-            <button
               onClick={handleSignOut}
               className="rounded-full border border-hairline px-4 py-2 text-sm font-medium text-foreground/70 hover:text-foreground"
             >
@@ -161,6 +199,14 @@ function SettingsPage() {
             </button>
           </div>
         </Card>
+
+        {/* Subscription */}
+        <SubscriptionCard
+          sub={sub}
+          openingPortal={openingPortal}
+          onManage={handleManageSubscription}
+          onUpgrade={() => setPricingOpen(true)}
+        />
 
         {/* Send feedback */}
         <div className="flex justify-center">
@@ -173,8 +219,8 @@ function SettingsPage() {
         </div>
 
 
-        {/* Narration voice (premium only) */}
-        {isPremium && (
+        {/* Narration voice (Explorer + Unlimited) */}
+        {hasNarration && (
           <Card
             title="🔊 Narration Voice"
             subtitle="Choose the voice used to read stories aloud."
@@ -283,7 +329,107 @@ function SettingsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <PricingModal
+        open={pricingOpen}
+        onOpenChange={setPricingOpen}
+        title="Upgrade your adventure"
+        currentTier={sub?.tier}
+      />
     </AppShell>
+  );
+}
+
+function SubscriptionCard({
+  sub,
+  openingPortal,
+  onManage,
+  onUpgrade,
+}: {
+  sub: SubscriptionState | null;
+  openingPortal: boolean;
+  onManage: () => void;
+  onUpgrade: () => void;
+}) {
+  if (!sub) {
+    return (
+      <section className="rounded-[28px] border border-hairline bg-surface/60 p-6 animate-slide-up">
+        <h2 className="font-display text-xl text-foreground">💫 Subscription</h2>
+        <p className="mt-2 text-sm text-foreground/55">Loading…</p>
+      </section>
+    );
+  }
+  const cfg = TIERS[sub.tier];
+  const isPaid = sub.tier !== "free";
+  const statusLabel = sub.status
+    ? sub.status.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+    : isPaid
+      ? "Active"
+      : "Trial";
+  const limit = sub.storyLimit;
+  const used = sub.storiesUsed;
+  const pct = limit === null ? 100 : Math.min(100, Math.round((used / limit) * 100));
+  const resetLabel = new Date(sub.resetDate + "T00:00:00").toLocaleDateString(undefined, {
+    day: "numeric",
+    month: "long",
+  });
+
+  return (
+    <section className="rounded-[28px] border border-hairline bg-surface/60 p-6 animate-slide-up">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h2 className="font-display text-xl text-foreground">💫 Subscription</h2>
+          <p className="mt-1 flex items-center gap-2 text-sm text-foreground/70">
+            <span className="text-lg">{cfg.emoji}</span>
+            <span className="font-display text-base text-foreground">{cfg.name}</span>
+            <span className="text-foreground/40">·</span>
+            <span className={sub.status === "canceled" ? "text-destructive" : "text-mint"}>
+              {statusLabel}
+            </span>
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {isPaid && sub.hasStripeCustomer ? (
+            <button
+              onClick={onManage}
+              disabled={openingPortal}
+              className="rounded-full border border-hairline bg-surface-elevated px-4 py-2 text-sm font-medium text-foreground disabled:opacity-60"
+            >
+              {openingPortal ? "Opening…" : "Manage subscription"}
+            </button>
+          ) : null}
+          {sub.tier !== "unlimited" && (
+            <button
+              onClick={onUpgrade}
+              className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
+            >
+              {isPaid ? "Change plan" : "Upgrade ✨"}
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="mt-5">
+        <div className="flex items-center justify-between text-xs text-foreground/70">
+          <span>
+            {limit === null
+              ? `${used} stories created`
+              : `${used} of ${limit} stories used${sub.storyLimitType === "monthly" ? " this month" : ""}`}
+          </span>
+          {limit !== null && sub.storyLimitType === "monthly" && (
+            <span className="text-foreground/45">Resets {resetLabel}</span>
+          )}
+        </div>
+        <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-surface-elevated">
+          <div
+            className={
+              "h-full transition-all " +
+              (pct >= 90 ? "bg-destructive" : pct >= 60 ? "bg-star" : "bg-mint")
+            }
+            style={{ width: limit === null ? "100%" : `${pct}%` }}
+          />
+        </div>
+      </div>
+    </section>
   );
 }
 

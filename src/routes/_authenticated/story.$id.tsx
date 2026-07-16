@@ -14,6 +14,8 @@ import { useAuth } from "@/lib/auth-context";
 import { toast } from "sonner";
 import { VoicePickerGrid, type NarrationVoiceKey } from "@/components/voice-picker";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { PricingModal } from "@/components/pricing-modal";
+import { tierHasNarration, isValidTier, type Tier } from "@/lib/subscription";
 
 type StoryPage = { text: string; illustration_prompt?: string; image_url?: string | null; audio_url?: string | null };
 type StoryRow = {
@@ -57,26 +59,29 @@ function StoryReader() {
   const [notFound, setNotFound] = useState(false);
   const [page, setPage] = useState(0);
   const [favorite, setFavorite] = useState(false);
-  const [isPremium, setIsPremium] = useState(false);
+  const [tier, setTier] = useState<Tier>("free");
   const [narrationVoice, setNarrationVoice] = useState<NarrationVoiceKey | null>(null);
   const [voicePickerOpen, setVoicePickerOpen] = useState(false);
   const [savingVoice, setSavingVoice] = useState(false);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
   const pendingPageRef = useRef<number | null>(null);
   const [playingIdx, setPlayingIdx] = useState<number | null>(null);
   const [loadingAudioIdx, setLoadingAudioIdx] = useState<number | null>(null);
   const audioCacheRef = useRef<Map<number, string>>(new Map());
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  const hasNarration = tierHasNarration(tier);
+
   useEffect(() => {
     if (!user) return;
     supabase
       .from("profiles")
-      .select("is_premium, narration_voice")
+      .select("subscription_tier, narration_voice")
       .eq("id", user.id)
       .maybeSingle()
       .then(({ data }) => {
-        const d = data as { is_premium?: boolean; narration_voice?: NarrationVoiceKey | null } | null;
-        setIsPremium(!!d?.is_premium);
+        const d = data as { subscription_tier?: string | null; narration_voice?: NarrationVoiceKey | null } | null;
+        setTier(isValidTier(d?.subscription_tier) ? d!.subscription_tier as Tier : "free");
         setNarrationVoice(d?.narration_voice ?? null);
       });
   }, [user]);
@@ -189,7 +194,11 @@ function StoryReader() {
   }
 
   async function handleNarrateClick(pageIdx: number) {
-    if (isPremium && !narrationVoice && playingIdx !== pageIdx) {
+    if (!hasNarration) {
+      setUpgradeOpen(true);
+      return;
+    }
+    if (!narrationVoice && playingIdx !== pageIdx) {
       pendingPageRef.current = pageIdx;
       setVoicePickerOpen(true);
       return;
@@ -391,7 +400,7 @@ function StoryReader() {
               <div className="flex-1 min-h-0 overflow-y-auto px-6 md:px-8 py-6 md:py-8">
                 <div className="mb-4 flex justify-end">
                   <NarrationButton
-                    isPremium={isPremium}
+                    isPremium={hasNarration}
                     isPlaying={playingIdx === storyPageIdx}
                     isLoading={loadingAudioIdx === storyPageIdx}
                     onClick={() => handleNarrateClick(storyPageIdx)}
@@ -449,6 +458,13 @@ function StoryReader() {
           </div>
         </DialogContent>
       </Dialog>
+      <PricingModal
+        open={upgradeOpen}
+        onOpenChange={setUpgradeOpen}
+        title="Unlock narration 🎙️"
+        subtitle="Narration is available on Explorer and Unlimited plans. Upgrade to hear the story come to life!"
+        currentTier={tier}
+      />
     </AppShell>
   );
 }
@@ -497,11 +513,14 @@ function NarrationButton({
         type="button"
         title="Upgrade to hear your story narrated ✨"
         aria-label="Upgrade to hear your story narrated"
-        onClick={() => toast("Upgrade to hear your story narrated ✨")}
-        className="inline-flex items-center gap-2 rounded-full border border-ink/15 bg-ink/5 px-4 py-2 text-sm font-medium text-ink/40 cursor-not-allowed"
+        onClick={onClick}
+        className="inline-flex items-center gap-2 rounded-full border border-ink/15 bg-ink/5 px-4 py-2 text-sm font-medium text-ink/60 hover:text-ink hover:bg-ink/10 transition-colors"
       >
         <span className="text-lg">🔊</span>
         <span>Narrate</span>
+        <span className="ml-1 rounded-full bg-star/20 px-2 py-0.5 text-[9px] font-mono uppercase tracking-widest text-star">
+          Upgrade
+        </span>
       </button>
     );
   }
