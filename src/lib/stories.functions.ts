@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { zoneForTheme } from "@/lib/worlds";
+import { assertCanGenerateStory, incrementStoryUsage } from "@/lib/subscription.functions";
 
 const GenerateInput = z.object({
   childId: z.string().uuid(),
@@ -76,6 +77,11 @@ export const generateStory = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const apiKey = process.env.LOVABLE_API_KEY;
     if (!apiKey) throw new Error("Lovable AI key is not configured.");
+
+    // Enforce subscription tier limits before spending AI credits.
+    await assertCanGenerateStory(context.userId);
+
+
 
 
     const { supabase, userId } = context;
@@ -380,6 +386,13 @@ The "pages" array MUST contain exactly ${pageCount} items, numbered 1 to ${pageC
       .select("id")
       .single();
     if (insErr || !inserted) throw new Error("Could not save the story. Please try again.");
+
+    // Bump usage counters (best-effort; do not fail the whole request if this errors).
+    try {
+      await incrementStoryUsage(context.userId);
+    } catch (e) {
+      console.error("Failed to increment story usage", e);
+    }
 
     // Mark the corresponding world zone visited on the child (best-effort).
     try {

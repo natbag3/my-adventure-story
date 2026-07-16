@@ -35,13 +35,16 @@ export const generateStoryPageAudio = createServerFn({ method: "POST" })
     const openaiKey = process.env.OPENAI_API_KEY;
     const { supabase, userId } = context;
 
-    // Check premium + get voice preference
+    // Check narration entitlement (Explorer + Unlimited) + get voice preference
     const { data: profile } = await supabase
       .from("profiles")
-      .select("is_premium, narration_voice")
+      .select("subscription_tier, narration_voice")
       .eq("id", userId)
       .maybeSingle();
-    if (!profile?.is_premium) throw new Error("Audio narration is a premium feature.");
+    const tier = (profile as { subscription_tier?: string | null } | null)?.subscription_tier ?? "free";
+    if (tier !== "explorer" && tier !== "unlimited") {
+      throw new Error("Narration is available on Explorer and Unlimited plans.");
+    }
     const pref = (profile as { narration_voice?: string | null } | null)?.narration_voice;
     const route: VoiceRoute = (pref && NARRATION_ROUTES[pref]) || DEFAULT_ROUTE;
 

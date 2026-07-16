@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/app-shell";
 import { CharacterAvatar } from "@/components/character-avatar";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,6 +19,9 @@ import {
 import { toast } from "sonner";
 import { openFeedbackDialog } from "@/components/feedback-dialog";
 import { VoicePickerGrid, type NarrationVoiceKey } from "@/components/voice-picker";
+import { PricingModal } from "@/components/pricing-modal";
+import { TIERS, tierHasNarration, type Tier } from "@/lib/subscription";
+import { getSubscriptionState, createPortalSession, type SubscriptionState } from "@/lib/subscription.functions";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({ meta: [{ title: "Profile — Adventure Club" }] }),

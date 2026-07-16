@@ -9,6 +9,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useActiveChild } from "@/lib/active-child-context";
 import { generateStory } from "@/lib/stories.functions";
 import { generateStoryPageImage, generateStoryCoverImage } from "@/lib/story-images.functions";
+import { getSubscriptionState, type SubscriptionState } from "@/lib/subscription.functions";
+import { PricingModal } from "@/components/pricing-modal";
 
 function calcAge(dob: string | null) {
   if (!dob) return null;
@@ -190,6 +192,9 @@ function CreateWizard() {
   const generateFn = useServerFn(generateStory);
   const generateImageFn = useServerFn(generateStoryPageImage);
   const generateCoverFn = useServerFn(generateStoryCoverImage);
+  const fetchSubscription = useServerFn(getSubscriptionState);
+  const [limitOpen, setLimitOpen] = useState(false);
+  const [subState, setSubState] = useState<SubscriptionState | null>(null);
 
   // Fetch the user's pets once.
   useEffect(() => {
@@ -264,6 +269,20 @@ function CreateWizard() {
 
   async function handleGenerate() {
     if (!primaryId || !adventure || !lesson || !mood) return;
+
+    // Pre-check subscription limit before spending time generating.
+    try {
+      const state = await fetchSubscription();
+      setSubState(state);
+      if (state.atLimit) {
+        setLimitOpen(true);
+        return;
+      }
+    } catch (e) {
+      console.error("Could not verify subscription state", e);
+      // fall through — server-side check will still enforce
+    }
+
     setGenerating(true);
     setError(null);
     setPrepStage("writing");
@@ -836,6 +855,13 @@ function CreateWizard() {
           )}
         </div>
       )}
+      <PricingModal
+        open={limitOpen}
+        onOpenChange={setLimitOpen}
+        title="You've used all your stories ✨"
+        subtitle="Upgrade to keep the adventures going!"
+        currentTier={subState?.tier}
+      />
     </AppShell>
   );
 }
