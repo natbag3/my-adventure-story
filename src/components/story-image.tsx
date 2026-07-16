@@ -37,8 +37,10 @@ export function StoryImage({ storyId, pageIndex, initialPath, alt, className }: 
     return () => { cancelled = true; };
   }, [path]);
 
-  // Trigger generation if missing
+  // Trigger generation ONLY if the page has no saved image_url.
+  // Never re-generate for pages that already have a stored path.
   useEffect(() => {
+    if (initialPath) return; // page already has an image — do nothing
     if (path || generating) return;
     setGenerating(true);
     setError(null);
