@@ -166,6 +166,17 @@ function SettingsPage() {
           </div>
         </Card>
 
+        {/* Send feedback */}
+        <div className="flex justify-center">
+          <button
+            onClick={openFeedbackDialog}
+            className="rounded-full border border-hairline bg-surface-elevated px-5 py-2.5 text-sm font-medium text-foreground/80 hover:text-foreground hover:border-lavender/40 transition-colors"
+          >
+            💬 Send feedback
+          </button>
+        </div>
+
+
         {/* Narration voice (premium only) */}
         {isPremium && (
           <Card
