@@ -260,7 +260,7 @@ function SettingsPage() {
                         Edit
                       </button>
                       <button
-                        onClick={() => deleteChild(c.id, c.first_name)}
+                        onClick={() => setDeleteTarget({ id: c.id, name: c.first_name })}
                         className="rounded-full border border-hairline px-3 py-1.5 text-xs font-medium text-foreground/55 hover:text-destructive"
                       >
                         ✕
