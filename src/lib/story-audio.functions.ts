@@ -34,14 +34,12 @@ export const generateStoryPageAudio = createServerFn({ method: "POST" })
     // Check premium + get voice preference
     const { data: profile } = await supabase
       .from("profiles")
-      .select("is_premium, preferred_voice")
+      .select("is_premium, narration_voice")
       .eq("id", userId)
       .maybeSingle();
     if (!profile?.is_premium) throw new Error("Audio narration is a premium feature.");
-    const voiceId =
-      profile.preferred_voice && ALLOWED_VOICES.has(profile.preferred_voice)
-        ? profile.preferred_voice
-        : DEFAULT_VOICE;
+    const pref = (profile as { narration_voice?: string | null } | null)?.narration_voice;
+    const voiceId = (pref && NARRATION_VOICE_MAP[pref]) || DEFAULT_NARRATION_VOICE_ID;
 
     const { data: story, error } = await supabase
       .from("stories")
