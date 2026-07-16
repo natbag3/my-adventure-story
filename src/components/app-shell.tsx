@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { useActiveChild } from "@/lib/active-child-context";
 import { CharacterAvatar } from "@/components/character-avatar";
+import { FeedbackDialog, openFeedbackDialog } from "@/components/feedback-dialog";
 
 const NAV = [
   { to: "/", label: "Home", icon: "🏠" },
@@ -142,13 +143,20 @@ export function AppShell({ children }: { children: ReactNode }) {
           <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-foreground/35">
             Premium Adventurer Access Active
           </p>
-          <div className="flex gap-6 text-[10px] uppercase tracking-[0.2em] text-foreground/30">
+          <div className="flex flex-wrap justify-center gap-6 text-[10px] uppercase tracking-[0.2em] text-foreground/30">
             <span>Privacy</span>
             <span>Support</span>
             <span>Family Terms</span>
+            <button
+              onClick={openFeedbackDialog}
+              className="uppercase tracking-[0.2em] text-foreground/40 hover:text-foreground/70 transition-colors"
+            >
+              Feedback
+            </button>
           </div>
         </div>
       </footer>
+      <FeedbackDialog />
     </div>
   );
 }
