@@ -38,7 +38,12 @@ function HomePage() {
   const { user } = useAuth();
   const { activeChild, children } = useActiveChild();
   const [stories, setStories] = useState<StoryRow[]>([]);
-  const time = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  const now = new Date();
+  const time = now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  const hour = now.getHours();
+  const partOfDay = hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening";
+  const ritualLabel = `${partOfDay.charAt(0).toUpperCase()}${partOfDay.slice(1)} Ritual`;
+  const greeting = `Good ${partOfDay}`;
 
   useEffect(() => {
     if (!user || !activeChild) {
@@ -63,12 +68,12 @@ function HomePage() {
       {/* HERO */}
       <section className="mb-10 animate-slide-up">
         <div className="mb-3 flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.25em] text-star/80">
-          <span>Evening Ritual</span>
+          <span>{ritualLabel}</span>
           <span className="h-px w-8 bg-foreground/20" />
           <span>{time}</span>
         </div>
         <h1 className="mb-5 font-display text-5xl md:text-6xl font-medium leading-[1.05] text-foreground text-balance">
-          Good evening,{" "}
+          {greeting},{" "}
           <span className="italic text-peach">
             {activeChild?.first_name ?? "little explorer"}
           </span>{" "}
