@@ -335,6 +335,7 @@ function CreateWizard() {
       }
 
       setPrepStage("binding");
+      await coverPromise;
       await new Promise((r) => setTimeout(r, 600));
       navigate({ to: "/story/$id", params: { id: result.storyId } });
     } catch (e) {
