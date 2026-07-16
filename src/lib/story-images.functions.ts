@@ -18,8 +18,9 @@ type PageObj = {
   [k: string]: unknown;
 };
 
-function describeChild(child: {
+type ChildLike = {
   first_name: string;
+  date_of_birth?: string | null;
   gender?: string | null;
   hair_color?: string | null;
   hair_style?: string | null;
@@ -28,13 +29,26 @@ function describeChild(child: {
   freckles?: boolean | null;
   glasses?: boolean | null;
   outfit_color?: string | null;
-}) {
-  const subject =
-    (child.gender ?? "").toLowerCase() === "boy"
-      ? "boy"
-      : (child.gender ?? "").toLowerCase() === "girl"
-      ? "girl"
-      : "child";
+};
+
+function calcAgeYears(dob?: string | null): number | null {
+  if (!dob) return null;
+  const d = new Date(dob);
+  if (isNaN(d.getTime())) return null;
+  const now = new Date();
+  let age = now.getFullYear() - d.getFullYear();
+  const m = now.getMonth() - d.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
+  return age >= 0 && age < 120 ? age : null;
+}
+
+function subjectNoun(gender?: string | null): "girl" | "boy" | "child" {
+  const g = (gender ?? "").toLowerCase();
+  return g === "boy" ? "boy" : g === "girl" ? "girl" : "child";
+}
+
+function describeChild(child: ChildLike) {
+  const subject = subjectNoun(child.gender);
   const traits = [
     child.hair_color && `${child.hair_color.toLowerCase()} ${child.hair_style?.toLowerCase() ?? ""} hair`.trim(),
     child.eye_color && `${child.eye_color.toLowerCase()} eyes`,
@@ -47,6 +61,29 @@ function describeChild(child: {
     .join(", ");
   return `${child.first_name} (a ${subject}${traits ? `, ${traits}` : ""})`;
 }
+
+function characterReference(child: ChildLike): string {
+  const age = calcAgeYears(child.date_of_birth);
+  const subject = subjectNoun(child.gender);
+  const hair = [child.hair_style?.toLowerCase(), child.hair_color?.toLowerCase()]
+    .filter(Boolean)
+    .join(" ");
+  const parts: string[] = [];
+  if (hair) parts.push(`${hair} hair`);
+  if (child.eye_color) parts.push(`${child.eye_color.toLowerCase()} eyes`);
+  if (child.skin_tone) parts.push(`${child.skin_tone.toLowerCase()} skin`);
+  if (child.freckles) parts.push("soft freckles");
+  if (child.glasses) parts.push("round glasses");
+  const ageStr = age !== null ? `${age}-year-old ` : "";
+  const traits = parts.length ? ` with ${parts.join(", ")}` : "";
+  const outfit = child.outfit_color
+    ? `, wearing a ${child.outfit_color.toLowerCase()} outfit`
+    : "";
+  return `The main character is ${child.first_name}, a ${ageStr}${subject}${traits}${outfit}.`;
+}
+
+const STYLE_ANCHOR =
+  "Consistent children's storybook illustration style, warm painterly art, same character design throughout.";
 
 export const generateStoryPageImage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -72,18 +109,19 @@ export const generateStoryPageImage = createServerFn({ method: "POST" })
     const heroIds = [story.child_id, ...((story.co_star_ids as string[] | null) ?? [])];
     const { data: kids } = await supabase
       .from("children")
-      .select("id, first_name, gender, hair_color, hair_style, eye_color, skin_tone, freckles, glasses, outfit_color")
+      .select("id, first_name, date_of_birth, gender, hair_color, hair_style, eye_color, skin_tone, freckles, glasses, outfit_color")
       .in("id", heroIds);
     const orderedKids = heroIds
       .map((id) => (kids ?? []).find((k) => k.id === id))
       .filter(Boolean) as NonNullable<typeof kids>;
 
     const heroDescriptions = orderedKids.map(describeChild).join("; ");
+    const mainCharacter = orderedKids[0] ? characterReference(orderedKids[0]) : "";
     const sceneDesc = page.illustration_prompt || page.text || "magical bedtime scene";
 
-    const prompt = `Pixar-style children's picture book illustration. Scene: ${sceneDesc}. ${
+    const prompt = `${mainCharacter} Maintain this exact character appearance consistently. Pixar-style children's picture book illustration. Scene: ${sceneDesc}. ${
       heroDescriptions ? `Heroes featured: ${heroDescriptions}. Keep every character design consistent across pages.` : ""
-    } Warm magical lighting, soft painterly Pixar/Disney style, gentle bedtime atmosphere, premium children's book art, no text, no logos, no watermarks.`;
+    } Warm magical lighting, soft painterly Pixar/Disney style, gentle bedtime atmosphere, premium children's book art, no text, no logos, no watermarks. ${STYLE_ANCHOR}`;
 
     const aiRes = await fetch("https://fal.run/fal-ai/flux/dev", {
       method: "POST",
@@ -136,16 +174,17 @@ export const generateStoryCoverImage = createServerFn({ method: "POST" })
     const heroIds = [story.child_id, ...((story.co_star_ids as string[] | null) ?? [])];
     const { data: kids } = await supabase
       .from("children")
-      .select("id, first_name, gender, hair_color, hair_style, eye_color, skin_tone, freckles, glasses, outfit_color")
+      .select("id, first_name, date_of_birth, gender, hair_color, hair_style, eye_color, skin_tone, freckles, glasses, outfit_color")
       .in("id", heroIds);
     const orderedKids = heroIds
       .map((id) => (kids ?? []).find((k) => k.id === id))
       .filter(Boolean) as NonNullable<typeof kids>;
     const heroDescriptions = orderedKids.map(describeChild).join("; ");
+    const mainCharacter = orderedKids[0] ? characterReference(orderedKids[0]) : "";
 
-    const prompt = `A storybook cover illustration titled "${story.title}". Scene: ${
+    const prompt = `${mainCharacter} Maintain this exact character appearance consistently. A storybook cover illustration titled "${story.title}". Scene: ${
       heroDescriptions ? `${heroDescriptions} on an adventure in ${story.theme.toLowerCase()}.` : `A magical ${story.theme.toLowerCase()} adventure.`
-    } ${story.mood ? `${story.mood} atmosphere.` : ""} Warm painterly Pixar/Disney children's book cover style, hero centered and heroic, rich background world, cinematic lighting, portrait orientation, no text, no title, no logos, no watermarks.`;
+    } ${story.mood ? `${story.mood} atmosphere.` : ""} Warm painterly Pixar/Disney children's book cover style, hero centered and heroic, rich background world, cinematic lighting, portrait orientation, no text, no title, no logos, no watermarks. ${STYLE_ANCHOR}`;
 
     const aiRes = await fetch("https://fal.run/fal-ai/flux/dev", {
       method: "POST",
