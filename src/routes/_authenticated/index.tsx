@@ -38,7 +38,12 @@ function HomePage() {
   const { user } = useAuth();
   const { activeChild, children } = useActiveChild();
   const [stories, setStories] = useState<StoryRow[]>([]);
-  const time = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  const now = new Date();
+  const time = now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  const hour = now.getHours();
+  const partOfDay = hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening";
+  const ritualLabel = `${partOfDay.charAt(0).toUpperCase()}${partOfDay.slice(1)} Ritual`;
+  const greeting = `Good ${partOfDay}`;
 
   useEffect(() => {
     if (!user || !activeChild) {
