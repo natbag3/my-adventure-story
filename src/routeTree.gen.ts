@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as ShareTokenRouteImport } from './routes/share.$token'
+import { Route as AuthResetRouteImport } from './routes/auth.reset'
 import { Route as AuthenticatedSubscriptionRouteImport } from './routes/_authenticated/subscription'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedRewardsRouteImport } from './routes/_authenticated/rewards'
@@ -44,6 +45,11 @@ const ShareTokenRoute = ShareTokenRouteImport.update({
   id: '/share/$token',
   path: '/share/$token',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthResetRoute = AuthResetRouteImport.update({
+  id: '/reset',
+  path: '/reset',
+  getParentRoute: () => AuthRoute,
 } as any)
 const AuthenticatedSubscriptionRoute =
   AuthenticatedSubscriptionRouteImport.update({
@@ -112,7 +118,7 @@ const ApiPublicHooksWeeklyDigestRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/adventurers': typeof AuthenticatedAdventurersRouteWithChildren
   '/create': typeof AuthenticatedCreateRoute
   '/library': typeof AuthenticatedLibraryRoute
@@ -121,6 +127,7 @@ export interface FileRoutesByFullPath {
   '/rewards': typeof AuthenticatedRewardsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/subscription': typeof AuthenticatedSubscriptionRoute
+  '/auth/reset': typeof AuthResetRoute
   '/share/$token': typeof ShareTokenRoute
   '/adventurers/new': typeof AuthenticatedAdventurersNewRoute
   '/pets/new': typeof AuthenticatedPetsNewRoute
@@ -128,7 +135,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/weekly-digest': typeof ApiPublicHooksWeeklyDigestRoute
 }
 export interface FileRoutesByTo {
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/adventurers': typeof AuthenticatedAdventurersRouteWithChildren
   '/create': typeof AuthenticatedCreateRoute
   '/library': typeof AuthenticatedLibraryRoute
@@ -137,6 +144,7 @@ export interface FileRoutesByTo {
   '/rewards': typeof AuthenticatedRewardsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/subscription': typeof AuthenticatedSubscriptionRoute
+  '/auth/reset': typeof AuthResetRoute
   '/share/$token': typeof ShareTokenRoute
   '/': typeof AuthenticatedIndexRoute
   '/adventurers/new': typeof AuthenticatedAdventurersNewRoute
@@ -147,7 +155,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/_authenticated/adventurers': typeof AuthenticatedAdventurersRouteWithChildren
   '/_authenticated/create': typeof AuthenticatedCreateRoute
   '/_authenticated/library': typeof AuthenticatedLibraryRoute
@@ -156,6 +164,7 @@ export interface FileRoutesById {
   '/_authenticated/rewards': typeof AuthenticatedRewardsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/subscription': typeof AuthenticatedSubscriptionRoute
+  '/auth/reset': typeof AuthResetRoute
   '/share/$token': typeof ShareTokenRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/adventurers/new': typeof AuthenticatedAdventurersNewRoute
@@ -176,6 +185,7 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/settings'
     | '/subscription'
+    | '/auth/reset'
     | '/share/$token'
     | '/adventurers/new'
     | '/pets/new'
@@ -192,6 +202,7 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/settings'
     | '/subscription'
+    | '/auth/reset'
     | '/share/$token'
     | '/'
     | '/adventurers/new'
@@ -210,6 +221,7 @@ export interface FileRouteTypes {
     | '/_authenticated/rewards'
     | '/_authenticated/settings'
     | '/_authenticated/subscription'
+    | '/auth/reset'
     | '/share/$token'
     | '/_authenticated/'
     | '/_authenticated/adventurers/new'
@@ -220,7 +232,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
-  AuthRoute: typeof AuthRoute
+  AuthRoute: typeof AuthRouteWithChildren
   ShareTokenRoute: typeof ShareTokenRoute
   ApiPublicHooksWeeklyDigestRoute: typeof ApiPublicHooksWeeklyDigestRoute
 }
@@ -254,6 +266,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/share/$token'
       preLoaderRoute: typeof ShareTokenRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/auth/reset': {
+      id: '/auth/reset'
+      path: '/reset'
+      fullPath: '/auth/reset'
+      preLoaderRoute: typeof AuthResetRouteImport
+      parentRoute: typeof AuthRoute
     }
     '/_authenticated/subscription': {
       id: '/_authenticated/subscription'
@@ -387,9 +406,19 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface AuthRouteChildren {
+  AuthResetRoute: typeof AuthResetRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthResetRoute: AuthResetRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
-  AuthRoute: AuthRoute,
+  AuthRoute: AuthRouteWithChildren,
   ShareTokenRoute: ShareTokenRoute,
   ApiPublicHooksWeeklyDigestRoute: ApiPublicHooksWeeklyDigestRoute,
 }
