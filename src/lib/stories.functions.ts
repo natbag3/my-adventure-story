@@ -225,7 +225,12 @@ STAGE 1 — SILENT BLUEPRINT (do NOT output)
 ═══════════════════════════════════════════
 Internally plan a proper 5-part narrative arc BEFORE writing. Every story MUST follow this shape across its ${pageCount} pages:
 
-  1. OPENING (first 1–2 pages) — Introduce ${heroLabel} in ${heroNames.length > 1 ? "their" : "their"} world. Set the scene warmly. Hint at what's about to begin.
+  1. OPENING (first 1–2 pages) — Hook the reader immediately. Vary the opening style between stories, choosing ONE of:
+       • IN MEDIA RES — drop straight into a moment of action or discovery, as if the adventure has already begun.
+       • ATMOSPHERE FIRST — paint the world with vivid, sensory language before the hero appears.
+       • A MYSTERY OR QUESTION — something unexplained that makes the child lean in.
+       • A SOUND, FEELING OR SIGHT — one striking sensory detail that sets the tone.
+     ${heroLabel}'s name must appear naturally within the first two lines. NEVER describe the main character's physical appearance (hair, eyes, skin, outfit) in the story text — the illustrations handle that. Personality and feelings are welcome.
   2. THE PROBLEM OR QUEST (next 2–3 pages) — Something happens that kicks off the adventure: a challenge appears, something is lost, a creature needs help, a mystery begins. It should feel exciting and raise a clear question: what will happen next?
   3. RISING ACTION WITH OBSTACLES (middle pages) — ${heroLabel} tr${heroNames.length > 1 ? "y" : "ies"} to solve the problem but face${heroNames.length > 1 ? "" : "s"} at least 2–3 setbacks, surprises, or discoveries. Each page should BUILD — tension, wonder, or stakes increasing. Every character met or place visited must add something meaningful to the plot.
   4. CLIMAX (1–2 pages near the end) — The biggest moment. ${heroLabel} face${heroNames.length > 1 ? "" : "s"} the main challenge head-on and must use what ${heroNames.length > 1 ? "they have" : "they have"} learned or discovered along the way to overcome it. This is the most exciting or emotional beat.
@@ -260,7 +265,7 @@ LANGUAGE SAFETY (STRICT — bedtime-safe only):
 - If ANY adult or complex word slips in during drafting, silently rewrite that line before output.
 
 STRUCTURE across ${pageCount} pages (map the 5-part arc to these pages):
-- Page 1${pageCount >= 6 ? "–2" : ""}: OPENING — introduce ${heroLabel} and the magical setting; hint at the adventure.
+- Page 1${pageCount >= 6 ? "–2" : ""}: OPENING — hook with action, atmosphere, mystery or a striking sensory detail; ${heroLabel}'s name appears within the first two lines; do NOT describe physical appearance.
 - Next 2–3 pages: THE PROBLEM/QUEST kicks in, then RISING ACTION with escalating obstacles.
 - Penultimate page (or the one before): CLIMAX — the biggest, most exciting moment.
 - Final page: ${
