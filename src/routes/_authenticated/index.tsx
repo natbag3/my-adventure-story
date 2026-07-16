@@ -191,8 +191,8 @@ function HomePage() {
           <p className="mt-5 text-sm text-foreground/55">
             Stamps, badges, and worlds {activeChild?.first_name} has explored.
           </p>
-          <p className="mt-5 font-mono text-[10px] uppercase tracking-widest text-foreground/40">
-            Read more to unlock
+          <p className="mt-5 text-sm text-star group-hover:text-star/80 transition-colors">
+            Explore new worlds by reading more stories →
           </p>
         </Link>
 
