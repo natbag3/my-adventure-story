@@ -93,15 +93,12 @@ export const generateStoryPageAudio = createServerFn({ method: "POST" })
         .upload(path, audioBytes, { contentType: "audio/mpeg", upsert: true });
       if (upErr) throw new Error(`Could not store narration: ${upErr.message}`);
 
-      // Persist path into pages[pageIndex].audio_url using jsonb_set-equivalent update.
-      const updatedPages = pages.map((p, i) =>
-        i === data.pageIndex ? { ...p, audio_url: path } : p,
+      // Atomically persist audio_url via jsonb_set so we don't clobber
+      // other fields (e.g. image_url) that may be written concurrently.
+      const { error: updErr } = await supabase.rpc(
+        "set_story_page_audio_url" as never,
+        { p_story_id: data.storyId, p_page_index: data.pageIndex, p_audio_url: path } as never,
       );
-      const { error: updErr } = await supabase
-        .from("stories")
-        .update({ pages: updatedPages as unknown as never })
-        .eq("id", data.storyId)
-        .eq("user_id", userId);
       if (updErr) throw new Error(`Could not save narration reference: ${updErr.message}`);
     }
 
