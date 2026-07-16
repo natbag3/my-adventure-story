@@ -5,6 +5,16 @@ import { CharacterAvatar } from "@/components/character-avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { useActiveChild } from "@/lib/active-child-context";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/settings")({
@@ -28,6 +38,8 @@ function SettingsPage() {
   const [isPremium, setIsPremium] = useState(false);
   const [preferredVoice, setPreferredVoice] = useState<string>(VOICES[0].id);
   const [savingVoice, setSavingVoice] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -86,10 +98,17 @@ function SettingsPage() {
   }
 
 
-  async function deleteChild(id: string, name: string) {
-    if (!confirm(`Remove ${name}'s profile? This can't be undone.`)) return;
+  async function confirmDeleteChild() {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    const { id, name } = deleteTarget;
     const { error } = await supabase.from("children").delete().eq("id", id);
-    if (error) return toast.error(error.message);
+    setDeleting(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setDeleteTarget(null);
     toast.success(`${name}'s profile removed`);
     await refresh();
   }
@@ -241,7 +260,7 @@ function SettingsPage() {
                         Edit
                       </button>
                       <button
-                        onClick={() => deleteChild(c.id, c.first_name)}
+                        onClick={() => setDeleteTarget({ id: c.id, name: c.first_name })}
                         className="rounded-full border border-hairline px-3 py-1.5 text-xs font-medium text-foreground/55 hover:text-destructive"
                       >
                         ✕
@@ -260,6 +279,29 @@ function SettingsPage() {
           </Link>
         </Card>
       </div>
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && !deleting && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove {deleteTarget?.name}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete all their stories and adventure progress. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                void confirmDeleteChild();
+              }}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? "Removing…" : "Remove permanently"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppShell>
   );
 }
