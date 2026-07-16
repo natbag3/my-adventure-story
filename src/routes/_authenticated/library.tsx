@@ -270,7 +270,7 @@ function LibraryPage() {
               style={{ animationDelay: `${i * 60}ms` }}
               className="group block animate-slide-up rounded-[28px] border border-hairline bg-surface/60 p-4 transition-all hover:-translate-y-1 hover:bg-surface"
             >
-              <StoryCover emoji={s.cover_emoji} gradient={s.cover_gradient} className="aspect-[4/3] mb-4" size="lg" />
+              <StoryCover emoji={s.cover_emoji} gradient={s.cover_gradient} coverPath={s.cover_url} className="aspect-[4/3] mb-4" size="lg" />
               <div className="px-1">
                 <div className="mb-1 flex items-center justify-between">
                   <span className="font-mono text-[10px] uppercase tracking-wider text-foreground/45">
