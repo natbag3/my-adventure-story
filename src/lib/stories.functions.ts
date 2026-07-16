@@ -295,7 +295,7 @@ STAGE 3 — SILENT SELF-CHECK (do NOT output)
 ═══════════════════════════════════════════
 Before returning, silently verify:
   ✓ Every page rhymes naturally
-  ✓ Every page is ≤ 60 words
+  ✓ Every page has at least 4 rhyming couplets (8 lines) — 3-min=4, 5-min=5, 10-min=6 couplets per page; NEVER fewer than 4
   ✓ Language is gentle and age-appropriate
   ✓ Reads aloud beautifully
   ✓ ${heroLabel} ${heroNames.length > 1 ? "are heroes" : "is the hero"} on every page
