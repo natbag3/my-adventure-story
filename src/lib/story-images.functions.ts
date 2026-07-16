@@ -7,6 +7,10 @@ const Input = z.object({
   pageIndex: z.number().int().min(0),
 });
 
+const CoverInput = z.object({
+  storyId: z.string().uuid(),
+});
+
 type PageObj = {
   text?: string;
   illustration_prompt?: string;
