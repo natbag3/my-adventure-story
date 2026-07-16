@@ -192,12 +192,6 @@ function SettingsPage() {
           <Row label="Email" value={user?.email ?? "—"} />
           <div className="flex flex-wrap gap-3 pt-2">
             <button
-              onClick={() => navigate({ to: "/subscription" })}
-              className="rounded-full border border-hairline bg-surface-elevated px-4 py-2 text-sm font-medium text-foreground"
-            >
-              Subscription
-            </button>
-            <button
               onClick={handleSignOut}
               className="rounded-full border border-hairline px-4 py-2 text-sm font-medium text-foreground/70 hover:text-foreground"
             >
@@ -205,6 +199,14 @@ function SettingsPage() {
             </button>
           </div>
         </Card>
+
+        {/* Subscription */}
+        <SubscriptionCard
+          sub={sub}
+          openingPortal={openingPortal}
+          onManage={handleManageSubscription}
+          onUpgrade={() => setPricingOpen(true)}
+        />
 
         {/* Send feedback */}
         <div className="flex justify-center">
@@ -217,8 +219,8 @@ function SettingsPage() {
         </div>
 
 
-        {/* Narration voice (premium only) */}
-        {isPremium && (
+        {/* Narration voice (Explorer + Unlimited) */}
+        {hasNarration && (
           <Card
             title="🔊 Narration Voice"
             subtitle="Choose the voice used to read stories aloud."
