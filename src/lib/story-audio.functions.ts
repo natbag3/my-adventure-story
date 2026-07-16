@@ -16,10 +16,10 @@ type PageObj = {
 };
 
 const NARRATION_VOICE_MAP: Record<string, string> = {
-  us_female: "cgSgspJ2msm6clMCkdW9", // Jessica
-  us_male: "pNInz6obpgDQGcFmaJgB", // Adam
-  uk_female: "vgctchiitYi1YFI9yf9Z", // Natalie
-  uk_male: "onwK4e9ZLuTAKqWW03F9", // Daniel
+  us_female: "ws2FOzqnmYGWrHKuLOEA", // Charlotte
+  us_male: "G8PV54VHq7ixzyt4p91v", // Adam
+  uk_female: "5lZLOKBuHnNE1axAo7W9", // Natalie
+  uk_male: "QaNYLA77MCFZ5tpoVsQn", // Daniel
 };
 const DEFAULT_NARRATION_VOICE_ID = NARRATION_VOICE_MAP.uk_female;
 
