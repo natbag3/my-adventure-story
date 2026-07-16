@@ -45,7 +45,7 @@ export const generateStoryBookPdf = createServerFn({ method: "POST" })
 
     const { data: child, error: childErr } = await supabase
       .from("children")
-      .select("id, first_name, avatar_emoji")
+      .select("id, first_name")
       .eq("id", data.childId)
       .eq("user_id", userId)
       .maybeSingle();
