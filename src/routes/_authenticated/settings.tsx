@@ -17,18 +17,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { openFeedbackDialog } from "@/components/feedback-dialog";
+import { VoicePickerGrid, type NarrationVoiceKey } from "@/components/voice-picker";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({ meta: [{ title: "Profile — Adventure Club" }] }),
   component: SettingsPage,
 });
 
-const VOICES = [
-  { id: "cgSgspJ2msm6clMCkdW9", flag: "🇺🇸", label: "Jessica", sub: "US · Female" },
-  { id: "pNInz6obpgDQGcFmaJgB", flag: "🇺🇸", label: "Adam", sub: "US · Male" },
-  { id: "XB0fDUnXU5powFXDhCwa", flag: "🇬🇧", label: "Charlotte", sub: "UK · Female" },
-  { id: "onwK4e9ZLuTAKqWW03F9", flag: "🇬🇧", label: "Daniel", sub: "UK · Male" },
-] as const;
 
 function SettingsPage() {
   const { user, signOut } = useAuth();
@@ -37,8 +32,8 @@ function SettingsPage() {
   const [parentName, setParentName] = useState<string>("");
   const [savingName, setSavingName] = useState(false);
   const [isPremium, setIsPremium] = useState(false);
-  const [preferredVoice, setPreferredVoice] = useState<string>(VOICES[0].id);
-  const [savingVoice, setSavingVoice] = useState<string | null>(null);
+  const [narrationVoice, setNarrationVoice] = useState<NarrationVoiceKey | null>(null);
+  const [savingVoice, setSavingVoice] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
   const [deleting, setDeleting] = useState(false);
 
@@ -46,7 +41,7 @@ function SettingsPage() {
     if (!user) return;
     supabase
       .from("profiles")
-      .select("first_name, display_name, is_premium, preferred_voice")
+      .select("first_name, display_name, is_premium, narration_voice")
       .eq("id", user.id)
       .maybeSingle()
       .then(({ data }) => {
@@ -54,7 +49,7 @@ function SettingsPage() {
           first_name?: string | null;
           display_name?: string | null;
           is_premium?: boolean | null;
-          preferred_voice?: string | null;
+          narration_voice?: NarrationVoiceKey | null;
         } | null;
         setParentName(
           d?.first_name ||
@@ -64,7 +59,7 @@ function SettingsPage() {
             "",
         );
         setIsPremium(!!d?.is_premium);
-        if (d?.preferred_voice) setPreferredVoice(d.preferred_voice);
+        if (d?.narration_voice) setNarrationVoice(d.narration_voice);
       });
   }, [user]);
 
@@ -80,23 +75,24 @@ function SettingsPage() {
     else toast.success("Saved");
   }
 
-  async function pickVoice(voiceId: string) {
+  async function pickVoice(key: NarrationVoiceKey) {
     if (!user) return;
-    setSavingVoice(voiceId);
-    const prev = preferredVoice;
-    setPreferredVoice(voiceId);
+    setSavingVoice(true);
+    const prev = narrationVoice;
+    setNarrationVoice(key);
     const { error } = await supabase
       .from("profiles")
-      .update({ preferred_voice: voiceId } as never)
+      .update({ narration_voice: key } as never)
       .eq("id", user.id);
-    setSavingVoice(null);
+    setSavingVoice(false);
     if (error) {
-      setPreferredVoice(prev);
+      setNarrationVoice(prev);
       toast.error(error.message);
     } else {
       toast.success("Narration voice updated");
     }
   }
+
 
 
   async function confirmDeleteChild() {
@@ -183,35 +179,8 @@ function SettingsPage() {
             title="🔊 Narration Voice"
             subtitle="Choose the voice used to read stories aloud."
           >
-            <div className="grid grid-cols-2 gap-3">
-              {VOICES.map((v) => {
-                const selected = preferredVoice === v.id;
-                return (
-                  <button
-                    key={v.id}
-                    onClick={() => pickVoice(v.id)}
-                    disabled={savingVoice !== null}
-                    className={
-                      "flex items-center gap-3 rounded-2xl border p-4 text-left transition-colors " +
-                      (selected
-                        ? "border-star/60 bg-star/10"
-                        : "border-hairline bg-surface-elevated hover:border-lavender/40")
-                    }
-                  >
-                    <span className="text-2xl">{v.flag}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-display text-base text-foreground">{v.label}</p>
-                      <p className="text-xs text-foreground/50">{v.sub}</p>
-                    </div>
-                    {selected && (
-                      <span className="text-[10px] font-mono uppercase tracking-widest text-star">
-                        ● Active
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
+            <VoicePickerGrid value={narrationVoice} onPick={pickVoice} disabled={savingVoice} />
+
           </Card>
         )}
 

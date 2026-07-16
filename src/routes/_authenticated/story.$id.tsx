@@ -12,6 +12,8 @@ import { bumpReadingStreak } from "@/lib/streak";
 import { useActiveChild } from "@/lib/active-child-context";
 import { useAuth } from "@/lib/auth-context";
 import { toast } from "sonner";
+import { VoicePickerGrid, type NarrationVoiceKey } from "@/components/voice-picker";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 type StoryPage = { text: string; illustration_prompt?: string; image_url?: string | null; audio_url?: string | null };
 type StoryRow = {
@@ -56,6 +58,10 @@ function StoryReader() {
   const [page, setPage] = useState(0);
   const [favorite, setFavorite] = useState(false);
   const [isPremium, setIsPremium] = useState(false);
+  const [narrationVoice, setNarrationVoice] = useState<NarrationVoiceKey | null>(null);
+  const [voicePickerOpen, setVoicePickerOpen] = useState(false);
+  const [savingVoice, setSavingVoice] = useState(false);
+  const pendingPageRef = useRef<number | null>(null);
   const [playingIdx, setPlayingIdx] = useState<number | null>(null);
   const [loadingAudioIdx, setLoadingAudioIdx] = useState<number | null>(null);
   const audioCacheRef = useRef<Map<number, string>>(new Map());
@@ -65,11 +71,13 @@ function StoryReader() {
     if (!user) return;
     supabase
       .from("profiles")
-      .select("is_premium")
+      .select("is_premium, narration_voice")
       .eq("id", user.id)
       .maybeSingle()
       .then(({ data }) => {
-        setIsPremium(!!(data as { is_premium?: boolean } | null)?.is_premium);
+        const d = data as { is_premium?: boolean; narration_voice?: NarrationVoiceKey | null } | null;
+        setIsPremium(!!d?.is_premium);
+        setNarrationVoice(d?.narration_voice ?? null);
       });
   }, [user]);
 
@@ -178,6 +186,34 @@ function StoryReader() {
       audioRef.current = null;
     }
     setPlayingIdx(null);
+  }
+
+  async function handleNarrateClick(pageIdx: number) {
+    if (isPremium && !narrationVoice && playingIdx !== pageIdx) {
+      pendingPageRef.current = pageIdx;
+      setVoicePickerOpen(true);
+      return;
+    }
+    void togglePlay(pageIdx);
+  }
+
+  async function pickNarrationVoice(key: NarrationVoiceKey) {
+    if (!user) return;
+    setSavingVoice(true);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ narration_voice: key } as never)
+      .eq("id", user.id);
+    setSavingVoice(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setNarrationVoice(key);
+    setVoicePickerOpen(false);
+    const pending = pendingPageRef.current;
+    pendingPageRef.current = null;
+    if (pending !== null) void togglePlay(pending);
   }
 
   async function togglePlay(pageIdx: number) {
@@ -358,7 +394,7 @@ function StoryReader() {
                     isPremium={isPremium}
                     isPlaying={playingIdx === storyPageIdx}
                     isLoading={loadingAudioIdx === storyPageIdx}
-                    onClick={() => togglePlay(storyPageIdx)}
+                    onClick={() => handleNarrateClick(storyPageIdx)}
                   />
                 </div>
                 <p className="font-display text-xl md:text-2xl leading-relaxed text-ink text-balance">
@@ -400,6 +436,19 @@ function StoryReader() {
           )}
         </div>
       </div>
+      <Dialog open={voicePickerOpen} onOpenChange={(o) => !savingVoice && setVoicePickerOpen(o)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Choose your narrator voice</DialogTitle>
+            <DialogDescription>
+              Pick the voice you'd like to read your stories aloud. You can change it anytime from your Profile.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-2">
+            <VoicePickerGrid value={narrationVoice} onPick={pickNarrationVoice} disabled={savingVoice} />
+          </div>
+        </DialogContent>
+      </Dialog>
     </AppShell>
   );
 }
