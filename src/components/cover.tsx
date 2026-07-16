@@ -38,6 +38,11 @@ export function StoryCover({
       setUrl(null);
       return;
     }
+    // Already an absolute URL (e.g. pre-signed for anonymous share viewers)
+    if (/^https?:\/\//i.test(coverPath)) {
+      setUrl(coverPath);
+      return;
+    }
     const cached = coverCache.get(coverPath);
     if (cached) {
       setUrl(cached);
