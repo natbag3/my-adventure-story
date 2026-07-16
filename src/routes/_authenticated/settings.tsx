@@ -35,24 +35,28 @@ function SettingsPage() {
   const navigate = useNavigate();
   const [parentName, setParentName] = useState<string>("");
   const [savingName, setSavingName] = useState(false);
-  const [isPremium, setIsPremium] = useState(false);
   const [narrationVoice, setNarrationVoice] = useState<NarrationVoiceKey | null>(null);
   const [savingVoice, setSavingVoice] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [sub, setSub] = useState<SubscriptionState | null>(null);
+  const [pricingOpen, setPricingOpen] = useState(false);
+  const [openingPortal, setOpeningPortal] = useState(false);
+  const fetchSub = useServerFn(getSubscriptionState);
+  const openPortal = useServerFn(createPortalSession);
+  const hasNarration = sub ? tierHasNarration(sub.tier) : false;
 
   useEffect(() => {
     if (!user) return;
     supabase
       .from("profiles")
-      .select("first_name, display_name, is_premium, narration_voice")
+      .select("first_name, display_name, narration_voice")
       .eq("id", user.id)
       .maybeSingle()
       .then(({ data }) => {
         const d = data as {
           first_name?: string | null;
           display_name?: string | null;
-          is_premium?: boolean | null;
           narration_voice?: NarrationVoiceKey | null;
         } | null;
         setParentName(
@@ -62,10 +66,46 @@ function SettingsPage() {
             user.email?.split("@")[0] ||
             "",
         );
-        setIsPremium(!!d?.is_premium);
         if (d?.narration_voice) setNarrationVoice(d.narration_voice);
       });
-  }, [user]);
+    fetchSub().then(setSub).catch((e) => console.error("Failed to load subscription", e));
+  }, [user, fetchSub]);
+
+  // Refresh subscription state after returning from Stripe Checkout.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("subscription") === "success") {
+      toast.success("Welcome aboard! ✨ Your subscription is active.");
+      // Poll for webhook to catch up
+      let tries = 0;
+      const iv = window.setInterval(async () => {
+        tries++;
+        try {
+          const s = await fetchSub();
+          setSub(s);
+          if (s.tier !== "free" || tries > 10) window.clearInterval(iv);
+        } catch {
+          if (tries > 10) window.clearInterval(iv);
+        }
+      }, 1500);
+      // Clean the URL
+      const url = new URL(window.location.href);
+      url.searchParams.delete("subscription");
+      window.history.replaceState({}, "", url.toString());
+      return () => window.clearInterval(iv);
+    }
+  }, [fetchSub]);
+
+  async function handleManageSubscription() {
+    setOpeningPortal(true);
+    try {
+      const { url } = await openPortal({ data: { origin: window.location.origin } });
+      window.location.href = url;
+    } catch (e) {
+      setOpeningPortal(false);
+      toast.error(e instanceof Error ? e.message : "Could not open subscription portal");
+    }
+  }
 
   async function saveParentName() {
     if (!user) return;
