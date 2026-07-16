@@ -316,7 +316,7 @@ OUTPUT — VALID JSON ONLY, this exact shape:
   "title": "short magical title (3–6 words)",
   "cover_emoji": "single emoji capturing the story",
   "pages": [
-    { "page_number": 1, "text": "rhyming page text ≤60 words", "illustration_prompt": "visual scene with each hero's consistent appearance" }
+    { "page_number": 1, "text": "rhyming page text with the required number of couplets for this story length", "illustration_prompt": "visual scene with each hero's consistent appearance" }
   ]
 }
 The "pages" array MUST contain exactly ${pageCount} items, numbered 1 to ${pageCount}.`;
