@@ -307,6 +307,12 @@ function CreateWizard() {
       setPrepTotal(pages.length);
       setPrepDone(pages.length - missing.length);
 
+      // Kick off the cover illustration in parallel with page illustrations.
+      const coverPromise = generateCoverFn({ data: { storyId: result.storyId } }).catch((e) => {
+        console.error("Cover failed", e);
+        return null;
+      });
+
       const results: Array<unknown | null> = [];
       for (const { i } of missing) {
         try {
