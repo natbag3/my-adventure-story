@@ -58,6 +58,14 @@ export const getSharedStory = createServerFn({ method: "GET" })
       }),
     );
 
+    let coverUrl: string | null = null;
+    if (story.cover_url) {
+      const { data: signedCover } = await supabaseAdmin.storage
+        .from("adventurer-photos")
+        .createSignedUrl(story.cover_url, 60 * 60 * 24);
+      coverUrl = signedCover?.signedUrl ?? null;
+    }
+
     return {
       id: story.id,
       title: story.title,
@@ -67,6 +75,7 @@ export const getSharedStory = createServerFn({ method: "GET" })
       length_minutes: story.length_minutes,
       cover_emoji: story.cover_emoji,
       cover_gradient: story.cover_gradient,
+      cover_url: coverUrl,
       pages: signedPages,
       child_first_name: child?.first_name ?? "",
     };
