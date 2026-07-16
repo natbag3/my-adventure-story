@@ -52,7 +52,7 @@ function HomePage() {
     }
     supabase
       .from("stories")
-      .select("id, title, theme, cover_emoji, cover_gradient, length_minutes, progress, child_id")
+      .select("id, title, theme, cover_emoji, cover_gradient, cover_url, length_minutes, progress, child_id")
       .eq("user_id", user.id)
       .eq("child_id", activeChild.id)
       .order("created_at", { ascending: false })

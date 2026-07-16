@@ -30,7 +30,7 @@ export const getSharedStory = createServerFn({ method: "GET" })
     const { data: story, error } = await supabaseAdmin
       .from("stories")
       .select(
-        "id, title, theme, mood, lesson, length_minutes, cover_emoji, cover_gradient, pages, child_id",
+        "id, title, theme, mood, lesson, length_minutes, cover_emoji, cover_gradient, cover_url, pages, child_id",
       )
       .eq("share_token", data.token)
       .maybeSingle();

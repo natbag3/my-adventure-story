@@ -62,7 +62,7 @@ function LibraryPage() {
       supabase
         .from("stories")
         .select(
-          "id, title, theme, mood, lesson, length_minutes, cover_emoji, cover_gradient, favorite, created_at, child_id, series_id, series_part",
+          "id, title, theme, mood, lesson, length_minutes, cover_emoji, cover_gradient, cover_url, favorite, created_at, child_id, series_id, series_part",
         )
         .eq("user_id", user.id)
         .order("created_at", { ascending: false }),
