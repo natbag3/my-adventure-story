@@ -221,6 +221,7 @@ function LibraryPage() {
                             <StoryCover
                               emoji={story.cover_emoji}
                               gradient={story.cover_gradient}
+                              coverPath={story.cover_url}
                               className="aspect-[4/3] mb-2"
                               size="lg"
                             />
