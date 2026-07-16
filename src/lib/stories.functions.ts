@@ -223,12 +223,13 @@ STORY SETTINGS:
 ═══════════════════════════════════════════
 STAGE 1 — SILENT BLUEPRINT (do NOT output)
 ═══════════════════════════════════════════
-Internally plan the arc before writing:
-  1. Beginning — ${heroLabel} enter${heroNames.length > 1 ? "" : "s"} a magical world.
-  2. Three magical discoveries or events.
-  3. One gentle challenge or problem.
-  4. Resolution of the challenge.
-  5. Calm bedtime ending — return home, drift to sleep.
+Internally plan a proper 5-part narrative arc BEFORE writing. Every story MUST follow this shape across its ${pageCount} pages:
+
+  1. OPENING (first 1–2 pages) — Introduce ${heroLabel} in ${heroNames.length > 1 ? "their" : "their"} world. Set the scene warmly. Hint at what's about to begin.
+  2. THE PROBLEM OR QUEST (next 2–3 pages) — Something happens that kicks off the adventure: a challenge appears, something is lost, a creature needs help, a mystery begins. It should feel exciting and raise a clear question: what will happen next?
+  3. RISING ACTION WITH OBSTACLES (middle pages) — ${heroLabel} tr${heroNames.length > 1 ? "y" : "ies"} to solve the problem but face${heroNames.length > 1 ? "" : "s"} at least 2–3 setbacks, surprises, or discoveries. Each page should BUILD — tension, wonder, or stakes increasing. Every character met or place visited must add something meaningful to the plot.
+  4. CLIMAX (1–2 pages near the end) — The biggest moment. ${heroLabel} face${heroNames.length > 1 ? "" : "s"} the main challenge head-on and must use what ${heroNames.length > 1 ? "they have" : "they have"} learned or discovered along the way to overcome it. This is the most exciting or emotional beat.
+  5. RESOLUTION & LESSON (final 1–2 pages) — The problem is solved, the quest complete. The lesson (${data.lesson}) emerges NATURALLY from what happened — never stated bluntly, always shown through the outcome. End warmly and satisfyingly, leaving the child feeling safe and happy.
 
 ═══════════════════════════════════════════
 STAGE 2 — FINAL STORY (the only thing you output)
@@ -239,6 +240,15 @@ WRITING STYLE:
 - Maximum 2–3 sentences per page. HARD CAP: 60 words per page.
 - One clear idea per page. No long paragraphs.
 - Use correct gendered pronouns for each hero based on their "gender" field.
+- Rhyming couplets should CARRY THE EMOTION of the moment — tense, punchy rhymes for exciting/action beats; gentle, flowing rhymes for the resolution and quiet moments.
+- Vary the pace: short punchy lines for action and climax; longer flowing lines for emotional or reflective moments.
+
+NARRATIVE RULES (STRICT):
+- Every page MUST move the plot forward — NO filler pages that only describe scenery or feelings without progressing the story.
+- Any character introduced early MUST reappear or matter later — no throwaway characters.
+- Use CALLBACKS: if something is mentioned or set up on an early page, refer back to it near the end so the story feels whole.
+- The obstacles in the middle must escalate — each setback bigger or more surprising than the last, leading naturally into the climax.
+- The climax must feel earned — ${heroLabel} solve${heroNames.length > 1 ? "" : "s"} it using something established earlier in the story, not a random new idea.
 
 LANGUAGE SAFETY (STRICT — bedtime-safe only):
 - Use ONLY simple children's vocabulary suitable for ages 3–7.
@@ -246,18 +256,19 @@ LANGUAGE SAFETY (STRICT — bedtime-safe only):
 - NO scary, violent, dark, sad, lonely, frightening, or unsettling phrasing. No death, fear, anger, monsters chasing, getting lost alone, crying, danger, weapons.
 - NO words like: terrified, anxious, depressed, devastated, betrayal, conflict, struggle, despair, demon, evil, dead, kill, hurt, blood.
 - Replace any tricky word with a warm, friendly, gentle alternative (e.g. "afraid" → "a little unsure", "angry" → "grumpy", "scary" → "silly").
-- Warm, cozy, calming, magical tone throughout. Reads like a goodnight hug.
+- Warm, cozy, calming, magical tone throughout, even at the climax — tension should come from stakes and wonder, never from fear.
 - If ANY adult or complex word slips in during drafting, silently rewrite that line before output.
 
-STRUCTURE across ${pageCount} pages:
-- Page 1: Introduce ${heroLabel} and the magical setting.
-- Middle pages: The three magical discoveries unfold, then the gentle problem.
-- Penultimate page: The problem is gently solved.
+STRUCTURE across ${pageCount} pages (map the 5-part arc to these pages):
+- Page 1${pageCount >= 6 ? "–2" : ""}: OPENING — introduce ${heroLabel} and the magical setting; hint at the adventure.
+- Next 2–3 pages: THE PROBLEM/QUEST kicks in, then RISING ACTION with escalating obstacles.
+- Penultimate page (or the one before): CLIMAX — the biggest, most exciting moment.
 - Final page: ${
       series && !isFinalPart
-        ? `A gentle bedtime-safe cliffhanger — hint at something new to discover next time. Curiosity, not fear. Do NOT fully resolve.`
-        : `Calm return home, peaceful, sleepy ending.`
+        ? `RESOLUTION with a gentle bedtime-safe cliffhanger — the immediate problem eases, but hint at something new to discover next time. Curiosity, not fear. Do NOT fully resolve the larger series thread.`
+        : `RESOLUTION — problem solved, lesson shown (not told), calm return home, peaceful sleepy ending.`
     }
+
 
 HERO RULES:
 - ${heroLabel} ${heroNames.length > 1 ? "are" : "is"} the main character${heroNames.length > 1 ? "s" : ""} on every page.
