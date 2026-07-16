@@ -1,0 +1,2 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS narration_voice text;
+ALTER TABLE public.profiles ADD CONSTRAINT profiles_narration_voice_check CHECK (narration_voice IS NULL OR narration_voice IN ('us_female','us_male','uk_female','uk_male'));

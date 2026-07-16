@@ -160,6 +160,7 @@ export type Database = {
           first_name: string | null
           id: string
           is_premium: boolean
+          narration_voice: string | null
           preferred_voice: string
           updated_at: string
         }
@@ -170,6 +171,7 @@ export type Database = {
           first_name?: string | null
           id: string
           is_premium?: boolean
+          narration_voice?: string | null
           preferred_voice?: string
           updated_at?: string
         }
@@ -180,6 +182,7 @@ export type Database = {
           first_name?: string | null
           id?: string
           is_premium?: boolean
+          narration_voice?: string | null
           preferred_voice?: string
           updated_at?: string
         }
