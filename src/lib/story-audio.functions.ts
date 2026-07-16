@@ -15,13 +15,13 @@ type PageObj = {
   [k: string]: unknown;
 };
 
-const DEFAULT_VOICE = "cgSgspJ2msm6clMCkdW9"; // Jessica
-const ALLOWED_VOICES = new Set([
-  "cgSgspJ2msm6clMCkdW9", // Jessica US F
-  "pNInz6obpgDQGcFmaJgB", // Adam US M
-  "XB0fDUnXU5powFXDhCwa", // Charlotte UK F
-  "onwK4e9ZLuTAKqWW03F9", // Daniel UK M
-]);
+const NARRATION_VOICE_MAP: Record<string, string> = {
+  us_female: "cgSgspJ2msm6clMCkdW9", // Jessica
+  us_male: "pNInz6obpgDQGcFmaJgB", // Adam
+  uk_female: "vgctchiitYi1YFI9yf9Z", // Natalie
+  uk_male: "onwK4e9ZLuTAKqWW03F9", // Daniel
+};
+const DEFAULT_NARRATION_VOICE_ID = NARRATION_VOICE_MAP.uk_female;
 
 export const generateStoryPageAudio = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
