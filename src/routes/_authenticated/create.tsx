@@ -82,22 +82,22 @@ function getSeasonalOptions(dobIso: string | null | undefined, now: Date = new D
     ? "Easter week!"
     : `Unlocks ${nextEaster.toLocaleDateString(undefined, { month: "short", day: "numeric" })}`;
 
-  // Birthday — within 7 days of the child's DOB (this year)
+  // Birthday — 5 days before through birthday itself (inclusive)
   let birthdayActive = false;
   let birthdayUnlock = "Add a birthday to unlock";
   if (dobIso) {
     const dob = new Date(dobIso);
     if (!isNaN(dob.getTime())) {
       const thisYear = new Date(year, dob.getMonth(), dob.getDate());
-      let delta = daysBetween(thisYear, now);
       let nextBirthday = thisYear;
-      if (delta < -7) {
+      // If this year's birthday is already more than 0 days past, roll to next year
+      if (daysBetween(thisYear, now) < 0) {
         nextBirthday = new Date(year + 1, dob.getMonth(), dob.getDate());
-        delta = daysBetween(nextBirthday, now);
       }
-      birthdayActive = Math.abs(daysBetween(now, nextBirthday)) <= 7;
+      const delta = daysBetween(nextBirthday, now); // positive = days until birthday
+      birthdayActive = delta >= 0 && delta <= 5;
       birthdayUnlock = birthdayActive
-        ? "Birthday week!"
+        ? delta === 0 ? "Happy birthday!" : "Birthday soon!"
         : `Unlocks ${nextBirthday.toLocaleDateString(undefined, { month: "short", day: "numeric" })}`;
     }
   }
