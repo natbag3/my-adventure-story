@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useActiveChild } from "@/lib/active-child-context";
 import { generateStory } from "@/lib/stories.functions";
-import { generateStoryPageImage } from "@/lib/story-images.functions";
+import { generateStoryPageImage, generateStoryCoverImage } from "@/lib/story-images.functions";
 
 function calcAge(dob: string | null) {
   if (!dob) return null;
