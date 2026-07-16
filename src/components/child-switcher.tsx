@@ -66,7 +66,7 @@ export function ChildSwitcher({ className }: { className?: string }) {
                   <span className="block text-sm font-medium text-foreground">
                     {c.first_name}
                   </span>
-                  {c.nickname && (
+                  {c.nickname && c.nickname !== c.first_name && (
                     <span className="block text-[11px] text-foreground/50">
                       aka {c.nickname}
                     </span>
