@@ -241,12 +241,17 @@ STAGE 2 — FINAL STORY (the only thing you output)
 ═══════════════════════════════════════════
 WRITING STYLE:
 - Every page MUST rhyme naturally (AABB, ABAB, or couplets) — never forced.
-- Short, lyrical lines with a clear sing-song rhythm.
-- Maximum 2–3 sentences per page. HARD CAP: 60 words per page.
-- One clear idea per page. No long paragraphs.
+- Lyrical lines with a clear sing-song rhythm.
+- LENGTH PER PAGE (HARD MINIMUM — never fewer than 4 couplets / 8 lines, regardless of story length or pacing):
+    • 3-minute story → 4 rhyming couplets per page (8 lines).
+    • 5-minute story → 5 rhyming couplets per page (10 lines).
+    • 10-minute story → 6 rhyming couplets per page (12 lines).
+  Target these numbers on every page. Aim for 5–6 couplets (10–12 lines) on most pages.
+- Each couplet must be a complete thought or moment — not a throwaway single line. Give rhymes room to breathe and build.
+- Treat each page as a small scene with a beginning, middle and end — not a caption for the illustration.
 - Use correct gendered pronouns for each hero based on their "gender" field.
 - Rhyming couplets should CARRY THE EMOTION of the moment — tense, punchy rhymes for exciting/action beats; gentle, flowing rhymes for the resolution and quiet moments.
-- Vary the pace: short punchy lines for action and climax; longer flowing lines for emotional or reflective moments.
+- Vary the pace: crisper couplets for action and climax; longer flowing couplets for emotional or reflective moments — but ALWAYS respect the minimum couplet count above.
 
 NARRATIVE RULES (STRICT):
 - Every page MUST move the plot forward — NO filler pages that only describe scenery or feelings without progressing the story.
