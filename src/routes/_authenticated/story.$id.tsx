@@ -369,13 +369,16 @@ function StoryReader() {
         </div>
 
         <div className="mt-6 flex items-center justify-between">
-          <button
-            onClick={() => setPage((p) => Math.max(0, p - 1))}
-            disabled={page === 0}
-            className="rounded-full border border-hairline bg-surface/60 px-5 py-2.5 text-sm font-medium text-foreground/80 disabled:opacity-30"
-          >
-            ← Previous
-          </button>
+          {page > 0 ? (
+            <button
+              onClick={() => setPage((p) => Math.max(0, p - 1))}
+              className="rounded-full border border-hairline bg-surface/60 px-5 py-2.5 text-sm font-medium text-foreground/80"
+            >
+              ← Previous
+            </button>
+          ) : (
+            <span />
+          )}
           <span className="font-mono text-[10px] uppercase tracking-widest text-foreground/45">
             {isCover ? "Cover" : isEnd ? "The End" : `Page ${page} of ${totalPages}`}
           </span>
