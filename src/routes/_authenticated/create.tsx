@@ -82,22 +82,22 @@ function getSeasonalOptions(dobIso: string | null | undefined, now: Date = new D
     ? "Easter week!"
     : `Unlocks ${nextEaster.toLocaleDateString(undefined, { month: "short", day: "numeric" })}`;
 
-  // Birthday — within 7 days of the child's DOB (this year)
+  // Birthday — 5 days before through birthday itself (inclusive)
   let birthdayActive = false;
   let birthdayUnlock = "Add a birthday to unlock";
   if (dobIso) {
     const dob = new Date(dobIso);
     if (!isNaN(dob.getTime())) {
       const thisYear = new Date(year, dob.getMonth(), dob.getDate());
-      let delta = daysBetween(thisYear, now);
       let nextBirthday = thisYear;
-      if (delta < -7) {
+      // If this year's birthday is already more than 0 days past, roll to next year
+      if (daysBetween(thisYear, now) < 0) {
         nextBirthday = new Date(year + 1, dob.getMonth(), dob.getDate());
-        delta = daysBetween(nextBirthday, now);
       }
-      birthdayActive = Math.abs(daysBetween(now, nextBirthday)) <= 7;
+      const delta = daysBetween(nextBirthday, now); // positive = days until birthday
+      birthdayActive = delta >= 0 && delta <= 5;
       birthdayUnlock = birthdayActive
-        ? "Birthday week!"
+        ? delta === 0 ? "Happy birthday!" : "Birthday soon!"
         : `Unlocks ${nextBirthday.toLocaleDateString(undefined, { month: "short", day: "numeric" })}`;
     }
   }
@@ -246,7 +246,7 @@ function CreateWizard() {
   }, [primaryId]);
 
   const selectedChild = children.find((c) => c.id === primaryId);
-  const seasonalOptions = getSeasonalOptions(selectedChild?.date_of_birth);
+  const seasonalOptions = getSeasonalOptions(selectedChild?.date_of_birth).filter((s) => s.active);
 
   const canNext =
     (step === 0 && !!primaryId) ||
@@ -644,47 +644,39 @@ function CreateWizard() {
               )}
             </div>
 
-            <div className="mb-8">
-              <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-star/80">
-                ✨ Special
-              </p>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {seasonalOptions.map((s) => {
-                  const selected = adventure === s.theme;
-                  return (
-                    <button
-                      key={s.id}
-                      disabled={!s.active}
-                      onClick={() => {
-                        if (!s.active) return;
-                        setAdventure(s.theme);
-                        setStep(2);
-                      }}
-                      className={cn(
-                        "relative flex flex-col items-center gap-2 rounded-2xl border p-4 text-center transition-all",
-                        !s.active
-                          ? "border-hairline bg-surface-elevated/40 opacity-50 cursor-not-allowed"
-                          : selected
-                          ? "border-star bg-star/15 shadow-[0_0_0_2px_oklch(0.85_0.16_88/0.4),0_10px_30px_-10px_oklch(0.85_0.16_88/0.6)]"
-                          : "border-star/60 bg-gradient-to-br from-star/10 to-peach/5 shadow-[0_0_0_1px_oklch(0.85_0.16_88/0.5),0_10px_30px_-15px_oklch(0.85_0.16_88/0.5)] hover:-translate-y-0.5",
-                      )}
-                    >
-                      <span className={cn("text-3xl", !s.active && "grayscale")}>{s.emoji}</span>
-                      <span className="text-sm font-medium text-foreground">{s.label}</span>
-                      {s.active ? (
+            {seasonalOptions.length > 0 && (
+              <div className="mb-8">
+                <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-star/80">
+                  ✨ Special
+                </p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {seasonalOptions.map((s) => {
+                    const selected = adventure === s.theme;
+                    return (
+                      <button
+                        key={s.id}
+                        onClick={() => {
+                          setAdventure(s.theme);
+                          setStep(2);
+                        }}
+                        className={cn(
+                          "relative flex flex-col items-center gap-2 rounded-2xl border p-4 text-center transition-all",
+                          selected
+                            ? "border-star bg-star/15 shadow-[0_0_0_2px_oklch(0.85_0.16_88/0.4),0_10px_30px_-10px_oklch(0.85_0.16_88/0.6)]"
+                            : "border-star/60 bg-gradient-to-br from-star/10 to-peach/5 shadow-[0_0_0_1px_oklch(0.85_0.16_88/0.5),0_10px_30px_-15px_oklch(0.85_0.16_88/0.5)] hover:-translate-y-0.5",
+                        )}
+                      >
+                        <span className="text-3xl">{s.emoji}</span>
+                        <span className="text-sm font-medium text-foreground">{s.label}</span>
                         <span className="font-mono text-[9px] uppercase tracking-widest text-star">
                           {s.unlockLabel}
                         </span>
-                      ) : (
-                        <span className="flex items-center gap-1 font-mono text-[9px] uppercase tracking-widest text-foreground/50">
-                          🔒 {s.unlockLabel}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            )}
 
             <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-foreground/45">
               All adventures
