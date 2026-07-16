@@ -240,7 +240,7 @@ function SettingsPage() {
                           </span>
                         )}
                       </p>
-                      {c.nickname && c.nickname !== c.first_name && (
+                      {c.nickname && c.nickname.trim().toLowerCase() !== c.first_name.trim().toLowerCase() && (
                         <p className="text-xs text-foreground/50">aka {c.nickname}</p>
                       )}
                     </div>
