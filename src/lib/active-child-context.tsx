@@ -15,7 +15,6 @@ export type ActiveChild = {
   nickname: string | null;
   gender: string | null;
   date_of_birth: string | null;
-  avatar_emoji: string | null;
   portrait_url: string | null;
   streak_count: number;
   last_story_read_date: string | null;
@@ -55,7 +54,7 @@ export function ActiveChildProvider({ children }: { children: ReactNode }) {
       supabase
         .from("children")
         .select(
-          "id, first_name, nickname, gender, date_of_birth, avatar_emoji, portrait_url, streak_count, last_story_read_date",
+          "id, first_name, nickname, gender, date_of_birth, portrait_url, streak_count, last_story_read_date",
         )
         .eq("user_id", user.id)
         .order("created_at", { ascending: true }),
