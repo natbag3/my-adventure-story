@@ -436,6 +436,19 @@ function StoryReader() {
           )}
         </div>
       </div>
+      <Dialog open={voicePickerOpen} onOpenChange={(o) => !savingVoice && setVoicePickerOpen(o)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Choose your narrator voice</DialogTitle>
+            <DialogDescription>
+              Pick the voice you'd like to read your stories aloud. You can change it anytime from your Profile.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-2">
+            <VoicePickerGrid value={narrationVoice} onPick={pickNarrationVoice} disabled={savingVoice} />
+          </div>
+        </DialogContent>
+      </Dialog>
     </AppShell>
   );
 }
