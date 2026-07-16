@@ -18,8 +18,9 @@ type PageObj = {
   [k: string]: unknown;
 };
 
-function describeChild(child: {
+type ChildLike = {
   first_name: string;
+  date_of_birth?: string | null;
   gender?: string | null;
   hair_color?: string | null;
   hair_style?: string | null;
@@ -28,13 +29,26 @@ function describeChild(child: {
   freckles?: boolean | null;
   glasses?: boolean | null;
   outfit_color?: string | null;
-}) {
-  const subject =
-    (child.gender ?? "").toLowerCase() === "boy"
-      ? "boy"
-      : (child.gender ?? "").toLowerCase() === "girl"
-      ? "girl"
-      : "child";
+};
+
+function calcAgeYears(dob?: string | null): number | null {
+  if (!dob) return null;
+  const d = new Date(dob);
+  if (isNaN(d.getTime())) return null;
+  const now = new Date();
+  let age = now.getFullYear() - d.getFullYear();
+  const m = now.getMonth() - d.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
+  return age >= 0 && age < 120 ? age : null;
+}
+
+function subjectNoun(gender?: string | null): "girl" | "boy" | "child" {
+  const g = (gender ?? "").toLowerCase();
+  return g === "boy" ? "boy" : g === "girl" ? "girl" : "child";
+}
+
+function describeChild(child: ChildLike) {
+  const subject = subjectNoun(child.gender);
   const traits = [
     child.hair_color && `${child.hair_color.toLowerCase()} ${child.hair_style?.toLowerCase() ?? ""} hair`.trim(),
     child.eye_color && `${child.eye_color.toLowerCase()} eyes`,
@@ -47,6 +61,29 @@ function describeChild(child: {
     .join(", ");
   return `${child.first_name} (a ${subject}${traits ? `, ${traits}` : ""})`;
 }
+
+function characterReference(child: ChildLike): string {
+  const age = calcAgeYears(child.date_of_birth);
+  const subject = subjectNoun(child.gender);
+  const hair = [child.hair_style?.toLowerCase(), child.hair_color?.toLowerCase()]
+    .filter(Boolean)
+    .join(" ");
+  const parts: string[] = [];
+  if (hair) parts.push(`${hair} hair`);
+  if (child.eye_color) parts.push(`${child.eye_color.toLowerCase()} eyes`);
+  if (child.skin_tone) parts.push(`${child.skin_tone.toLowerCase()} skin`);
+  if (child.freckles) parts.push("soft freckles");
+  if (child.glasses) parts.push("round glasses");
+  const ageStr = age !== null ? `${age}-year-old ` : "";
+  const traits = parts.length ? ` with ${parts.join(", ")}` : "";
+  const outfit = child.outfit_color
+    ? `, wearing a ${child.outfit_color.toLowerCase()} outfit`
+    : "";
+  return `The main character is ${child.first_name}, a ${ageStr}${subject}${traits}${outfit}.`;
+}
+
+const STYLE_ANCHOR =
+  "Consistent children's storybook illustration style, warm painterly art, same character design throughout.";
 
 export const generateStoryPageImage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
