@@ -84,6 +84,7 @@ function SharedStoryPage() {
               <StoryCover
                 emoji={story.cover_emoji}
                 gradient={story.cover_gradient}
+                coverPath={story.cover_url}
                 className="aspect-[4/5]"
                 size="xl"
               />
