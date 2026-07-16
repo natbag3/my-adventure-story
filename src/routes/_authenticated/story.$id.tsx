@@ -300,7 +300,7 @@ function StoryReader() {
         >
           {isCover ? (
             <div className="p-2">
-              <StoryCover emoji={story.cover_emoji} gradient={story.cover_gradient} className="aspect-[4/5]" size="xl" />
+              <StoryCover emoji={story.cover_emoji} gradient={story.cover_gradient} coverPath={story.cover_url} className="aspect-[4/5]" size="xl" />
               <div className="px-8 py-10 text-center">
                 <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-ink/50">
                   An adventure starring {childName}
