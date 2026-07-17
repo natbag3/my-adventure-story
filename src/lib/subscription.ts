@@ -77,7 +77,7 @@ export const TIERS: Record<Tier, TierConfig> = {
     profiles: 3,
     profilesLabel: "3 child profiles",
     priceMonthly: 12.99,
-    priceYearly: 104.99,
+    priceYearly: 124.99,
     priceEnvMonthly: "STRIPE_PRICE_EXPLORER_MONTHLY",
     priceEnvYearly: "STRIPE_PRICE_EXPLORER_YEARLY",
     features: [
