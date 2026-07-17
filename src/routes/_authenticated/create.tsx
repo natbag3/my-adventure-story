@@ -251,6 +251,23 @@ function CreateWizard() {
     };
   }, [primaryId]);
 
+  // story_abandoned: fired if the wizard unmounts after progress was made
+  // but no story was generated. `generating` becoming true kicks off nav to
+  // the reader, so we suppress the event by clearing the ref then.
+  const abandonRef = useRef<{ armed: boolean; getPayload: () => Record<string, unknown> }>({
+    armed: false,
+    getPayload: () => ({}),
+  });
+  abandonRef.current.armed = !generating && (!!adventure || !!lesson || step > 1);
+  abandonRef.current.getPayload = () => ({ step, adventure, mood, lesson });
+  useEffect(() => {
+    return () => {
+      if (abandonRef.current.armed) {
+        track("story_abandoned", abandonRef.current.getPayload());
+      }
+    };
+  }, []);
+
   const selectedChild = children.find((c) => c.id === primaryId);
   const seasonalOptions = getSeasonalOptions(selectedChild?.date_of_birth).filter((s) => s.active);
 
