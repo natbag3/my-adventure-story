@@ -348,6 +348,7 @@ function LandingPage() {
             </p>
             <Link
               to="/auth"
+              onClick={handleCta("final_cta")}
               className="mt-8 inline-block rounded-2xl bg-primary px-8 py-4 font-display text-lg font-bold text-primary-foreground shadow-[0_24px_60px_-20px_oklch(0.85_0.16_88/0.45)] transition-transform hover:scale-[1.03]"
             >
               Start for free
