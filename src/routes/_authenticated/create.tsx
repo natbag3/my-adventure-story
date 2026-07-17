@@ -331,6 +331,16 @@ function CreateWizard() {
         },
       });
 
+      abandonRef.current.armed = false;
+      track("story_created", {
+        story_id: result.storyId,
+        world: adventureLabel,
+        mood: moodLabel,
+        lesson: lessonLabel,
+        length,
+        has_pet: petIds.length > 0,
+      });
+
       setPrepStage("painting");
       const { data: story } = await supabase
         .from("stories")
