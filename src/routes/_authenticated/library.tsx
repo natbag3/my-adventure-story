@@ -58,6 +58,10 @@ function LibraryPage() {
   const [bookOpen, setBookOpen] = useState(false);
 
   useEffect(() => {
+    track("story_library_viewed");
+  }, []);
+
+  useEffect(() => {
     if (!user) return;
     setLoading(true);
     Promise.all([
