@@ -438,7 +438,16 @@ function StoryReader() {
           </span>
           {!isEnd ? (
             <button
-              onClick={() => setPage((p) => Math.min(totalPages + 1, p + 1))}
+              onClick={() => setPage((p) => {
+                const next = Math.min(totalPages + 1, p + 1);
+                if (next !== p) {
+                  track("story_page_turned", { story_id: story?.id, page_number: next });
+                  if (next === totalPages + 1) {
+                    track("story_completed", { story_id: story?.id });
+                  }
+                }
+                return next;
+              })}
               className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground"
             >
               Next →
