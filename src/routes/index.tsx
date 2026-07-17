@@ -117,20 +117,14 @@ const PLANS = [
 ];
 
 function LandingPage() {
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && user) navigate({ to: "/home", replace: true });
-  }, [loading, user, navigate]);
+    if (user) navigate({ to: "/home", replace: true });
+  }, [user, navigate]);
 
-  if (loading || user) {
-    return (
-      <div className="grid min-h-screen place-items-center magical-bg">
-        <span className="size-3 animate-shimmer rounded-full bg-star shadow-[0_0_20px_var(--star)]" />
-      </div>
-    );
-  }
+
 
   const scrollToFeatures = (e: React.MouseEvent) => {
     e.preventDefault();
