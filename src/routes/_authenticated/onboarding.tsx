@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { generateChildPortrait } from "@/lib/portraits.functions";
+import { track } from "@/lib/analytics";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
   head: () => ({ meta: [{ title: "Create your adventurer — Adventure Club" }] }),
