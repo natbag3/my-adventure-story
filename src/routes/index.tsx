@@ -117,12 +117,28 @@ const PLANS = [
 ];
 
 function LandingPage() {
-  const { user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) navigate({ to: "/home", replace: true });
-  }, [user, navigate]);
+    let cancelled = false;
+
+    supabase.auth.getUser().then(({ data }) => {
+      if (!cancelled && data.user) {
+        navigate({ to: "/home", replace: true });
+      }
+    });
+
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!cancelled && session?.user) {
+        navigate({ to: "/home", replace: true });
+      }
+    });
+
+    return () => {
+      cancelled = true;
+      sub.subscription.unsubscribe();
+    };
+  }, [navigate]);
 
 
 
