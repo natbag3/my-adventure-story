@@ -75,7 +75,7 @@ export function PricingModal({
                 {v === "month" ? "Monthly" : "Yearly"}
                 {v === "year" && (
                   <span className="ml-2 rounded-full bg-mint/20 px-2 py-0.5 text-[9px] uppercase tracking-widest text-mint">
-                    Save 2 mo
+                    Save 20%
                   </span>
                 )}
               </button>
