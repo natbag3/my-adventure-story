@@ -22,6 +22,8 @@ import { VoicePickerGrid, type NarrationVoiceKey } from "@/components/voice-pick
 import { PricingModal } from "@/components/pricing-modal";
 import { TIERS, tierHasNarration, type Tier } from "@/lib/subscription";
 import { getSubscriptionState, createPortalSession, type SubscriptionState } from "@/lib/subscription.functions";
+import { track } from "@/lib/analytics";
+import { NARRATION_VOICES } from "@/components/voice-picker";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({ meta: [{ title: "Profile — Adventure Club" }] }),
