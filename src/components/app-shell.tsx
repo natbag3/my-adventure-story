@@ -6,7 +6,7 @@ import { CharacterAvatar } from "@/components/character-avatar";
 import { FeedbackDialog, openFeedbackDialog } from "@/components/feedback-dialog";
 
 const NAV = [
-  { to: "/", label: "Home", icon: "🏠" },
+  { to: "/home", label: "Home", icon: "🏠" },
   { to: "/create", label: "Create", icon: "✨" },
   { to: "/library", label: "Library", icon: "📚" },
   { to: "/passport", label: "Passport", icon: "🗺️" },
@@ -66,8 +66,8 @@ export function AppShell({ children }: { children: ReactNode }) {
           <nav className="hidden md:flex items-center gap-1 rounded-full border border-hairline bg-surface/60 p-1 text-sm">
             {NAV.map((item) => {
               const active =
-                item.to === "/"
-                  ? pathname === "/"
+                item.to === "/home"
+                  ? pathname === "/home"
                   : pathname.startsWith(item.to);
               return (
                 <Link
@@ -119,7 +119,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="flex items-center gap-1 rounded-full border border-hairline bg-background/85 px-2 py-1.5 backdrop-blur-xl shadow-lg">
           {NAV.map((item) => {
             const active =
-              item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
+              item.to === "/home" ? pathname === "/home" : pathname.startsWith(item.to);
             return (
               <Link
                 key={item.to}

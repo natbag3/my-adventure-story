@@ -27,7 +27,7 @@ function AuthPage() {
   const [resetSent, setResetSent] = useState(false);
 
   useEffect(() => {
-    if (user) navigate({ to: "/", replace: true });
+    if (user) navigate({ to: "/home", replace: true });
   }, [user, navigate]);
 
   async function submit(e: React.FormEvent) {
