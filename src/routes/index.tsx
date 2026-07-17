@@ -176,6 +176,7 @@ function LandingPage() {
             </Link>
             <Link
               to="/auth"
+              onClick={handleCta("header")}
               className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-[0_10px_30px_-10px_oklch(0.85_0.16_88/0.5)] transition-transform hover:scale-[1.03]"
             >
               Start free
