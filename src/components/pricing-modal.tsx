@@ -49,6 +49,7 @@ export function PricingModal({
 
   async function pick(tier: Tier) {
     if (tier === "free") return;
+    pickedRef.current = true;
     setBusyTier(tier);
     try {
       const { url } = await checkout({
