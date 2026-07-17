@@ -11,6 +11,7 @@ import { generateStory } from "@/lib/stories.functions";
 import { generateStoryPageImage, generateStoryCoverImage } from "@/lib/story-images.functions";
 import { getSubscriptionState, type SubscriptionState } from "@/lib/subscription.functions";
 import { PricingModal } from "@/components/pricing-modal";
+import { track } from "@/lib/analytics";
 
 function calcAge(dob: string | null) {
   if (!dob) return null;
