@@ -1,6 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { createFileRoute, Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
   ssr: false,
@@ -117,31 +115,6 @@ const PLANS = [
 ];
 
 function LandingPage() {
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    let cancelled = false;
-
-    supabase.auth.getUser().then(({ data }) => {
-      if (!cancelled && data.user) {
-        navigate({ to: "/home", replace: true });
-      }
-    });
-
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!cancelled && session?.user) {
-        navigate({ to: "/home", replace: true });
-      }
-    });
-
-    return () => {
-      cancelled = true;
-      sub.subscription.unsubscribe();
-    };
-  }, [navigate]);
-
-
-
   const scrollToFeatures = (e: React.MouseEvent) => {
     e.preventDefault();
     document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" });
