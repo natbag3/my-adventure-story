@@ -1,4 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useRef } from "react";
+import { track } from "@/lib/analytics";
 
 export const Route = createFileRoute("/")({
   ssr: false,
