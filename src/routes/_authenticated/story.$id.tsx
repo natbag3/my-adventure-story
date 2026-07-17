@@ -205,6 +205,7 @@ function StoryReader() {
       setVoicePickerOpen(true);
       return;
     }
+    track("narration_played", { voice: narrationVoice, page_number: pageIdx + 1 });
     void togglePlay(pageIdx);
   }
 
@@ -221,10 +222,15 @@ function StoryReader() {
       return;
     }
     setNarrationVoice(key);
+    const voiceLabel = NARRATION_VOICES.find((v) => v.key === key)?.label ?? key;
+    track("voice_selected", { voice: key, voice_name: voiceLabel });
     setVoicePickerOpen(false);
     const pending = pendingPageRef.current;
     pendingPageRef.current = null;
-    if (pending !== null) void togglePlay(pending);
+    if (pending !== null) {
+      track("narration_played", { voice: key, page_number: pending + 1 });
+      void togglePlay(pending);
+    }
   }
 
   async function togglePlay(pageIdx: number) {
