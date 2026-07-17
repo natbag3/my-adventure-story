@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import { usePostHog } from "@posthog/react";
 import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/app-shell";
 import { StoryCover } from "@/components/cover";
@@ -47,6 +48,7 @@ export const Route = createFileRoute("/_authenticated/story/$id")({
 function StoryReader() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
+  const posthog = usePostHog();
   const generateImageFn = useServerFn(generateStoryPageImage);
   const generateAudioFn = useServerFn(generateStoryPageAudio);
   const { refresh: refreshChildren } = useActiveChild();
@@ -161,6 +163,12 @@ function StoryReader() {
     if (!story) return;
     const next = !favorite;
     setFavorite(next);
+    posthog.capture("story_favorited", {
+      story_id: story.id,
+      is_favorite: next,
+      story_theme: story.theme,
+      story_mood: story.mood,
+    });
     await supabase.from("stories").update({ favorite: next }).eq("id", story.id);
   }
 
@@ -170,6 +178,11 @@ function StoryReader() {
     try {
       await navigator.clipboard.writeText(url);
       toast.success("Link copied!", { description: "Share it with anyone." });
+      posthog.capture("story_shared", {
+        story_id: story.id,
+        story_theme: story.theme,
+        story_mood: story.mood,
+      });
     } catch {
       toast.error("Couldn't copy link", { description: url });
     }
@@ -195,6 +208,12 @@ function StoryReader() {
 
   async function handleNarrateClick(pageIdx: number) {
     if (!hasNarration) {
+      posthog.capture("narration_upgrade_prompted", {
+        story_id: id,
+        story_theme: story?.theme,
+        story_mood: story?.mood,
+        page_index: pageIdx,
+      });
       setUpgradeOpen(true);
       return;
     }
@@ -430,7 +449,20 @@ function StoryReader() {
           </span>
           {!isEnd ? (
             <button
-              onClick={() => setPage((p) => Math.min(totalPages + 1, p + 1))}
+              onClick={() => {
+                const next = Math.min(totalPages + 1, page + 1);
+                if (next === totalPages + 1 && story) {
+                  posthog.capture("story_completed", {
+                    story_id: story.id,
+                    story_theme: story.theme,
+                    story_mood: story.mood,
+                    story_lesson: story.lesson,
+                    length_minutes: story.length_minutes,
+                    page_count: totalPages,
+                  });
+                }
+                setPage(next);
+              }}
               className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground"
             >
               Next →

@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { generateChildPortrait } from "@/lib/portraits.functions";
+import { usePostHog } from "@posthog/react";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
   head: () => ({ meta: [{ title: "Create your adventurer — Adventure Club" }] }),
@@ -154,6 +155,7 @@ const TOTAL_STEPS = 7;
 function OnboardingPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const posthog = usePostHog();
   const [step, setStep] = useState(0);
   const [busy, setBusy] = useState(false);
 
@@ -264,6 +266,13 @@ function OnboardingPage() {
         .update({ active_child_id: inserted.id })
         .eq("id", user.id);
 
+      posthog.capture("adventurer_created", {
+        gender: form.gender,
+        has_date_of_birth: !!form.date_of_birth,
+        personality_traits_count: form.personality_traits.length,
+        learning_goals_count: form.learning_goals.length,
+        favorite_story_themes_count: form.favorite_story_themes.length,
+      });
       setStep(6); // success
       void generateChildPortrait({ data: { childId: inserted.id } }).catch((e) => {
         console.error("Portrait generation failed", e);

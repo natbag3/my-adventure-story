@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/app-shell";
 import { SUBSCRIPTION } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
+import { usePostHog } from "@posthog/react";
 
 export const Route = createFileRoute("/_authenticated/subscription")({
   head: () => ({
@@ -73,6 +74,7 @@ const PLANS: readonly Plan[] = [
 ];
 
 function SubscriptionPage() {
+  const posthog = usePostHog();
   return (
     <AppShell>
       <header className="mb-10 animate-slide-up">
@@ -129,6 +131,7 @@ function SubscriptionPage() {
               ))}
             </ul>
             <button
+              onClick={() => posthog.capture("subscription_plan_clicked", { plan_id: p.id })}
               className={cn(
                 "mt-8 rounded-full px-5 py-3 text-sm font-semibold transition-transform hover:scale-[1.02]",
                 p.featured
