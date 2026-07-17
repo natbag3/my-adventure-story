@@ -99,7 +99,7 @@ export const TIERS: Record<Tier, TierConfig> = {
     profiles: null,
     profilesLabel: "Unlimited profiles",
     priceMonthly: 19.99,
-    priceYearly: 159.99,
+    priceYearly: 191.99,
     priceEnvMonthly: "STRIPE_PRICE_UNLIMITED_MONTHLY",
     priceEnvYearly: "STRIPE_PRICE_UNLIMITED_YEARLY",
     features: [
