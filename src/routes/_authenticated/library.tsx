@@ -272,6 +272,7 @@ function LibraryPage() {
               key={s.id}
               to="/story/$id"
               params={{ id: s.id }}
+              onClick={() => track("story_replayed", { story_id: s.id })}
               style={{ animationDelay: `${i * 60}ms` }}
               className="group block animate-slide-up rounded-[28px] border border-hairline bg-surface/60 p-4 transition-all hover:-translate-y-1 hover:bg-surface"
             >
