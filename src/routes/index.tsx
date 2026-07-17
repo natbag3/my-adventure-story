@@ -117,6 +117,36 @@ const PLANS = [
 ];
 
 function LandingPage() {
+  const pricingRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    track("landing_page_viewed");
+  }, []);
+
+  useEffect(() => {
+    const el = pricingRef.current;
+    if (!el) return;
+    let fired = false;
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting && !fired) {
+            fired = true;
+            track("pricing_section_viewed");
+            io.disconnect();
+          }
+        }
+      },
+      { threshold: 0.3 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  const handleCta = (location: string) => () => {
+    track("get_started_clicked", { location });
+  };
+
   const scrollToFeatures = (e: React.MouseEvent) => {
     e.preventDefault();
     document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" });
