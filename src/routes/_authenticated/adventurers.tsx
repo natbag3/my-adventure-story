@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { generateChildPortrait } from "@/lib/portraits.functions";
 import { toast } from "sonner";
+import { track } from "@/lib/analytics";
 
 type ChildRow = {
   id: string;
