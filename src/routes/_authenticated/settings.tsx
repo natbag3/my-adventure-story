@@ -84,12 +84,24 @@ function SettingsPage() {
       toast.success("Welcome aboard! ✨ Your subscription is active.");
       // Poll for webhook to catch up
       let tries = 0;
+      const prevTier = sub?.tier;
       const iv = window.setInterval(async () => {
         tries++;
         try {
           const s = await fetchSub();
           setSub(s);
-          if (s.tier !== "free" || tries > 10) window.clearInterval(iv);
+          if (s.tier !== "free" || tries > 10) {
+            window.clearInterval(iv);
+            if (s.tier !== "free") {
+              track("subscription_started", {
+                tier: s.tier,
+                billing_period: s.storyLimitType ?? "monthly",
+              });
+              if (prevTier && prevTier !== "free" && prevTier !== s.tier) {
+                track("tier_upgraded", { from_tier: prevTier, to_tier: s.tier });
+              }
+            }
+          }
         } catch {
           if (tries > 10) window.clearInterval(iv);
         }
@@ -100,7 +112,7 @@ function SettingsPage() {
       window.history.replaceState({}, "", url.toString());
       return () => window.clearInterval(iv);
     }
-  }, [fetchSub]);
+  }, [fetchSub, sub?.tier]);
 
   async function handleManageSubscription() {
     setOpeningPortal(true);
