@@ -54,6 +54,9 @@ function AuthPage() {
             })
             .eq("id", data.user.id);
         }
+        if (data.user) {
+          track("sign_up_completed", { method: "email", user_id: data.user.id });
+        }
         // If a session was auto-created, sign out so the user explicitly signs in.
         if (data.session) {
           await supabase.auth.signOut();
@@ -65,12 +68,14 @@ function AuthPage() {
       } else if (mode === "signin") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+        track("login_completed", { method: "email" });
       } else {
         // forgot
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: window.location.origin + "/auth/reset",
         });
         if (error) throw error;
+        track("password_reset_requested");
         setResetSent(true);
       }
     } catch (err) {
