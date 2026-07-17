@@ -49,6 +49,10 @@ function SettingsPage() {
   const hasNarration = sub ? tierHasNarration(sub.tier) : false;
 
   useEffect(() => {
+    track("settings_viewed");
+  }, []);
+
+  useEffect(() => {
     if (!user) return;
     supabase
       .from("profiles")
