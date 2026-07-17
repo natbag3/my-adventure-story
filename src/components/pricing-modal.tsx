@@ -117,7 +117,7 @@ export function PricingModal({
                 </p>
                 {interval === "year" && savings > 0 && (
                   <p className="mt-1 text-[11px] font-medium text-mint">
-                    Save {formatUSD(savings)} · 2 months free
+                    Save {formatUSD(savings)} · 20% off
                   </p>
                 )}
                 <ul className="mt-4 space-y-1.5 text-sm text-foreground/80 flex-1">
