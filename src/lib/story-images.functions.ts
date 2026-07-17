@@ -88,8 +88,6 @@ const STYLE_PREFIX =
 const STYLE_ANCHOR =
   "Consistent children's storybook illustration style, warm painterly art, same character design throughout.";
 
-const NEGATIVE_SUFFIX =
-  ", avoiding: photorealistic, 3D render, CGI, digital art, sharp harsh edges, modern, neon, anime, cartoon";
 
 
 export const generateStoryPageImage = createServerFn({ method: "POST" })
