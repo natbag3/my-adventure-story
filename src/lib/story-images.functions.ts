@@ -82,8 +82,15 @@ function characterReference(child: ChildLike): string {
   return `The main character is ${child.first_name}, a ${ageStr}${subject}${traits}${outfit}.`;
 }
 
+const STYLE_PREFIX =
+  "Beatrix Potter style children's storybook illustration, soft watercolour painting, warm muted tones, hand-painted brushstrokes, gentle and whimsical, picture book art — ";
+
 const STYLE_ANCHOR =
   "Consistent children's storybook illustration style, warm painterly art, same character design throughout.";
+
+const NEGATIVE_SUFFIX =
+  ", avoiding: photorealistic, 3D render, CGI, digital art, sharp harsh edges, modern, neon, anime, cartoon";
+
 
 export const generateStoryPageImage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
