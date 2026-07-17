@@ -21,7 +21,7 @@ type StoryRow = {
   child_id: string;
 };
 
-export const Route = createFileRoute("/_authenticated/")({
+export const Route = createFileRoute("/_authenticated/home")({
   head: () => ({
     meta: [
       { title: "Adventure Club — Tonight's Bedtime Story" },

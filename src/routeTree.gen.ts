@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
-import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as ShareTokenRouteImport } from './routes/share.$token'
 import { Route as AuthResetRouteImport } from './routes/auth.reset'
 import { Route as AuthenticatedSubscriptionRouteImport } from './routes/_authenticated/subscription'
@@ -20,6 +19,7 @@ import { Route as AuthenticatedRewardsRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedPassportRouteImport } from './routes/_authenticated/passport'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticated/library'
+import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
 import { Route as AuthenticatedCreateRouteImport } from './routes/_authenticated/create'
 import { Route as AuthenticatedAdventurersRouteImport } from './routes/_authenticated/adventurers'
 import { Route as AuthenticatedStoryIdRouteImport } from './routes/_authenticated/story.$id'
@@ -36,11 +36,6 @@ const AuthRoute = AuthRouteImport.update({
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const ShareTokenRoute = ShareTokenRouteImport.update({
   id: '/share/$token',
@@ -83,6 +78,11 @@ const AuthenticatedLibraryRoute = AuthenticatedLibraryRouteImport.update({
   path: '/library',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
+  id: '/home',
+  path: '/home',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedCreateRoute = AuthenticatedCreateRouteImport.update({
   id: '/create',
   path: '/create',
@@ -123,10 +123,11 @@ const ApiPublicHooksWeeklyDigestRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof AuthenticatedIndexRoute
+  '/': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
   '/adventurers': typeof AuthenticatedAdventurersRouteWithChildren
   '/create': typeof AuthenticatedCreateRoute
+  '/home': typeof AuthenticatedHomeRoute
   '/library': typeof AuthenticatedLibraryRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/passport': typeof AuthenticatedPassportRoute
@@ -142,9 +143,11 @@ export interface FileRoutesByFullPath {
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
   '/adventurers': typeof AuthenticatedAdventurersRouteWithChildren
   '/create': typeof AuthenticatedCreateRoute
+  '/home': typeof AuthenticatedHomeRoute
   '/library': typeof AuthenticatedLibraryRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/passport': typeof AuthenticatedPassportRoute
@@ -153,7 +156,6 @@ export interface FileRoutesByTo {
   '/subscription': typeof AuthenticatedSubscriptionRoute
   '/auth/reset': typeof AuthResetRoute
   '/share/$token': typeof ShareTokenRoute
-  '/': typeof AuthenticatedIndexRoute
   '/adventurers/new': typeof AuthenticatedAdventurersNewRoute
   '/pets/new': typeof AuthenticatedPetsNewRoute
   '/story/$id': typeof AuthenticatedStoryIdRoute
@@ -166,6 +168,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRouteWithChildren
   '/_authenticated/adventurers': typeof AuthenticatedAdventurersRouteWithChildren
   '/_authenticated/create': typeof AuthenticatedCreateRoute
+  '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/library': typeof AuthenticatedLibraryRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/passport': typeof AuthenticatedPassportRoute
@@ -174,7 +177,6 @@ export interface FileRoutesById {
   '/_authenticated/subscription': typeof AuthenticatedSubscriptionRoute
   '/auth/reset': typeof AuthResetRoute
   '/share/$token': typeof ShareTokenRoute
-  '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/adventurers/new': typeof AuthenticatedAdventurersNewRoute
   '/_authenticated/pets/new': typeof AuthenticatedPetsNewRoute
   '/_authenticated/story/$id': typeof AuthenticatedStoryIdRoute
@@ -188,6 +190,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/adventurers'
     | '/create'
+    | '/home'
     | '/library'
     | '/onboarding'
     | '/passport'
@@ -203,9 +206,11 @@ export interface FileRouteTypes {
     | '/api/public/webhooks/stripe'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
     | '/auth'
     | '/adventurers'
     | '/create'
+    | '/home'
     | '/library'
     | '/onboarding'
     | '/passport'
@@ -214,7 +219,6 @@ export interface FileRouteTypes {
     | '/subscription'
     | '/auth/reset'
     | '/share/$token'
-    | '/'
     | '/adventurers/new'
     | '/pets/new'
     | '/story/$id'
@@ -226,6 +230,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/adventurers'
     | '/_authenticated/create'
+    | '/_authenticated/home'
     | '/_authenticated/library'
     | '/_authenticated/onboarding'
     | '/_authenticated/passport'
@@ -234,7 +239,6 @@ export interface FileRouteTypes {
     | '/_authenticated/subscription'
     | '/auth/reset'
     | '/share/$token'
-    | '/_authenticated/'
     | '/_authenticated/adventurers/new'
     | '/_authenticated/pets/new'
     | '/_authenticated/story/$id'
@@ -265,13 +269,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/': {
-      id: '/_authenticated/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/share/$token': {
       id: '/share/$token'
@@ -327,6 +324,13 @@ declare module '@tanstack/react-router' {
       path: '/library'
       fullPath: '/library'
       preLoaderRoute: typeof AuthenticatedLibraryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/home': {
+      id: '/_authenticated/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof AuthenticatedHomeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/create': {
@@ -398,13 +402,13 @@ const AuthenticatedAdventurersRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdventurersRoute: typeof AuthenticatedAdventurersRouteWithChildren
   AuthenticatedCreateRoute: typeof AuthenticatedCreateRoute
+  AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedLibraryRoute: typeof AuthenticatedLibraryRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedPassportRoute: typeof AuthenticatedPassportRoute
   AuthenticatedRewardsRoute: typeof AuthenticatedRewardsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedSubscriptionRoute: typeof AuthenticatedSubscriptionRoute
-  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedPetsNewRoute: typeof AuthenticatedPetsNewRoute
   AuthenticatedStoryIdRoute: typeof AuthenticatedStoryIdRoute
 }
@@ -412,13 +416,13 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdventurersRoute: AuthenticatedAdventurersRouteWithChildren,
   AuthenticatedCreateRoute: AuthenticatedCreateRoute,
+  AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedLibraryRoute: AuthenticatedLibraryRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedPassportRoute: AuthenticatedPassportRoute,
   AuthenticatedRewardsRoute: AuthenticatedRewardsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedSubscriptionRoute: AuthenticatedSubscriptionRoute,
-  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedPetsNewRoute: AuthenticatedPetsNewRoute,
   AuthenticatedStoryIdRoute: AuthenticatedStoryIdRoute,
 }
