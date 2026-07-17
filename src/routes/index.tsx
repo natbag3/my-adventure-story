@@ -272,7 +272,7 @@ function LandingPage() {
         </section>
 
         {/* PRICING */}
-        <section id="pricing" className="py-16 md:py-20 scroll-mt-24">
+        <section id="pricing" ref={pricingRef} className="py-16 md:py-20 scroll-mt-24">
           <div className="mb-12 text-center">
             <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-star/80">Pricing</p>
             <h2 className="mt-3 font-display text-4xl md:text-5xl font-medium text-foreground">
