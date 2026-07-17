@@ -169,6 +169,7 @@ function SettingsPage() {
       toast.error(error.message);
       return;
     }
+    track("child_profile_deleted", { child_id: id });
     setDeleteTarget(null);
     toast.success(`${name}'s profile removed`);
     await refresh();
