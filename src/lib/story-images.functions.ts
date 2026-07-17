@@ -88,6 +88,18 @@ const STYLE_PREFIX =
 const STYLE_ANCHOR =
   "Consistent children's storybook illustration style, warm painterly art, same character design throughout.";
 
+async function imageBytesFromOpenAiResponse(aiJson: any, emptyMessage: string, downloadMessage: string) {
+  const first = aiJson?.data?.[0] ?? {};
+  if (first.b64_json) {
+    return Uint8Array.from(atob(first.b64_json), (c) => c.charCodeAt(0));
+  }
+  if (first.url) {
+    const imgRes = await fetch(first.url);
+    if (!imgRes.ok) throw new Error(`${downloadMessage}: ${imgRes.status}`);
+    return new Uint8Array(await imgRes.arrayBuffer());
+  }
+  throw new Error(emptyMessage);
+}
 
 
 export const generateStoryPageImage = createServerFn({ method: "POST" })
@@ -133,10 +145,9 @@ export const generateStoryPageImage = createServerFn({ method: "POST" })
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({
-        model: "dall-e-3",
+        model: "gpt-image-1-mini",
         prompt,
         size: "1024x1024",
-        quality: "standard",
         n: 1,
       }),
     });
@@ -145,12 +156,11 @@ export const generateStoryPageImage = createServerFn({ method: "POST" })
       throw new Error(`Illustration generation failed: ${aiRes.status} ${txt.slice(0, 200)}`);
     }
     const aiJson = await aiRes.json();
-    const imageUrl: string | undefined = aiJson?.data?.[0]?.url;
-    if (!imageUrl) throw new Error("Illustration generation returned no image.");
-
-    const imgRes = await fetch(imageUrl);
-    if (!imgRes.ok) throw new Error(`Could not download illustration: ${imgRes.status}`);
-    const bytes = new Uint8Array(await imgRes.arrayBuffer());
+    const bytes = await imageBytesFromOpenAiResponse(
+      aiJson,
+      "Illustration generation returned no image.",
+      "Could not download illustration",
+    );
 
     const path = `${userId}/stories/${data.storyId}/${data.pageIndex}.png`;
     const { error: upErr } = await supabase.storage
@@ -204,10 +214,9 @@ export const generateStoryCoverImage = createServerFn({ method: "POST" })
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({
-        model: "dall-e-3",
+        model: "gpt-image-1-mini",
         prompt,
         size: "1024x1024",
-        quality: "standard",
         n: 1,
       }),
     });
@@ -216,12 +225,11 @@ export const generateStoryCoverImage = createServerFn({ method: "POST" })
       throw new Error(`Cover generation failed: ${aiRes.status} ${txt.slice(0, 200)}`);
     }
     const aiJson = await aiRes.json();
-    const imageUrl: string | undefined = aiJson?.data?.[0]?.url;
-    if (!imageUrl) throw new Error("Cover generation returned no image.");
-
-    const imgRes = await fetch(imageUrl);
-    if (!imgRes.ok) throw new Error(`Could not download cover: ${imgRes.status}`);
-    const bytes = new Uint8Array(await imgRes.arrayBuffer());
+    const bytes = await imageBytesFromOpenAiResponse(
+      aiJson,
+      "Cover generation returned no image.",
+      "Could not download cover",
+    );
 
     const path = `${userId}/stories/${data.storyId}/cover.png`;
     const { error: upErr } = await supabase.storage
