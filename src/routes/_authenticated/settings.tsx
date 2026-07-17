@@ -52,6 +52,26 @@ function SettingsPage() {
     track("settings_viewed");
   }, []);
 
+  // Fire subscription_cancelled / subscription_expired at most once per state
+  // change per user session, based on the last-known snapshot.
+  useEffect(() => {
+    if (!sub || !user) return;
+    try {
+      const key = `sub-snap-${user.id}`;
+      const prevRaw = sessionStorage.getItem(key);
+      const prev = prevRaw ? (JSON.parse(prevRaw) as { tier: string; status: string | null }) : null;
+      if (prev) {
+        if (sub.status === "canceled" && prev.status !== "canceled") {
+          track("subscription_cancelled", { tier: sub.tier });
+        }
+        if (prev.tier !== "free" && sub.tier === "free" && prev.status !== "canceled") {
+          track("subscription_expired", { from_tier: prev.tier });
+        }
+      }
+      sessionStorage.setItem(key, JSON.stringify({ tier: sub.tier, status: sub.status ?? null }));
+    } catch { /* ignore */ }
+  }, [sub, user]);
+
   useEffect(() => {
     if (!user) return;
     supabase
