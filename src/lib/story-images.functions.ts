@@ -137,7 +137,6 @@ export const generateStoryPageImage = createServerFn({ method: "POST" })
         prompt,
         size: "1024x1024",
         quality: "standard",
-        style: "vivid",
         n: 1,
       }),
     });
@@ -209,7 +208,6 @@ export const generateStoryCoverImage = createServerFn({ method: "POST" })
         prompt,
         size: "1024x1024",
         quality: "standard",
-        style: "vivid",
         n: 1,
       }),
     });
