@@ -16,6 +16,8 @@ import { VoicePickerGrid, type NarrationVoiceKey } from "@/components/voice-pick
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { PricingModal } from "@/components/pricing-modal";
 import { tierHasNarration, isValidTier, type Tier } from "@/lib/subscription";
+import { track } from "@/lib/analytics";
+import { NARRATION_VOICES } from "@/components/voice-picker";
 
 type StoryPage = { text: string; illustration_prompt?: string; image_url?: string | null; audio_url?: string | null };
 type StoryRow = {
