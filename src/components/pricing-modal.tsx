@@ -11,6 +11,7 @@ import {
 import { cn } from "@/lib/utils";
 import { TIERS, formatUSD, yearlySavings, type Interval, type Tier } from "@/lib/subscription";
 import { createCheckoutSession } from "@/lib/subscription.functions";
+import { track } from "@/lib/analytics";
 
 const PAID: readonly Tier[] = ["starter", "explorer", "unlimited"];
 
