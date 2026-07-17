@@ -31,6 +31,21 @@ export function PricingModal({
   const [interval, setInterval] = useState<Interval>("month");
   const [busyTier, setBusyTier] = useState<Tier | null>(null);
   const checkout = useServerFn(createCheckoutSession);
+  const pickedRef = useRef(false);
+
+  useEffect(() => {
+    if (open) {
+      pickedRef.current = false;
+      track("upgrade_modal_viewed", { current_tier: currentTier });
+    }
+  }, [open, currentTier]);
+
+  function handleOpenChange(next: boolean) {
+    if (!next && open && !pickedRef.current) {
+      track("upgrade_modal_dismissed", { current_tier: currentTier });
+    }
+    onOpenChange(next);
+  }
 
   async function pick(tier: Tier) {
     if (tier === "free") return;
