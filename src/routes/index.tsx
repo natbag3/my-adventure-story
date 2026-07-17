@@ -322,6 +322,7 @@ function LandingPage() {
                 </ul>
                 <Link
                   to="/auth"
+                  onClick={handleCta(`pricing_${p.name.toLowerCase()}`)}
                   className={
                     "block rounded-2xl px-5 py-3 text-center font-semibold transition-transform hover:scale-[1.02] " +
                     (p.highlight
