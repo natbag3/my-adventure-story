@@ -22,6 +22,8 @@ import { VoicePickerGrid, type NarrationVoiceKey } from "@/components/voice-pick
 import { PricingModal } from "@/components/pricing-modal";
 import { TIERS, tierHasNarration, type Tier } from "@/lib/subscription";
 import { getSubscriptionState, createPortalSession, type SubscriptionState } from "@/lib/subscription.functions";
+import { track } from "@/lib/analytics";
+import { NARRATION_VOICES } from "@/components/voice-picker";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({ meta: [{ title: "Profile — Adventure Club" }] }),
@@ -45,6 +47,30 @@ function SettingsPage() {
   const fetchSub = useServerFn(getSubscriptionState);
   const openPortal = useServerFn(createPortalSession);
   const hasNarration = sub ? tierHasNarration(sub.tier) : false;
+
+  useEffect(() => {
+    track("settings_viewed");
+  }, []);
+
+  // Fire subscription_cancelled / subscription_expired at most once per state
+  // change per user session, based on the last-known snapshot.
+  useEffect(() => {
+    if (!sub || !user) return;
+    try {
+      const key = `sub-snap-${user.id}`;
+      const prevRaw = sessionStorage.getItem(key);
+      const prev = prevRaw ? (JSON.parse(prevRaw) as { tier: string; status: string | null }) : null;
+      if (prev) {
+        if (sub.status === "canceled" && prev.status !== "canceled") {
+          track("subscription_cancelled", { tier: sub.tier });
+        }
+        if (prev.tier !== "free" && sub.tier === "free" && prev.status !== "canceled") {
+          track("subscription_expired", { from_tier: prev.tier });
+        }
+      }
+      sessionStorage.setItem(key, JSON.stringify({ tier: sub.tier, status: sub.status ?? null }));
+    } catch { /* ignore */ }
+  }, [sub, user]);
 
   useEffect(() => {
     if (!user) return;
@@ -78,12 +104,24 @@ function SettingsPage() {
       toast.success("Welcome aboard! ✨ Your subscription is active.");
       // Poll for webhook to catch up
       let tries = 0;
+      const prevTier = sub?.tier;
       const iv = window.setInterval(async () => {
         tries++;
         try {
           const s = await fetchSub();
           setSub(s);
-          if (s.tier !== "free" || tries > 10) window.clearInterval(iv);
+          if (s.tier !== "free" || tries > 10) {
+            window.clearInterval(iv);
+            if (s.tier !== "free") {
+              track("subscription_started", {
+                tier: s.tier,
+                billing_period: s.storyLimitType ?? "monthly",
+              });
+              if (prevTier && prevTier !== "free" && prevTier !== s.tier) {
+                track("tier_upgraded", { from_tier: prevTier, to_tier: s.tier });
+              }
+            }
+          }
         } catch {
           if (tries > 10) window.clearInterval(iv);
         }
@@ -94,7 +132,7 @@ function SettingsPage() {
       window.history.replaceState({}, "", url.toString());
       return () => window.clearInterval(iv);
     }
-  }, [fetchSub]);
+  }, [fetchSub, sub?.tier]);
 
   async function handleManageSubscription() {
     setOpeningPortal(true);
@@ -133,6 +171,8 @@ function SettingsPage() {
       setNarrationVoice(prev);
       toast.error(error.message);
     } else {
+      const voiceLabel = NARRATION_VOICES.find((v) => v.key === key)?.label ?? key;
+      track("voice_selected", { voice: key, voice_name: voiceLabel });
       toast.success("Narration voice updated");
     }
   }
@@ -149,6 +189,7 @@ function SettingsPage() {
       toast.error(error.message);
       return;
     }
+    track("child_profile_deleted", { child_id: id });
     setDeleteTarget(null);
     toast.success(`${name}'s profile removed`);
     await refresh();

@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { CharacterAvatar } from "@/components/character-avatar";
 import { ADVENTURES, MOODS, LESSONS, LENGTHS } from "@/lib/mock-data";
@@ -11,6 +11,7 @@ import { generateStory } from "@/lib/stories.functions";
 import { generateStoryPageImage, generateStoryCoverImage } from "@/lib/story-images.functions";
 import { getSubscriptionState, type SubscriptionState } from "@/lib/subscription.functions";
 import { PricingModal } from "@/components/pricing-modal";
+import { track } from "@/lib/analytics";
 
 function calcAge(dob: string | null) {
   if (!dob) return null;
@@ -250,6 +251,23 @@ function CreateWizard() {
     };
   }, [primaryId]);
 
+  // story_abandoned: fired if the wizard unmounts after progress was made
+  // but no story was generated. `generating` becoming true kicks off nav to
+  // the reader, so we suppress the event by clearing the ref then.
+  const abandonRef = useRef<{ armed: boolean; getPayload: () => Record<string, unknown> }>({
+    armed: false,
+    getPayload: () => ({}),
+  });
+  abandonRef.current.armed = !generating && (!!adventure || !!lesson || step > 1);
+  abandonRef.current.getPayload = () => ({ step, adventure, mood, lesson });
+  useEffect(() => {
+    return () => {
+      if (abandonRef.current.armed) {
+        track("story_abandoned", abandonRef.current.getPayload());
+      }
+    };
+  }, []);
+
   const selectedChild = children.find((c) => c.id === primaryId);
   const seasonalOptions = getSeasonalOptions(selectedChild?.date_of_birth).filter((s) => s.active);
 
@@ -311,6 +329,16 @@ function CreateWizard() {
                 }
               : null,
         },
+      });
+
+      abandonRef.current.armed = false;
+      track("story_created", {
+        story_id: result.storyId,
+        world: adventureLabel,
+        mood: moodLabel,
+        lesson: lessonLabel,
+        length,
+        has_pet: petIds.length > 0,
       });
 
       setPrepStage("painting");

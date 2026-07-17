@@ -9,6 +9,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useActiveChild } from "@/lib/active-child-context";
 import { StreakBadge } from "@/components/streak-badge";
 import { StoryBookModal } from "@/components/story-book-modal";
+import { track } from "@/lib/analytics";
 
 type StoryRow = {
   id: string;
@@ -55,6 +56,10 @@ function LibraryPage() {
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [loading, setLoading] = useState(true);
   const [bookOpen, setBookOpen] = useState(false);
+
+  useEffect(() => {
+    track("story_library_viewed");
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -267,6 +272,7 @@ function LibraryPage() {
               key={s.id}
               to="/story/$id"
               params={{ id: s.id }}
+              onClick={() => track("story_replayed", { story_id: s.id })}
               style={{ animationDelay: `${i * 60}ms` }}
               className="group block animate-slide-up rounded-[28px] border border-hairline bg-surface/60 p-4 transition-all hover:-translate-y-1 hover:bg-surface"
             >

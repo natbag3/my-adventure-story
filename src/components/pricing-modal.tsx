@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import {
@@ -11,6 +11,7 @@ import {
 import { cn } from "@/lib/utils";
 import { TIERS, formatUSD, yearlySavings, type Interval, type Tier } from "@/lib/subscription";
 import { createCheckoutSession } from "@/lib/subscription.functions";
+import { track } from "@/lib/analytics";
 
 const PAID: readonly Tier[] = ["starter", "explorer", "unlimited"];
 
@@ -30,9 +31,25 @@ export function PricingModal({
   const [interval, setInterval] = useState<Interval>("month");
   const [busyTier, setBusyTier] = useState<Tier | null>(null);
   const checkout = useServerFn(createCheckoutSession);
+  const pickedRef = useRef(false);
+
+  useEffect(() => {
+    if (open) {
+      pickedRef.current = false;
+      track("upgrade_modal_viewed", { current_tier: currentTier });
+    }
+  }, [open, currentTier]);
+
+  function handleOpenChange(next: boolean) {
+    if (!next && open && !pickedRef.current) {
+      track("upgrade_modal_dismissed", { current_tier: currentTier });
+    }
+    onOpenChange(next);
+  }
 
   async function pick(tier: Tier) {
     if (tier === "free") return;
+    pickedRef.current = true;
     setBusyTier(tier);
     try {
       const { url } = await checkout({
@@ -46,7 +63,7 @@ export function PricingModal({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-4xl">
         <DialogHeader>
           <DialogTitle className="font-display text-2xl">

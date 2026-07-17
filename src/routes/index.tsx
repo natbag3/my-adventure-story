@@ -1,4 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useRef } from "react";
+import { track } from "@/lib/analytics";
 
 export const Route = createFileRoute("/")({
   ssr: false,
@@ -115,6 +117,36 @@ const PLANS = [
 ];
 
 function LandingPage() {
+  const pricingRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    track("landing_page_viewed");
+  }, []);
+
+  useEffect(() => {
+    const el = pricingRef.current;
+    if (!el) return;
+    let fired = false;
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting && !fired) {
+            fired = true;
+            track("pricing_section_viewed");
+            io.disconnect();
+          }
+        }
+      },
+      { threshold: 0.3 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  const handleCta = (location: string) => () => {
+    track("get_started_clicked", { location });
+  };
+
   const scrollToFeatures = (e: React.MouseEvent) => {
     e.preventDefault();
     document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" });
@@ -144,6 +176,7 @@ function LandingPage() {
             </Link>
             <Link
               to="/auth"
+              onClick={handleCta("header")}
               className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-[0_10px_30px_-10px_oklch(0.85_0.16_88/0.5)] transition-transform hover:scale-[1.03]"
             >
               Start free
@@ -170,6 +203,7 @@ function LandingPage() {
           <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
               to="/auth"
+              onClick={handleCta("hero")}
               className="w-full sm:w-auto rounded-2xl bg-primary px-7 py-4 font-display text-lg font-bold text-primary-foreground shadow-[0_24px_60px_-20px_oklch(0.85_0.16_88/0.45)] transition-transform hover:scale-[1.03]"
             >
               Start for free
@@ -238,7 +272,7 @@ function LandingPage() {
         </section>
 
         {/* PRICING */}
-        <section id="pricing" className="py-16 md:py-20 scroll-mt-24">
+        <section id="pricing" ref={pricingRef} className="py-16 md:py-20 scroll-mt-24">
           <div className="mb-12 text-center">
             <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-star/80">Pricing</p>
             <h2 className="mt-3 font-display text-4xl md:text-5xl font-medium text-foreground">
@@ -288,6 +322,7 @@ function LandingPage() {
                 </ul>
                 <Link
                   to="/auth"
+                  onClick={handleCta(`pricing_${p.name.toLowerCase()}`)}
                   className={
                     "block rounded-2xl px-5 py-3 text-center font-semibold transition-transform hover:scale-[1.02] " +
                     (p.highlight
@@ -313,6 +348,7 @@ function LandingPage() {
             </p>
             <Link
               to="/auth"
+              onClick={handleCta("final_cta")}
               className="mt-8 inline-block rounded-2xl bg-primary px-8 py-4 font-display text-lg font-bold text-primary-foreground shadow-[0_24px_60px_-20px_oklch(0.85_0.16_88/0.45)] transition-transform hover:scale-[1.03]"
             >
               Start for free

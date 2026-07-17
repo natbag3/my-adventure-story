@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { generateChildPortrait } from "@/lib/portraits.functions";
+import { track } from "@/lib/analytics";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
   head: () => ({ meta: [{ title: "Create your adventurer — Adventure Club" }] }),
@@ -263,6 +264,16 @@ function OnboardingPage() {
         .from("profiles")
         .update({ active_child_id: inserted.id })
         .eq("id", user.id);
+
+      track("adventurer_created", { child_id: inserted.id });
+      // Detect first child: if this insert was their only one, treat as onboarding completion.
+      const { count } = await supabase
+        .from("children")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id);
+      if ((count ?? 0) <= 1) {
+        track("onboarding_completed", { child_id: inserted.id });
+      }
 
       setStep(6); // success
       void generateChildPortrait({ data: { childId: inserted.id } }).catch((e) => {

@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
+import { initAnalytics, identify, resetAnalytics, track } from "@/lib/analytics";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
@@ -135,7 +136,29 @@ function RootComponent() {
   const router = useRouter();
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+    initAnalytics();
+    // Identify pre-existing session on load.
+    supabase.auth.getSession().then(({ data }) => {
+      const u = data.session?.user;
+      if (u) identify(u.id, { email: u.email });
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session?.user) {
+        const u = session.user;
+        identify(u.id, { email: u.email });
+        // Distinguish sign-up vs login for OAuth (email/password fires
+        // sign_up_completed / login_completed explicitly from auth.tsx).
+        try {
+          const created = new Date(u.created_at).getTime();
+          const isNew = Date.now() - created < 60_000;
+          if (isNew && (u.app_metadata?.provider ?? "") !== "email") {
+            track("sign_up_completed", { method: u.app_metadata?.provider ?? "oauth" });
+          }
+        } catch { /* ignore */ }
+      }
+      if (event === "SIGNED_OUT") {
+        resetAnalytics();
+      }
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       router.invalidate();
       if (event !== "SIGNED_OUT") queryClient.invalidateQueries();

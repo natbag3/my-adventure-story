@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { generateChildPortrait } from "@/lib/portraits.functions";
 import { toast } from "sonner";
+import { track } from "@/lib/analytics";
 
 type ChildRow = {
   id: string;
@@ -101,6 +102,7 @@ function AdventurersPage() {
     const { error } = await supabase.from("children").delete().eq("id", id);
     if (error) return toast.error(error.message);
     setChildren((cs) => cs.filter((c) => c.id !== id));
+    track("child_profile_deleted", { child_id: id });
     toast.success(`${name}'s profile removed`);
   }
 
@@ -117,6 +119,7 @@ function AdventurersPage() {
       setChildren((cs) =>
         cs.map((c) => (c.id === id ? { ...c, portrait_url: data?.portrait_url ?? c.portrait_url } : c)),
       );
+      track("child_profile_edited", { child_id: id, field: "portrait" });
       toast.success(`${name}'s portrait is ready ✨`, { id: t });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Couldn't draw portrait", { id: t });

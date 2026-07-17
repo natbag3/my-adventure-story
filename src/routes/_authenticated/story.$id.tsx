@@ -16,6 +16,8 @@ import { VoicePickerGrid, type NarrationVoiceKey } from "@/components/voice-pick
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { PricingModal } from "@/components/pricing-modal";
 import { tierHasNarration, isValidTier, type Tier } from "@/lib/subscription";
+import { track } from "@/lib/analytics";
+import { NARRATION_VOICES } from "@/components/voice-picker";
 
 type StoryPage = { text: string; illustration_prompt?: string; image_url?: string | null; audio_url?: string | null };
 type StoryRow = {
@@ -203,6 +205,7 @@ function StoryReader() {
       setVoicePickerOpen(true);
       return;
     }
+    track("narration_played", { voice: narrationVoice, page_number: pageIdx + 1 });
     void togglePlay(pageIdx);
   }
 
@@ -219,10 +222,15 @@ function StoryReader() {
       return;
     }
     setNarrationVoice(key);
+    const voiceLabel = NARRATION_VOICES.find((v) => v.key === key)?.label ?? key;
+    track("voice_selected", { voice: key, voice_name: voiceLabel });
     setVoicePickerOpen(false);
     const pending = pendingPageRef.current;
     pendingPageRef.current = null;
-    if (pending !== null) void togglePlay(pending);
+    if (pending !== null) {
+      track("narration_played", { voice: key, page_number: pending + 1 });
+      void togglePlay(pending);
+    }
   }
 
   async function togglePlay(pageIdx: number) {
@@ -430,7 +438,16 @@ function StoryReader() {
           </span>
           {!isEnd ? (
             <button
-              onClick={() => setPage((p) => Math.min(totalPages + 1, p + 1))}
+              onClick={() => setPage((p) => {
+                const next = Math.min(totalPages + 1, p + 1);
+                if (next !== p) {
+                  track("story_page_turned", { story_id: story?.id, page_number: next });
+                  if (next === totalPages + 1) {
+                    track("story_completed", { story_id: story?.id });
+                  }
+                }
+                return next;
+              })}
               className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground"
             >
               Next →
