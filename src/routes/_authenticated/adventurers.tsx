@@ -102,6 +102,7 @@ function AdventurersPage() {
     const { error } = await supabase.from("children").delete().eq("id", id);
     if (error) return toast.error(error.message);
     setChildren((cs) => cs.filter((c) => c.id !== id));
+    track("child_profile_deleted", { child_id: id });
     toast.success(`${name}'s profile removed`);
   }
 
