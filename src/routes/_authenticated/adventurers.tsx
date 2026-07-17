@@ -119,6 +119,7 @@ function AdventurersPage() {
       setChildren((cs) =>
         cs.map((c) => (c.id === id ? { ...c, portrait_url: data?.portrait_url ?? c.portrait_url } : c)),
       );
+      track("child_profile_edited", { child_id: id, field: "portrait" });
       toast.success(`${name}'s portrait is ready ✨`, { id: t });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Couldn't draw portrait", { id: t });
