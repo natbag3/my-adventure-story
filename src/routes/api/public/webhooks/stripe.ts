@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createHmac, timingSafeEqual } from "crypto";
 import { isValidTier, type Tier } from "@/lib/subscription";
+import { getPostHogClient } from "@/utils/posthog-server";
 
 // Stripe signs webhooks as t=<ts>,v1=<sig>. We recompute HMAC-SHA256 over `${t}.${payload}`
 // with the endpoint secret and compare in constant time.
@@ -109,6 +110,17 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
                   is_premium: true,
                 } as never)
                 .eq("id", userId);
+              const posthog = getPostHogClient();
+              posthog.capture({
+                distinctId: userId,
+                event: "subscription_activated",
+                properties: {
+                  tier,
+                  stripe_subscription_id: session.subscription,
+                  source: "stripe_webhook",
+                },
+              });
+              await posthog.flush();
               break;
             }
             case "customer.subscription.updated": {
@@ -151,6 +163,16 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
                   .update(updates as never)
                   .eq("stripe_customer_id", sub.customer);
               }
+              const posthog = getPostHogClient();
+              posthog.capture({
+                distinctId: userId ?? `stripe:${sub.customer}`,
+                event: "subscription_canceled",
+                properties: {
+                  stripe_subscription_id: sub.id,
+                  source: "stripe_webhook",
+                },
+              });
+              await posthog.flush();
               break;
             }
             default:

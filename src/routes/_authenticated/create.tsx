@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
+import { usePostHog } from "@posthog/react";
 import { AppShell } from "@/components/app-shell";
 import { CharacterAvatar } from "@/components/character-avatar";
 import { ADVENTURES, MOODS, LESSONS, LENGTHS } from "@/lib/mock-data";
@@ -163,6 +164,7 @@ type PetRow = {
 
 function CreateWizard() {
   const navigate = useNavigate();
+  const posthog = usePostHog();
   const { children, activeChild } = useActiveChild();
 
   const [step, setStep] = useState(0);
@@ -275,6 +277,13 @@ function CreateWizard() {
       const state = await fetchSubscription();
       setSubState(state);
       if (state.atLimit) {
+        posthog.capture("subscription_limit_reached", {
+          tier: state.tier,
+          adventure_theme: adventure,
+          mood,
+          lesson,
+          length_minutes: length,
+        });
         setLimitOpen(true);
         return;
       }
@@ -283,6 +292,15 @@ function CreateWizard() {
       // fall through — server-side check will still enforce
     }
 
+    posthog.capture("story_generation_started", {
+      adventure_theme: adventure,
+      mood,
+      lesson,
+      length_minutes: length,
+      series_mode: seriesMode,
+      co_star_count: mode === "multi" ? coStarIds.filter((id) => id !== primaryId).length : 0,
+      has_pet: petIds.length > 0,
+    });
     setGenerating(true);
     setError(null);
     setPrepStage("writing");

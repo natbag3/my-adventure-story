@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { usePostHog } from "@posthog/react";
 
 type AuthCtx = {
   session: Session | null;
@@ -19,24 +20,33 @@ const Ctx = createContext<AuthCtx>({
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const posthog = usePostHog();
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
       setSession(s);
+      if (s?.user) {
+        posthog.identify(s.user.id, { email: s.user.email });
+      }
     });
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
+      if (data.session?.user) {
+        posthog.identify(data.session.user.id, { email: data.session.user.email });
+      }
       setLoading(false);
     });
     return () => sub.subscription.unsubscribe();
-  }, []);
+  }, [posthog]);
 
   const value: AuthCtx = {
     session,
     user: session?.user ?? null,
     loading,
     signOut: async () => {
+      posthog.capture("user_signed_out");
       await supabase.auth.signOut();
+      posthog.reset();
     },
   };
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
