@@ -172,8 +172,8 @@ export const generateStoryCoverImage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => CoverInput.parse(i))
   .handler(async ({ data, context }) => {
-    const apiKey = process.env.FAL_KEY;
-    if (!apiKey) throw new Error("FAL API key is not configured.");
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) throw new Error("OpenAI API key is not configured.");
     const { supabase, userId } = context;
 
     const { data: story, error } = await supabase
@@ -198,21 +198,29 @@ export const generateStoryCoverImage = createServerFn({ method: "POST" })
 
     const prompt = `${STYLE_PREFIX}${mainCharacter} Maintain this exact character appearance consistently. A storybook cover illustration titled "${story.title}". Scene: ${
       heroDescriptions ? `${heroDescriptions} on an adventure in ${story.theme.toLowerCase()}.` : `A magical ${story.theme.toLowerCase()} adventure.`
-    } ${story.mood ? `${story.mood} atmosphere.` : ""} Warm painterly Pixar/Disney children's book cover style, hero centered and heroic, rich background world, cinematic lighting, portrait orientation, no text, no title, no logos, no watermarks. ${STYLE_ANCHOR}${NEGATIVE_SUFFIX}`;
+    } ${story.mood ? `${story.mood} atmosphere.` : ""} Warm painterly Pixar/Disney children's book cover style, hero centered and heroic, rich background world, cinematic lighting, portrait orientation, no text, no title, no logos, no watermarks. ${STYLE_ANCHOR}`;
 
 
-    const aiRes = await fetch("https://fal.run/fal-ai/flux/dev", {
+    const aiRes = await fetch("https://api.openai.com/v1/images/generations", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Key ${apiKey}` },
-      body: JSON.stringify({ prompt, image_size: "portrait_4_3", num_images: 1 }),
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+      body: JSON.stringify({
+        model: "dall-e-3",
+        prompt,
+        size: "1024x1024",
+        quality: "standard",
+        style: "vivid",
+        n: 1,
+      }),
     });
     if (!aiRes.ok) {
       const txt = await aiRes.text();
       throw new Error(`Cover generation failed: ${aiRes.status} ${txt.slice(0, 200)}`);
     }
     const aiJson = await aiRes.json();
-    const imageUrl: string | undefined = aiJson?.images?.[0]?.url;
+    const imageUrl: string | undefined = aiJson?.data?.[0]?.url;
     if (!imageUrl) throw new Error("Cover generation returned no image.");
+
     const imgRes = await fetch(imageUrl);
     if (!imgRes.ok) throw new Error(`Could not download cover: ${imgRes.status}`);
     const bytes = new Uint8Array(await imgRes.arrayBuffer());
