@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { CharacterAvatar } from "@/components/character-avatar";
 import { ADVENTURES, MOODS, LESSONS, LENGTHS } from "@/lib/mock-data";
