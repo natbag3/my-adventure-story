@@ -203,6 +203,7 @@ function LandingPage() {
           <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
               to="/auth"
+              onClick={handleCta("hero")}
               className="w-full sm:w-auto rounded-2xl bg-primary px-7 py-4 font-display text-lg font-bold text-primary-foreground shadow-[0_24px_60px_-20px_oklch(0.85_0.16_88/0.45)] transition-transform hover:scale-[1.03]"
             >
               Start for free
