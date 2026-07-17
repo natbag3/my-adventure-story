@@ -151,6 +151,8 @@ function SettingsPage() {
       setNarrationVoice(prev);
       toast.error(error.message);
     } else {
+      const voiceLabel = NARRATION_VOICES.find((v) => v.key === key)?.label ?? key;
+      track("voice_selected", { voice: key, voice_name: voiceLabel });
       toast.success("Narration voice updated");
     }
   }
