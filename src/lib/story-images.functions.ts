@@ -82,8 +82,15 @@ function characterReference(child: ChildLike): string {
   return `The main character is ${child.first_name}, a ${ageStr}${subject}${traits}${outfit}.`;
 }
 
+const STYLE_PREFIX =
+  "Beatrix Potter style children's storybook illustration, soft watercolour painting, warm muted tones, hand-painted brushstrokes, gentle and whimsical, picture book art — ";
+
 const STYLE_ANCHOR =
   "Consistent children's storybook illustration style, warm painterly art, same character design throughout.";
+
+const NEGATIVE_SUFFIX =
+  ", avoiding: photorealistic, 3D render, CGI, digital art, sharp harsh edges, modern, neon, anime, cartoon";
+
 
 export const generateStoryPageImage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -119,9 +126,10 @@ export const generateStoryPageImage = createServerFn({ method: "POST" })
     const mainCharacter = orderedKids[0] ? characterReference(orderedKids[0]) : "";
     const sceneDesc = page.illustration_prompt || page.text || "magical bedtime scene";
 
-    const prompt = `${mainCharacter} Maintain this exact character appearance consistently. Pixar-style children's picture book illustration. Scene: ${sceneDesc}. ${
+    const prompt = `${STYLE_PREFIX}${mainCharacter} Maintain this exact character appearance consistently. Pixar-style children's picture book illustration. Scene: ${sceneDesc}. ${
       heroDescriptions ? `Heroes featured: ${heroDescriptions}. Keep every character design consistent across pages.` : ""
-    } Warm magical lighting, soft painterly Pixar/Disney style, gentle bedtime atmosphere, premium children's book art, no text, no logos, no watermarks. ${STYLE_ANCHOR}`;
+    } Warm magical lighting, soft painterly Pixar/Disney style, gentle bedtime atmosphere, premium children's book art, no text, no logos, no watermarks. ${STYLE_ANCHOR}${NEGATIVE_SUFFIX}`;
+
 
     const aiRes = await fetch("https://fal.run/fal-ai/flux/dev", {
       method: "POST",
@@ -182,9 +190,10 @@ export const generateStoryCoverImage = createServerFn({ method: "POST" })
     const heroDescriptions = orderedKids.map(describeChild).join("; ");
     const mainCharacter = orderedKids[0] ? characterReference(orderedKids[0]) : "";
 
-    const prompt = `${mainCharacter} Maintain this exact character appearance consistently. A storybook cover illustration titled "${story.title}". Scene: ${
+    const prompt = `${STYLE_PREFIX}${mainCharacter} Maintain this exact character appearance consistently. A storybook cover illustration titled "${story.title}". Scene: ${
       heroDescriptions ? `${heroDescriptions} on an adventure in ${story.theme.toLowerCase()}.` : `A magical ${story.theme.toLowerCase()} adventure.`
-    } ${story.mood ? `${story.mood} atmosphere.` : ""} Warm painterly Pixar/Disney children's book cover style, hero centered and heroic, rich background world, cinematic lighting, portrait orientation, no text, no title, no logos, no watermarks. ${STYLE_ANCHOR}`;
+    } ${story.mood ? `${story.mood} atmosphere.` : ""} Warm painterly Pixar/Disney children's book cover style, hero centered and heroic, rich background world, cinematic lighting, portrait orientation, no text, no title, no logos, no watermarks. ${STYLE_ANCHOR}${NEGATIVE_SUFFIX}`;
+
 
     const aiRes = await fetch("https://fal.run/fal-ai/flux/dev", {
       method: "POST",
