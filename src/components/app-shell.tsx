@@ -6,7 +6,7 @@ import { CharacterAvatar } from "@/components/character-avatar";
 import { FeedbackDialog, openFeedbackDialog } from "@/components/feedback-dialog";
 
 const NAV = [
-  { to: "/", label: "Home", icon: "🏠" },
+  { to: "/home", label: "Home", icon: "🏠" },
   { to: "/create", label: "Create", icon: "✨" },
   { to: "/library", label: "Library", icon: "📚" },
   { to: "/passport", label: "Passport", icon: "🗺️" },
