@@ -126,9 +126,10 @@ export const generateStoryPageImage = createServerFn({ method: "POST" })
     const mainCharacter = orderedKids[0] ? characterReference(orderedKids[0]) : "";
     const sceneDesc = page.illustration_prompt || page.text || "magical bedtime scene";
 
-    const prompt = `${mainCharacter} Maintain this exact character appearance consistently. Pixar-style children's picture book illustration. Scene: ${sceneDesc}. ${
+    const prompt = `${STYLE_PREFIX}${mainCharacter} Maintain this exact character appearance consistently. Pixar-style children's picture book illustration. Scene: ${sceneDesc}. ${
       heroDescriptions ? `Heroes featured: ${heroDescriptions}. Keep every character design consistent across pages.` : ""
-    } Warm magical lighting, soft painterly Pixar/Disney style, gentle bedtime atmosphere, premium children's book art, no text, no logos, no watermarks. ${STYLE_ANCHOR}`;
+    } Warm magical lighting, soft painterly Pixar/Disney style, gentle bedtime atmosphere, premium children's book art, no text, no logos, no watermarks. ${STYLE_ANCHOR}${NEGATIVE_SUFFIX}`;
+
 
     const aiRes = await fetch("https://fal.run/fal-ai/flux/dev", {
       method: "POST",
